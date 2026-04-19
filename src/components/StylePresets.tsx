@@ -1,4 +1,4 @@
-import { presets, Preset } from "@/types/beautifier";
+import { presets, Preset } from "@/types";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 

@@ -2,8 +2,6 @@
 
 Transform raw screenshots into polished, shareable visuals with beautiful gradients, shadows, rounded corners, and instant exports. A fast, privacy-focused web app that processes everything locally in your browser.
 
-![Snaply Preview](public/logo.png)
-
 ## Features
 
 - **15+ Style Presets** - One-click transformations with curated styles like Candy Pop, Glassmorphism, Neon Cyber, and more
@@ -21,45 +19,45 @@ Transform raw screenshots into polished, shareable visuals with beautiful gradie
 
 ### Prerequisites
 
-- Node.js 18+ or Bun
+- Node.js 18+
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd screenshot-stylizer
+git clone https://github.com/tanbiralam/Snaply-Screenshot-Stylizer.git
+cd Snaply-Screenshot-Stylizer
 
 # Install dependencies
 npm install
-# or
-bun install
 
 # Start development server
 npm run dev
-# or
-bun dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Tech Stack
 
 | Category         | Technology                   |
 | ---------------- | ---------------------------- |
-| Framework        | React 18 + TypeScript        |
-| Build Tool       | Vite 5                       |
-| Styling          | Tailwind CSS 3.4             |
+| Framework        | Next.js 16 (App Router)      |
+| Language         | TypeScript                   |
+| Styling          | Tailwind CSS 3               |
 | UI Components    | shadcn/ui (Radix primitives) |
 | Icons            | Lucide React                 |
 | Theme Management | next-themes                  |
 | Notifications    | Sonner                       |
-| Routing          | React Router DOM 6           |
 
 ## Project Structure
 
 ```
 src/
+├── app/
+│   ├── layout.tsx             # Root layout with metadata & providers
+│   ├── page.tsx               # Main application page
+│   ├── not-found.tsx          # 404 fallback page
+│   └── providers.tsx          # React context providers (theme, tooltip, toaster)
 ├── components/
 │   ├── ui/                    # shadcn/ui components (button, slider, etc.)
 │   ├── CanvasRenderer.tsx     # Core canvas rendering with effects
@@ -74,25 +72,19 @@ src/
 │   └── use-toast.ts           # Toast notifications
 ├── lib/
 │   └── utils.ts               # Utility functions (cn helper)
-├── pages/
-│   ├── Index.tsx              # Main application page
-│   └── NotFound.tsx           # 404 fallback page
 ├── types/
 │   └── beautifier.ts          # TypeScript types & style presets
-├── App.tsx                    # App wrapper with router
-├── main.tsx                   # Entry point
 └── index.css                  # Global styles & CSS variables
 ```
 
 ## Available Scripts
 
-| Command             | Description                              |
-| ------------------- | ---------------------------------------- |
-| `npm run dev`       | Start development server with hot reload |
-| `npm run build`     | Production build (optimized)             |
-| `npm run build:dev` | Development build (unminified)           |
-| `npm run preview`   | Preview production build locally         |
-| `npm run lint`      | Run ESLint on the codebase               |
+| Command           | Description                              |
+| ----------------- | ---------------------------------------- |
+| `npm run dev`     | Start development server with hot reload |
+| `npm run build`   | Production build (optimized)             |
+| `npm run start`   | Start production server locally          |
+| `npm run lint`    | Run ESLint on the codebase               |
 
 ## Core Components
 
@@ -108,7 +100,7 @@ The heart of the application. Uses HTML5 Canvas API to render styled screenshots
 
 ### StylePresets
 
-Pre-configured styles defined in [`src/types/beautifier.ts`](src/types/beautifier.ts:32):
+Pre-configured styles defined in [`src/types/beautifier.ts`](src/types/beautifier.ts):
 
 | Preset         | Description                       |
 | -------------- | --------------------------------- |
@@ -147,7 +139,7 @@ All processing happens client-side using the Canvas API. No server uploads requi
 
 ### Adding New Presets
 
-Edit [`src/types/beautifier.ts`](src/types/beautifier.ts:32) to add new style presets:
+Edit [`src/types/beautifier.ts`](src/types/beautifier.ts) to add new style presets:
 
 ```typescript
 export const presets: Preset[] = [
@@ -206,4 +198,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-Built with React, TypeScript, and Tailwind CSS.
+Built with Next.js, TypeScript, and Tailwind CSS.

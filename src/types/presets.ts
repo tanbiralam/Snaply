@@ -1,14 +1,4 @@
-export interface StyleSettings {
-  padding: number;
-  borderRadius: number;
-  shadowIntensity: number;
-  backgroundColor: string;
-  gradientStart: string;
-  gradientEnd: string;
-  useGradient: boolean;
-  blurBackground: boolean;
-  aspectRatio: "1:1" | "16:9" | "4:5" | "9:16" | "auto";
-}
+import { StyleSettings } from "./settings";
 
 export interface Preset {
   id: string;
@@ -16,67 +6,6 @@ export interface Preset {
   description: string;
   settings: Partial<StyleSettings>;
 }
-
-
-
-
-export type DeviceMockup =
-  | "none"
-  | "browser"
-  | "macos"
-  | "iphone"
-  | "android"
-  | "ipad";
-
-export interface StyleSettings {
-  padding: number;
-  borderRadius: number;
-  shadowIntensity: number;
-  backgroundColor: string;
-  gradientStart: string;
-  gradientEnd: string;
-  useGradient: boolean;
-  blurBackground: boolean;
-  aspectRatio: "1:1" | "16:9" | "4:5" | "9:16" | "auto";
-  deviceMockup: DeviceMockup;
-}
-
-export interface Preset {
-  id: string;
-  name: string;
-  description: string;
-  settings: Partial<StyleSettings>;
-}
-
-export interface DeviceMockupOption {
-  value: DeviceMockup;
-  label: string;
-}
-
-export const deviceMockupOptions: DeviceMockupOption[] = [
-  { value: "none", label: "None" },
-  { value: "browser", label: "Browser" },
-  { value: "macos", label: "macOS" },
-  { value: "iphone", label: "iPhone" },
-  { value: "android", label: "Android" },
-  { value: "ipad", label: "iPad" },
-];
-
-export const defaultSettings: StyleSettings = {
-  padding: 48,
-  borderRadius: 16,
-  shadowIntensity: 30,
-  backgroundColor: "#ffffff",
-  gradientStart: "#667eea",
-  gradientEnd: "#764ba2",
-  useGradient: false,
-  blurBackground: false,
-  aspectRatio: "auto",
-  deviceMockup: "none",
-};
-
-
-
 
 export const presets: Preset[] = [
   {
@@ -107,7 +36,6 @@ export const presets: Preset[] = [
       blurBackground: false,
     },
   },
-
   {
     id: "glassmorphism",
     name: "Glassmorphism",
@@ -163,7 +91,6 @@ export const presets: Preset[] = [
       blurBackground: false,
     },
   },
-
   {
     id: "royal-blue",
     name: "Royal Blue",
@@ -178,7 +105,6 @@ export const presets: Preset[] = [
       blurBackground: false,
     },
   },
-
   {
     id: "pearl-light",
     name: "Pearl Light",
@@ -192,7 +118,6 @@ export const presets: Preset[] = [
       blurBackground: false,
     },
   },
-
   {
     id: "gradient-purple",
     name: "Purple Gradient",

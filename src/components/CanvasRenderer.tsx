@@ -1,6 +1,18 @@
-import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
-import { StyleSettings } from '@/types/beautifier';
-import { ImageIcon } from 'lucide-react';
+import {
+  useRef,
+  useEffect,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
+import { StyleSettings } from "@/types";
+import { ImageIcon } from "lucide-react";
+import { useTheme } from "next-themes";
+import {
+  drawDeviceFrame,
+  getDeviceColors,
+  getDeviceLayout,
+} from "@/lib/deviceMockups";
 
 interface CanvasRendererProps {
   image: string | null;
@@ -8,48 +20,60 @@ interface CanvasRendererProps {
 }
 
 export interface CanvasRendererRef {
-  exportImage: (format?: 'png' | 'jpeg' | 'webp', quality?: number) => string | null;
+  exportImage: (
+    format?: "png" | "jpeg" | "webp",
+    quality?: number
+  ) => string | null;
 }
 
+/**
+ * Returns the top-left position to center a box on the canvas,
+ * compensating for shadow offset so the visual center stays true.
+ * Snaps to full pixels to avoid sub-pixel blur.
+ */
 const getCenteredPosition = (
   canvasWidth: number,
   canvasHeight: number,
-  imageWidth: number,
-  imageHeight: number,
+  boxWidth: number,
+  boxHeight: number,
   shadowOffsetX: number,
   shadowOffsetY: number
 ) => {
-  // Compensate for shadow offsets and snap to full pixels to avoid subtle visual drift.
-  const x = Math.round((canvasWidth - imageWidth) / 2 - shadowOffsetX / 2);
-  const y = Math.round((canvasHeight - imageHeight) / 2 - shadowOffsetY / 2);
+  const x = Math.round((canvasWidth - boxWidth) / 2 - shadowOffsetX / 2);
+  const y = Math.round((canvasHeight - boxHeight) / 2 - shadowOffsetY / 2);
   return { x, y };
 };
 
+/**
+ * Given an aspect ratio setting and the content bounding box size + padding,
+ * returns the canvas dimensions that satisfy the ratio constraint while never
+ * cropping the content.
+ */
 const getAspectRatioDimensions = (
-  aspectRatio: StyleSettings['aspectRatio'],
-  imageWidth: number,
-  imageHeight: number,
+  aspectRatio: StyleSettings["aspectRatio"],
+  boxWidth: number,
+  boxHeight: number,
   padding: number
 ) => {
-  const contentWidth = imageWidth + padding * 2;
-  const contentHeight = imageHeight + padding * 2;
+  const contentWidth = boxWidth + padding * 2;
+  const contentHeight = boxHeight + padding * 2;
 
   switch (aspectRatio) {
-    case '1:1': {
+    case "1:1": {
       const size = Math.max(contentWidth, contentHeight);
       return { width: size, height: size };
     }
-    case '16:9': {
+    case "16:9": {
       const width = Math.max(contentWidth, (contentHeight * 16) / 9);
       const height = Math.max(contentHeight, (contentWidth * 9) / 16);
       return { width, height };
     }
-    case '4:5': {
+    case "4:5": {
       const width = Math.max(contentWidth, (contentHeight * 4) / 5);
       const height = Math.max(contentHeight, (contentWidth * 5) / 4);
       return { width, height };
     }
-    case '9:16': {
+    case "9:16": {
       const width = Math.max(contentWidth, (contentHeight * 9) / 16);
       const height = Math.max(contentHeight, (contentWidth * 16) / 9);
       return { width, height };
@@ -59,271 +83,10 @@ const getAspectRatioDimensions = (
   }
 };
 
-export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>(
-  ({ image, settings }, ref) => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
-    const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
-    const [containerWidth, setContainerWidth] = useState(700);
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-      if (image) {
-        setIsLoading(true);
-        const img = new Image();
-        img.onload = () => {
-          setLoadedImage(img);
-          setTimeout(() => setIsLoading(false), 200);
-        };
-        img.onerror = () => {
-          setIsLoading(false);
-          setLoadedImage(null);
-        };
-        img.src = image;
-      } else {
-        setLoadedImage(null);
-        setIsLoading(false);
-      }
-    }, [image]);
-
-    useEffect(() => {
-      const updateWidth = () => {
-        if (containerRef.current) {
-          setContainerWidth(containerRef.current.clientWidth);
-        }
-      };
-      updateWidth();
-      window.addEventListener('resize', updateWidth);
-      return () => window.removeEventListener('resize', updateWidth);
-    }, []);
-
-    useEffect(() => {
-      if (!loadedImage) return;
-
-      const { width, height } = getAspectRatioDimensions(
-        settings.aspectRatio,
-        loadedImage.width,
-        loadedImage.height,
-        settings.padding
-      );
-      setCanvasSize({ width, height });
-    }, [loadedImage, settings.aspectRatio, settings.padding]);
-
-    useEffect(() => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw background
-      if (settings.useGradient) {
-        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, settings.gradientStart);
-        gradient.addColorStop(1, settings.gradientEnd);
-        ctx.fillStyle = gradient;
-      } else {
-        ctx.fillStyle = settings.backgroundColor;
-      }
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      if (!loadedImage) return;
-
-      // Center based on visual footprint when drop shadow is offset.
-      const shadowOffsetX = 0;
-      const shadowOffsetY = settings.shadowIntensity > 0 ? settings.shadowIntensity / 2 : 0;
-      const { x, y } = getCenteredPosition(
-        canvas.width,
-        canvas.height,
-        loadedImage.width,
-        loadedImage.height,
-        shadowOffsetX,
-        shadowOffsetY
-      );
-
-      // Draw blurred background if enabled
-      if (settings.blurBackground) {
-        ctx.save();
-        ctx.filter = 'blur(40px) saturate(1.2)';
-        ctx.globalAlpha = 0.7;
-        ctx.drawImage(loadedImage, -80, -80, canvas.width + 160, canvas.height + 160);
-        ctx.restore();
-
-        // Redraw the gradient with transparency
-        if (settings.useGradient) {
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-          gradient.addColorStop(0, settings.gradientStart + '90');
-          gradient.addColorStop(1, settings.gradientEnd + '90');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-      }
-
-      // Draw shadow
-      if (settings.shadowIntensity > 0) {
-        ctx.save();
-        ctx.shadowColor = `rgba(0, 0, 0, ${settings.shadowIntensity / 100})`;
-        ctx.shadowBlur = settings.shadowIntensity * 1.5;
-        ctx.shadowOffsetX = shadowOffsetX;
-        ctx.shadowOffsetY = shadowOffsetY;
-
-        // Draw shadow shape
-        ctx.beginPath();
-        roundRect(ctx, x, y, loadedImage.width, loadedImage.height, settings.borderRadius);
-        ctx.fillStyle = 'white';
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // Draw image with rounded corners
-      ctx.save();
-      ctx.beginPath();
-      roundRect(ctx, x, y, loadedImage.width, loadedImage.height, settings.borderRadius);
-      ctx.clip();
-      ctx.drawImage(loadedImage, x, y);
-      ctx.restore();
-    }, [loadedImage, settings, canvasSize]);
-
-    useImperativeHandle(ref, () => ({
-      exportImage: (format: 'png' | 'jpeg' | 'webp' = 'png', quality: number = 0.95) => {
-        const canvas = canvasRef.current;
-        if (!canvas || !loadedImage) return null;
-
-        // Create high-res export canvas (2x)
-        const exportCanvas = document.createElement('canvas');
-        const scale = 2;
-        exportCanvas.width = canvas.width * scale;
-        exportCanvas.height = canvas.height * scale;
-        const ctx = exportCanvas.getContext('2d');
-        if (!ctx) return null;
-
-        ctx.scale(scale, scale);
-
-        // Redraw everything at 2x
-        if (settings.useGradient) {
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-          gradient.addColorStop(0, settings.gradientStart);
-          gradient.addColorStop(1, settings.gradientEnd);
-          ctx.fillStyle = gradient;
-        } else {
-          ctx.fillStyle = settings.backgroundColor;
-        }
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        const shadowOffsetX = 0;
-        const shadowOffsetY = settings.shadowIntensity > 0 ? settings.shadowIntensity / 2 : 0;
-        const { x, y } = getCenteredPosition(
-          canvas.width,
-          canvas.height,
-          loadedImage.width,
-          loadedImage.height,
-          shadowOffsetX,
-          shadowOffsetY
-        );
-
-        if (settings.blurBackground) {
-          ctx.save();
-          ctx.filter = 'blur(40px) saturate(1.2)';
-          ctx.globalAlpha = 0.7;
-          ctx.drawImage(loadedImage, -80, -80, canvas.width + 160, canvas.height + 160);
-          ctx.restore();
-
-          if (settings.useGradient) {
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, settings.gradientStart + '90');
-            gradient.addColorStop(1, settings.gradientEnd + '90');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-          }
-        }
-
-        if (settings.shadowIntensity > 0) {
-          ctx.save();
-          ctx.shadowColor = `rgba(0, 0, 0, ${settings.shadowIntensity / 100})`;
-          ctx.shadowBlur = settings.shadowIntensity * 1.5;
-          ctx.shadowOffsetX = shadowOffsetX;
-          ctx.shadowOffsetY = shadowOffsetY;
-          ctx.beginPath();
-          roundRect(ctx, x, y, loadedImage.width, loadedImage.height, settings.borderRadius);
-          ctx.fillStyle = 'white';
-          ctx.fill();
-          ctx.restore();
-        }
-
-        ctx.save();
-        ctx.beginPath();
-        roundRect(ctx, x, y, loadedImage.width, loadedImage.height, settings.borderRadius);
-        ctx.clip();
-        ctx.drawImage(loadedImage, x, y);
-        ctx.restore();
-
-        // Export with specified format
-        const mimeType = format === 'png' ? 'image/png' : format === 'jpeg' ? 'image/jpeg' : 'image/webp';
-        return exportCanvas.toDataURL(mimeType, quality);
-      },
-    }));
-
-    // Calculate display size to fit container
-    const maxWidth = containerWidth - 48;
-    const scale = Math.min(1, maxWidth / canvasSize.width);
-    const displayWidth = Math.round(canvasSize.width * scale);
-    const displayHeight = Math.round(canvasSize.height * scale);
-
-    return (
-      <div ref={containerRef} className="flex items-center justify-center w-full min-h-[360px] p-5 bg-gradient-to-br from-background to-accent/10 rounded-xl border border-border/60">
-        <div
-          className="relative rounded-lg overflow-hidden bg-card/80"
-          style={{ 
-            width: displayWidth, 
-            height: displayHeight,
-            boxShadow: image ? '0 12px 40px -22px rgba(0, 0, 0, 0.45)' : '0 0 0 1px hsl(var(--border) / 0.7)',
-            opacity: isLoading ? 0.85 : 1,
-          }}
-        >
-          <canvas
-            ref={canvasRef}
-            width={canvasSize.width}
-            height={canvasSize.height}
-            style={{
-              width: displayWidth,
-              height: displayHeight,
-            }}
-            className="block"
-          />
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-card/50 backdrop-blur-sm rounded-xl">
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-                <p className="text-sm text-muted-foreground font-medium">Processing...</p>
-              </div>
-            </div>
-          )}
-          {!image && !isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card/90 backdrop-blur-sm border-2 border-dashed border-border/50 rounded-xl">
-              <div className="p-4 rounded-full bg-muted/50">
-                <ImageIcon className="w-8 h-8 text-muted-foreground/50" />
-              </div>
-              <div className="text-center px-6">
-                <p className="text-muted-foreground font-medium">Preview Area</p>
-                <p className="text-sm text-muted-foreground/70 mt-1">
-                  Upload a screenshot to see the magic
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-);
-
-CanvasRenderer.displayName = 'CanvasRenderer';
-
-// Helper function to draw rounded rectangles
+/**
+ * Draws a rounded rectangle path on the given context.
+ * Radius is clamped to half the shortest side so it never exceeds the box.
+ */
 function roundRect(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -332,14 +95,335 @@ function roundRect(
   height: number,
   radius: number
 ) {
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
+
+export const CanvasRenderer = forwardRef<
+  CanvasRendererRef,
+  CanvasRendererProps
+>(({ image, settings }, ref) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
+  const [containerWidth, setContainerWidth] = useState(700);
+  const [isLoading, setIsLoading] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  // Load image from data URL whenever the image prop changes.
+  useEffect(() => {
+    if (image) {
+      setIsLoading(true);
+      const img = new Image();
+      img.onload = () => {
+        setLoadedImage(img);
+        setTimeout(() => setIsLoading(false), 200);
+      };
+      img.onerror = () => {
+        setIsLoading(false);
+        setLoadedImage(null);
+      };
+      img.src = image;
+    } else {
+      setLoadedImage(null);
+      setIsLoading(false);
+    }
+  }, [image]);
+
+  // Keep track of the container's rendered width so we can scale the preview.
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth);
+      }
+    };
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  // Recompute canvas dimensions when image, aspect ratio, padding, or mockup changes.
+  // We base dimensions on the device frame bounding box (not raw image) so the
+  // frame chrome is always fully visible.
+  useEffect(() => {
+    if (!loadedImage) return;
+    const layout = getDeviceLayout(
+      settings.deviceMockup,
+      loadedImage.width,
+      loadedImage.height,
+      settings.borderRadius
+    );
+    const { width, height } = getAspectRatioDimensions(
+      settings.aspectRatio,
+      layout.frameWidth,
+      layout.frameHeight,
+      settings.padding
+    );
+    setCanvasSize({ width, height });
+  }, [
+    loadedImage,
+    settings.aspectRatio,
+    settings.padding,
+    settings.deviceMockup,
+    settings.borderRadius,
+  ]);
+
+  /**
+   * Core draw routine shared by the live preview and the 2x export path.
+   *
+   * Drawing order:
+   *   1. Background (gradient or solid colour)
+   *   2. Blurred backdrop (optional glassmorphism effect)
+   *   3. Drop shadow (emitted from a filled frame-shape rect)
+   *   4. Device frame chrome (bezels, title bar, traffic lights, notch …)
+   *   5. Screenshot clipped inside the content area
+   *
+   * canvasW / canvasH are the *logical* pixel dimensions of the destination
+   * canvas. When exporting at 2x the context has already been scaled, so we
+   * still pass the logical size here and let the scale transform handle the
+   * physical pixel count.
+   */
+  const drawToContext = (
+    ctx: CanvasRenderingContext2D,
+    canvasW: number,
+    canvasH: number
+  ) => {
+    ctx.clearRect(0, 0, canvasW, canvasH);
+
+    // --- 1. Background ---
+    if (settings.useGradient) {
+      const gradient = ctx.createLinearGradient(0, 0, canvasW, canvasH);
+      gradient.addColorStop(0, settings.gradientStart);
+      gradient.addColorStop(1, settings.gradientEnd);
+      ctx.fillStyle = gradient;
+    } else {
+      ctx.fillStyle = settings.backgroundColor;
+    }
+    ctx.fillRect(0, 0, canvasW, canvasH);
+
+    if (!loadedImage) return;
+
+    const layout = getDeviceLayout(
+      settings.deviceMockup,
+      loadedImage.width,
+      loadedImage.height,
+      settings.borderRadius
+    );
+
+    // Shadow offset — only vertical so the shadow falls naturally below.
+    const shadowOffsetX = 0;
+    const shadowOffsetY =
+      settings.shadowIntensity > 0 ? settings.shadowIntensity / 2 : 0;
+
+    // Top-left corner of the entire device frame bounding box on the canvas.
+    const { x: frameX, y: frameY } = getCenteredPosition(
+      canvasW,
+      canvasH,
+      layout.frameWidth,
+      layout.frameHeight,
+      shadowOffsetX,
+      shadowOffsetY
+    );
+
+    // --- 2. Blurred backdrop ---
+    if (settings.blurBackground) {
+      ctx.save();
+      ctx.filter = "blur(40px) saturate(1.2)";
+      ctx.globalAlpha = 0.7;
+      ctx.drawImage(loadedImage, -80, -80, canvasW + 160, canvasH + 160);
+      ctx.restore();
+
+      // Re-apply gradient overlay with reduced opacity so the blur still shows.
+      if (settings.useGradient) {
+        const gradient = ctx.createLinearGradient(0, 0, canvasW, canvasH);
+        gradient.addColorStop(0, settings.gradientStart + "90");
+        gradient.addColorStop(1, settings.gradientEnd + "90");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvasW, canvasH);
+      }
+    }
+
+    // Outer corner radius for the frame shadow shape.
+    // When a device is active we use a fixed 14 px so the shadow follows the
+    // device bezel shape; otherwise we respect the user's borderRadius slider.
+    const frameOuterRadius =
+      settings.deviceMockup === "none" ? settings.borderRadius : 14;
+
+    // --- 3. Drop shadow ---
+    // We draw a filled rect with canvas shadow APIs. The rect itself is
+    // immediately painted over by the frame / screenshot layers above it.
+    if (settings.shadowIntensity > 0) {
+      ctx.save();
+      ctx.shadowColor = `rgba(0, 0, 0, ${settings.shadowIntensity / 100})`;
+      ctx.shadowBlur = settings.shadowIntensity * 1.5;
+      ctx.shadowOffsetX = shadowOffsetX;
+      ctx.shadowOffsetY = shadowOffsetY;
+
+      ctx.beginPath();
+      roundRect(
+        ctx,
+        frameX,
+        frameY,
+        layout.frameWidth,
+        layout.frameHeight,
+        frameOuterRadius
+      );
+      ctx.fillStyle = "white";
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // --- 4. Device frame chrome ---
+    if (settings.deviceMockup !== "none") {
+      const colors = getDeviceColors(isDark);
+      drawDeviceFrame(
+        ctx,
+        settings.deviceMockup,
+        frameX,
+        frameY,
+        layout,
+        colors,
+        frameOuterRadius
+      );
+    }
+
+    // --- 5. Screenshot (clipped to content area) ---
+    const contentX = frameX + layout.contentX;
+    const contentY = frameY + layout.contentY;
+
+    ctx.save();
+    ctx.beginPath();
+    roundRect(
+      ctx,
+      contentX,
+      contentY,
+      layout.contentWidth,
+      layout.contentHeight,
+      layout.contentRadius
+    );
+    ctx.clip();
+    ctx.drawImage(
+      loadedImage,
+      contentX,
+      contentY,
+      layout.contentWidth,
+      layout.contentHeight
+    );
+    ctx.restore();
+  };
+
+  // Trigger a preview redraw whenever any relevant state changes.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    drawToContext(ctx, canvas.width, canvas.height);
+    // drawToContext is reconstructed on every render; listing its captured
+    // dependencies directly is more reliable than listing the function itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadedImage, settings, canvasSize, isDark]);
+
+  // Expose exportImage to parent via ref.
+  useImperativeHandle(ref, () => ({
+    exportImage: (
+      format: "png" | "jpeg" | "webp" = "png",
+      quality: number = 0.95
+    ) => {
+      const canvas = canvasRef.current;
+      if (!canvas || !loadedImage) return null;
+
+      // Create a 2x resolution off-screen canvas for crisp retina exports.
+      const exportCanvas = document.createElement("canvas");
+      const scale = 2;
+      exportCanvas.width = canvas.width * scale;
+      exportCanvas.height = canvas.height * scale;
+      const ctx = exportCanvas.getContext("2d");
+      if (!ctx) return null;
+
+      // Scale the context so drawToContext can use logical pixel coordinates
+      // unchanged — the transform handles the physical 2x pixel count.
+      ctx.scale(scale, scale);
+      drawToContext(ctx, canvas.width, canvas.height);
+
+      const mimeType =
+        format === "png"
+          ? "image/png"
+          : format === "jpeg"
+            ? "image/jpeg"
+            : "image/webp";
+      return exportCanvas.toDataURL(mimeType, quality);
+    },
+  }));
+
+  // Scale the preview canvas to fit inside the panel without overflow.
+  const maxWidth = containerWidth - 48;
+  const previewScale = Math.min(1, maxWidth / canvasSize.width);
+  const displayWidth = Math.round(canvasSize.width * previewScale);
+  const displayHeight = Math.round(canvasSize.height * previewScale);
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex items-center justify-center w-full min-h-[360px] p-5 bg-gradient-to-br from-background to-accent/10 rounded-xl border border-border/60"
+    >
+      <div
+        className="relative rounded-lg overflow-hidden bg-card/80"
+        style={{
+          width: displayWidth,
+          height: displayHeight,
+          boxShadow: image
+            ? "0 12px 40px -22px rgba(0, 0, 0, 0.45)"
+            : "0 0 0 1px hsl(var(--border) / 0.7)",
+          opacity: isLoading ? 0.85 : 1,
+        }}
+      >
+        <canvas
+          ref={canvasRef}
+          width={canvasSize.width}
+          height={canvasSize.height}
+          style={{ width: displayWidth, height: displayHeight }}
+          className="block"
+        />
+
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-card/50 backdrop-blur-sm rounded-xl">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <p className="text-sm text-muted-foreground font-medium">
+                Processing...
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!image && !isLoading && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-card/90 backdrop-blur-sm border-2 border-dashed border-border/50 rounded-xl">
+            <div className="p-4 rounded-full bg-muted/50">
+              <ImageIcon className="w-8 h-8 text-muted-foreground/50" />
+            </div>
+            <div className="text-center px-6">
+              <p className="text-muted-foreground font-medium">Preview Area</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                Upload a screenshot to see the magic
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
+CanvasRenderer.displayName = "CanvasRenderer";
