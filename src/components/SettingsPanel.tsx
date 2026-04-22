@@ -282,6 +282,30 @@ export const SettingsPanel = ({
                   }
                 />
               </div>
+
+              {/* Grain intensity */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-xs font-medium">Grain</Label>
+                    <p className="text-[10px] text-muted-foreground">
+                      Film texture on background only
+                    </p>
+                  </div>
+                  <span className="rounded bg-muted/50 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                    {settings.grainIntensity}%
+                  </span>
+                </div>
+                <Slider
+                  value={[settings.grainIntensity]}
+                  onValueChange={([value]) =>
+                    updateSetting("grainIntensity", value)
+                  }
+                  min={0}
+                  max={100}
+                  step={5}
+                />
+              </div>
             </div>
           </div>
         ) : (

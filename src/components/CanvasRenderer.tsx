@@ -84,6 +84,98 @@ const getAspectRatioDimensions = (
 };
 
 /**
+ * Draws a premium film-grain noise overlay on the background only.
+ *
+ * The grain is composited over the full background with "overlay" blending
+ * which interacts with the existing colours for an analogue, filmic look.
+ * The screenshot content rectangle is excluded using a clipping region built
+ * with the even-odd fill rule, so the actual screenshot pixel data is never
+ * touched.
+ *
+ * @param ctx       Destination context.
+ * @param w         Canvas logical width.
+ * @param h         Canvas logical height.
+ * @param intensity 0–100 — maps to a max per-pixel noise alpha of 0–55%.
+ * @param contentX  Screenshot rect left edge (grain-free zone).
+ * @param contentY  Screenshot rect top edge.
+ * @param contentW  Screenshot rect width.
+ * @param contentH  Screenshot rect height.
+ * @param contentR  Screenshot rect corner radius.
+ */
+function drawGrain(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  intensity: number,
+  contentX: number,
+  contentY: number,
+  contentW: number,
+  contentH: number,
+  contentR: number
+) {
+  if (intensity <= 0) return;
+
+  // --- Generate noise on a small off-screen canvas -------------------------
+  // Downscale 2× for a slightly coarser, more filmic texture and better perf.
+  const scale = 2;
+  const nw = Math.ceil(w / scale);
+  const nh = Math.ceil(h / scale);
+
+  const noiseCanvas = document.createElement("canvas");
+  noiseCanvas.width = nw;
+  noiseCanvas.height = nh;
+  const nc = noiseCanvas.getContext("2d");
+  if (!nc) return;
+
+  const imageData = nc.createImageData(nw, nh);
+  const data = imageData.data;
+  // Map 0–100 → max per-pixel alpha 0–0.55 so grain is never overpowering.
+  const maxAlpha = (intensity / 100) * 0.55;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const luma = Math.random() * 255;
+    // Subtle warm/cool channel variation for organic feel.
+    data[i]     = Math.max(0, Math.min(255, luma + (Math.random() - 0.5) * 14));
+    data[i + 1] = luma;
+    data[i + 2] = Math.max(0, Math.min(255, luma + (Math.random() - 0.5) * 14));
+    // Randomise per-pixel alpha so the texture is non-uniform.
+    data[i + 3] = Math.random() * maxAlpha * 255;
+  }
+  nc.putImageData(imageData, 0, 0);
+
+  // --- Apply grain, clipping OUT the screenshot area -----------------------
+  ctx.save();
+
+  // Build a clip path: outer rect (full canvas) minus the inner screenshot rect.
+  // Using the even-odd rule, overlapping regions cancel out → the screenshot
+  // rect is excluded from the clip, so nothing we draw will touch it.
+  ctx.beginPath();
+  // Outer rectangle (full canvas).
+  ctx.rect(0, 0, w, h);
+  // Inner rectangle (screenshot area) — drawn in the same path so even-odd
+  // rule makes the intersection empty.
+  const r = Math.min(contentR, contentW / 2, contentH / 2);
+  ctx.moveTo(contentX + r, contentY);
+  ctx.lineTo(contentX + contentW - r, contentY);
+  ctx.quadraticCurveTo(contentX + contentW, contentY, contentX + contentW, contentY + r);
+  ctx.lineTo(contentX + contentW, contentY + contentH - r);
+  ctx.quadraticCurveTo(contentX + contentW, contentY + contentH, contentX + contentW - r, contentY + contentH);
+  ctx.lineTo(contentX + r, contentY + contentH);
+  ctx.quadraticCurveTo(contentX, contentY + contentH, contentX, contentY + contentH - r);
+  ctx.lineTo(contentX, contentY + r);
+  ctx.quadraticCurveTo(contentX, contentY, contentX + r, contentY);
+  ctx.closePath();
+  ctx.clip("evenodd");
+
+  // "overlay" blend: bright noise → lighter, dark noise → darker, exactly
+  // like analogue film grain interacting with the scene.
+  ctx.globalCompositeOperation = "overlay";
+  ctx.drawImage(noiseCanvas, 0, 0, w, h);
+
+  ctx.restore();
+}
+
+/**
  * Draws a rounded rectangle path on the given context.
  * Radius is clamped to half the shortest side so it never exceeds the box.
  */
@@ -259,6 +351,23 @@ export const CanvasRenderer = forwardRef<
     // device bezel shape; otherwise we respect the user's borderRadius slider.
     const frameOuterRadius =
       settings.deviceMockup === "none" ? settings.borderRadius : 14;
+
+    // --- 2b. Grain overlay (background only, screenshot area excluded) ---
+    if (settings.grainIntensity > 0 && loadedImage) {
+      const contentX = frameX + layout.contentX;
+      const contentY = frameY + layout.contentY;
+      drawGrain(
+        ctx,
+        canvasW,
+        canvasH,
+        settings.grainIntensity,
+        contentX,
+        contentY,
+        layout.contentWidth,
+        layout.contentHeight,
+        layout.contentRadius
+      );
+    }
 
     // --- 3. Drop shadow ---
     // We draw a filled rect with canvas shadow APIs. The rect itself is

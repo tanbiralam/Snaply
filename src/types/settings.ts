@@ -13,6 +13,8 @@ export interface StyleSettings {
   blurBackground: boolean;
   aspectRatio: AspectRatio;
   deviceMockup: DeviceMockup;
+  /** Film-grain intensity applied ONLY to the background layer (0 = off, 100 = max). */
+  grainIntensity: number;
 }
 
 export const defaultSettings: StyleSettings = {
@@ -26,4 +28,5 @@ export const defaultSettings: StyleSettings = {
   blurBackground: false,
   aspectRatio: "free",
   deviceMockup: "none",
+  grainIntensity: 0,
 };
