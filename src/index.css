@@ -36,6 +36,7 @@ All colors MUST be HSL.
     --destructive-foreground: 0 0% 98%;
 
     --border: 220 12% 82%;
+    --hairline: 220 12% 82%;
     --input: 220 12% 82%;
     --ring: 246 65% 55%;
 
@@ -109,6 +110,7 @@ All colors MUST be HSL.
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 12% 22%;
+    --hairline: 220 12% 22%;
     --input: 220 12% 22%;
     --ring: 247 63% 62%;
     --sidebar-background: 220 15% 13%;
@@ -133,6 +135,96 @@ All colors MUST be HSL.
     --shadow-lg: 0 8px 20px -8px hsl(0 0% 0% / 0.4);
     --shadow-xl: 0 10px 30px -12px hsl(0 0% 0% / 0.45);
     --shadow-2xl: 0 18px 45px -15px hsl(0 0% 0% / 0.5);
+  }
+}
+
+@layer utilities {
+  .font-serif-display {
+    font-family: var(--font-serif);
+  }
+
+  .hairline {
+    border-color: hsl(var(--hairline) / 0.7);
+  }
+
+  .bg-paper-glow {
+    background:
+      radial-gradient(circle at 20% 15%, hsl(var(--primary) / 0.14), transparent 34%),
+      radial-gradient(circle at 82% 12%, hsl(166 64% 54% / 0.12), transparent 30%),
+      linear-gradient(180deg, hsl(var(--background)), hsl(var(--background)));
+  }
+
+  .bg-gradient-canvas {
+    background: linear-gradient(135deg, hsl(246 65% 55%), hsl(195 74% 60%));
+  }
+
+  .bg-gradient-canvas-soft {
+    background: linear-gradient(135deg, hsl(247 63% 62% / 0.85), hsl(166 64% 54% / 0.85));
+  }
+
+  .shadow-soft {
+    box-shadow: 0 16px 40px -28px hsl(var(--foreground) / 0.45);
+  }
+
+  .shadow-frame {
+    box-shadow: 0 24px 80px -36px hsl(var(--foreground) / 0.45);
+  }
+
+  .animate-float-slow {
+    animation: float-slow 7s ease-in-out infinite;
+  }
+
+  .animate-slide-compare {
+    animation: slide-compare 4.5s ease-in-out infinite;
+  }
+
+  .reveal {
+    animation: reveal-up 0.7s ease-out both;
+  }
+
+  .reveal-delay-1 {
+    animation-delay: 0.08s;
+  }
+
+  .reveal-delay-2 {
+    animation-delay: 0.16s;
+  }
+
+  .reveal-delay-3 {
+    animation-delay: 0.24s;
+  }
+
+  .reveal-delay-4 {
+    animation-delay: 0.32s;
+  }
+
+  @keyframes float-slow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes slide-compare {
+    0%, 100% {
+      left: 42%;
+    }
+    50% {
+      left: 58%;
+    }
+  }
+
+  @keyframes reveal-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
