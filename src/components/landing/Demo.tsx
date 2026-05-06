@@ -19,7 +19,7 @@ const Demo = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-10 items-stretch">
+        <div className="grid lg:grid-cols-[280px_1fr] gap-6 lg:gap-10 items-center">
           {/* Faux controls */}
           <div className="rounded-2xl border hairline bg-background p-5 shadow-soft flex flex-col gap-5">
             <div className="flex items-center gap-2 text-sm font-medium">
@@ -71,30 +71,7 @@ const Demo = () => {
             </div>
           </div>
 
-          {/* Canvas */}
-          <div className="relative rounded-2xl overflow-hidden border hairline shadow-frame animate-float-slow">
-            <div className="bg-gradient-canvas p-10 sm:p-16 grid place-items-center min-h-[380px]">
-              <div className="w-full max-w-2xl rounded-xl overflow-hidden bg-white shadow-frame border border-black/5">
-                {/* Browser chrome */}
-                <div className="flex items-center gap-2 px-3 py-2 border-b border-black/5 bg-[hsl(35_20%_97%)]">
-                  <div className="flex gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-[hsl(0_70%_65%)]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[hsl(40_85%_60%)]" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-[hsl(140_50%_55%)]" />
-                  </div>
-                  <div className="flex-1 mx-3 h-5 rounded bg-black/5 text-[10px] text-muted-foreground grid place-items-center">
-                    snaply.app
-                  </div>
-                </div>
-                <div className="aspect-[16/9]">
-                  <MockScreenshot />
-                </div>
-              </div>
-            </div>
-            <div className="absolute bottom-3 left-3 text-[11px] font-medium px-2 py-1 rounded-md bg-background/80 backdrop-blur border hairline">
-              Auto-styled · 0.4s
-            </div>
-          </div>
+          <MockScreenshot framed />
         </div>
       </div>
     </section>
