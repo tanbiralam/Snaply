@@ -14,6 +14,21 @@ interface StylePresetsProps {
 
 const PresetSwatch = ({ preset }: { preset: Preset }) => {
   const s = preset.settings;
+
+  // Image-based background preset — show a thumbnail
+  if (s.backgroundImage) {
+    return (
+      <span
+        className="w-7 h-7 rounded-md flex-shrink-0 ring-1 ring-black/10 dark:ring-white/10 overflow-hidden"
+        style={{
+          backgroundImage: `url(${s.backgroundImage})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
+    );
+  }
+
   const bg =
     s.useGradient && s.gradientStart && s.gradientEnd
       ? `linear-gradient(${(s as { gradientAngle?: number }).gradientAngle ?? 135}deg, ${s.gradientStart}, ${s.gradientEnd})`

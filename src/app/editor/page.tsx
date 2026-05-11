@@ -26,7 +26,12 @@ export default function Home() {
   // Receives full Preset object, sets activePreset id and merges settings
   const handlePresetSelect = useCallback((preset: Preset) => {
     setActivePreset(preset.id);
-    setSettings((prev) => ({ ...prev, ...preset.settings }));
+    setSettings((prev) => ({
+      ...prev,
+      // Always reset backgroundImage so switching from image preset to gradient clears it
+      backgroundImage: null,
+      ...preset.settings,
+    }));
   }, []);
 
   // Clears activePreset when user manually changes any setting

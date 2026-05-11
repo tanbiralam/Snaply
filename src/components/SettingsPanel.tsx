@@ -22,8 +22,23 @@ export const SettingsPanel = ({
 }: SettingsPanelProps) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>("style");
 
-  const updateSetting = <K extends keyof StyleSettings>(key: K, value: StyleSettings[K]) =>
-    onSettingsChange({ ...settings, [key]: value });
+  const updateSetting = <K extends keyof StyleSettings>(key: K, value: StyleSettings[K]) => {
+    const newSettings = { ...settings, [key]: value };
+
+    const bgControls: Array<keyof StyleSettings> = [
+      "useGradient",
+      "gradientStart",
+      "gradientEnd",
+      "gradientAngle",
+      "backgroundColor"
+    ];
+
+    if (bgControls.includes(key as keyof StyleSettings)) {
+      newSettings.backgroundImage = null;
+    }
+
+    onSettingsChange(newSettings);
+  };
 
   return (
     <div className="flex h-full flex-col">

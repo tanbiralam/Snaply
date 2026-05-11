@@ -77,6 +77,7 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
     const autoFitScaleRef = useRef(1);
 
     const [loadedImage,    setLoadedImage]    = useState<HTMLImageElement | null>(null);
+    const [loadedBgImage,  setLoadedBgImage]  = useState<HTMLImageElement | null>(null);
     const [canvasSize,     setCanvasSize]     = useState({ width: 800, height: 500 });
     const [containerWidth, setContainerWidth] = useState(700);
     const [containerHeight,setContainerHeight]= useState(500);
@@ -104,6 +105,19 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
         setZoomLevel(null);
       }
     }, [image]);
+
+    // ── Load background image (for image-based presets) ─────────────────────
+    useEffect(() => {
+      const src = settings.backgroundImage;
+      if (!src) {
+        setLoadedBgImage(null);
+        return;
+      }
+      const bg = new Image();
+      bg.onload = () => setLoadedBgImage(bg);
+      bg.onerror = () => setLoadedBgImage(null);
+      bg.src = src;
+    }, [settings.backgroundImage]);
 
     // ── Track container size ────────────────────────────────────────────────
     useEffect(() => {
@@ -155,16 +169,27 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
         ctx.clearRect(0, 0, canvasW, canvasH);
 
         // 1. Background
-        if (settings.useGradient) {
+        if (settings.backgroundImage && loadedBgImage) {
+          // Draw background image cover-style
+          const iw = loadedBgImage.naturalWidth;
+          const ih = loadedBgImage.naturalHeight;
+          const scale = Math.max(canvasW / iw, canvasH / ih);
+          const sw = iw * scale;
+          const sh = ih * scale;
+          const sx = (canvasW - sw) / 2;
+          const sy = (canvasH - sh) / 2;
+          ctx.drawImage(loadedBgImage, sx, sy, sw, sh);
+        } else if (settings.useGradient) {
           const [x0, y0, x1, y1] = angleToGradientPoints(settings.gradientAngle ?? 135, canvasW, canvasH);
           const g = ctx.createLinearGradient(x0, y0, x1, y1);
           g.addColorStop(0, settings.gradientStart);
           g.addColorStop(1, settings.gradientEnd);
           ctx.fillStyle = g;
+          ctx.fillRect(0, 0, canvasW, canvasH);
         } else {
           ctx.fillStyle = settings.backgroundColor;
+          ctx.fillRect(0, 0, canvasW, canvasH);
         }
-        ctx.fillRect(0, 0, canvasW, canvasH);
         if (!loadedImage) return;
 
         const layout = getDeviceLayout(
@@ -231,7 +256,7 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
         );
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [loadedImage, settings, isDark]
+      [loadedImage, loadedBgImage, settings, isDark]
     );
 
     // ── Redraw on change ────────────────────────────────────────────────────

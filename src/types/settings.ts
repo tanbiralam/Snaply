@@ -15,6 +15,8 @@ export interface StyleSettings {
   aspectRatio: AspectRatio;
   deviceMockup: DeviceMockup;
   grainIntensity: number;
+  /** Path to a public background image, e.g. "/backgrounds/bokeh-dark.jpg" */
+  backgroundImage: string | null;
 }
 
 export const defaultSettings: StyleSettings = {
@@ -30,4 +32,5 @@ export const defaultSettings: StyleSettings = {
   aspectRatio: "free",
   deviceMockup: "none",
   grainIntensity: 0,
+  backgroundImage: null,
 };

@@ -16,6 +16,92 @@ export interface PresetCategory {
 
 export const presetCategories: PresetCategory[] = [
   {
+    id: "image-backgrounds",
+    label: "Image Backgrounds",
+    presets: [
+
+      {
+        id: "img-pastel-mesh",
+        name: "Pastel Dream",
+        settings: {
+          padding: 60,
+          borderRadius: 24,
+          shadowIntensity: 35,
+          useGradient: false,
+          backgroundImage: "/backgrounds/pastel-mesh.jpg",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
+      {
+        id: "img-dark-marble",
+        name: "Dark Marble",
+        settings: {
+          padding: 56,
+          borderRadius: 16,
+          shadowIntensity: 55,
+          useGradient: false,
+          backgroundImage: "/backgrounds/dark-marble.jpg",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
+      {
+        id: "img-aurora",
+        name: "Aurora",
+        settings: {
+          padding: 68,
+          borderRadius: 22,
+          shadowIntensity: 45,
+          useGradient: false,
+          backgroundImage: "/backgrounds/aurora.jpg",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
+      {
+        id: "img-neon-grid",
+        name: "Neon Grid",
+        settings: {
+          padding: 64,
+          borderRadius: 18,
+          shadowIntensity: 60,
+          useGradient: false,
+          backgroundImage: "/backgrounds/neon-grid.jpg",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
+      {
+        id: "img-light-concrete",
+        name: "Concrete",
+        settings: {
+          padding: 52,
+          borderRadius: 14,
+          shadowIntensity: 30,
+          useGradient: false,
+          backgroundImage: "/backgrounds/light-concrete.jpg",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
+      {
+        id: "img-windows-ghibli",
+        name: "Windows Ghibli",
+        settings: {
+          padding: 52,
+          borderRadius: 14,
+          shadowIntensity: 30,
+          useGradient: false,
+          backgroundImage: "/backgrounds/windows-ghibli.png",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
+    ],
+  },
+
+  {
     id: "gradients",
     label: "Gradients",
     presets: [
