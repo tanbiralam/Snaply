@@ -124,7 +124,7 @@ export default {
           },
           fontFamily: {
               sans: [
-                  'Lato',
+                  'Poppins',
                   'ui-sans-serif',
                   'system-ui',
                   '-apple-system',

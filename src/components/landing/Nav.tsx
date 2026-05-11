@@ -1,5 +1,6 @@
 import { Github } from "lucide-react";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Nav = () => {
   return (
@@ -17,7 +18,14 @@ const Nav = () => {
           <a href="#use-cases" className="hover:text-foreground transition-colors">Use cases</a>
         </nav>
         <div className="flex items-center gap-2">
-          <a href="#" aria-label="GitHub" className="hidden sm:grid place-items-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+          <ThemeToggle />
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            className="hidden sm:grid place-items-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors border hairline"
+          >
             <Github className="w-4 h-4" />
           </a>
           <Link

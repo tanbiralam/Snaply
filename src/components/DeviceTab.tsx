@@ -73,9 +73,9 @@ export const DeviceTab = ({ settings, onSettingsChange, imageAspectRatio }: Devi
 
       {/* Incompatibility warning for the currently selected device */}
       {selectedIsIncompat && (
-        <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/8 px-3 py-2">
+        <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2">
           <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
-          <p className="text-[11px] leading-relaxed text-amber-600 dark:text-amber-400">
+          <p className="text-[11px] leading-relaxed text-amber-700 dark:text-amber-400">
             This frame works best with a different image ratio. You may see letterboxing or stretching.
           </p>
         </div>

@@ -10,28 +10,7 @@ import { StylePresets } from "@/components/StylePresets";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { ImageIcon } from "lucide-react";
-
-// ─── URL state encoding helpers ──────────────────────────────────────────────
-
-function encodeSettings(settings: StyleSettings): string {
-  try {
-    return btoa(JSON.stringify(settings));
-  } catch {
-    return "";
-  }
-}
-
-function decodeSettings(encoded: string): Partial<StyleSettings> | null {
-  try {
-    const decoded = JSON.parse(atob(encoded));
-    if (typeof decoded === "object" && decoded !== null) {
-      return decoded as Partial<StyleSettings>;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
+import Link from "next/link";
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -40,32 +19,7 @@ export default function Home() {
   const [image, setImage] = useState<string | null>(null);
   const [settings, setSettings] = useState<StyleSettings>(defaultSettings);
   const [activePreset, setActivePreset] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
-
-  // ── Restore settings from URL hash on mount ──────────────────────────────
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith("#state=")) {
-      const encoded = hash.slice("#state=".length);
-      const decoded = decodeSettings(encoded);
-      if (decoded) {
-        setSettings({ ...defaultSettings, ...decoded });
-      }
-    }
-    setIsInitialized(true);
-  }, []);
-
-  // ── Sync settings to URL hash whenever they change ───────────────────────
-  useEffect(() => {
-    if (!isInitialized) return;
-    const encoded = encodeSettings(settings);
-    if (encoded) {
-      const newUrl =
-        window.location.pathname + window.location.search + "#state=" + encoded;
-      window.history.replaceState(null, "", newUrl);
-    }
-  }, [settings, isInitialized]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -131,13 +85,13 @@ export default function Home() {
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        {/* Logo — mirrors landing Nav */}
-        <div className="flex items-center gap-2">
+        {/* Logo — clicking returns to landing page */}
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <span className="grid place-items-center w-7 h-7 rounded-lg bg-foreground text-background font-semibold text-sm">
             S
           </span>
           <span className="font-semibold tracking-tight text-[15px]">Snaply</span>
-        </div>
+        </Link>
 
         {/* Header actions */}
         <div className="flex items-center gap-2">
@@ -161,7 +115,7 @@ export default function Home() {
         </aside>
 
         {/* Center — canvas / upload area */}
-        <main className="flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden bg-secondary/20 p-4 md:p-6 lg:p-8">
+        <main className="flex min-w-0 flex-1 flex-col items-center justify-center overflow-hidden bg-muted/60 p-4 md:p-6 lg:p-8">
           {image ? (
             <div className="flex h-full w-full flex-col items-center gap-4">
               {/* Canvas preview — fills available height */}

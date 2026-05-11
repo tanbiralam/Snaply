@@ -155,9 +155,9 @@ export const ExportButton = ({ onExport, disabled }: ExportButtonProps) => {
             />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-52" sideOffset={8}>
-          <DropdownMenuLabel className="flex items-center gap-2 text-xs">
-            <FileImage className="w-3.5 h-3.5 text-muted-foreground" />
+        <DropdownMenuContent align="end" className="w-56 font-sans" sideOffset={8}>
+          <DropdownMenuLabel className="flex items-center gap-2 text-xs text-muted-foreground font-medium px-2 py-2">
+            <FileImage className="w-3.5 h-3.5 shrink-0" />
             Export format
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -166,21 +166,17 @@ export const ExportButton = ({ onExport, disabled }: ExportButtonProps) => {
               key={format.value}
               onClick={() => handleExport(format.value)}
               className={cn(
-                "cursor-pointer transition-colors duration-150",
+                "cursor-pointer flex items-center gap-3 px-2 py-2 rounded-md transition-colors duration-150",
                 selectedFormat === format.value && "bg-secondary"
               )}
             >
-              <div className="flex flex-col gap-0.5 py-0.5">
-                <div className="flex items-center justify-between w-full gap-4">
-                  <span className="font-medium text-sm">{format.label}</span>
-                  {selectedFormat === format.value && (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-foreground/60" />
-                  )}
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {format.description}
-                </span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium leading-tight">{format.label}</p>
+                <p className="text-xs text-muted-foreground leading-tight mt-0.5">{format.description}</p>
               </div>
+              {selectedFormat === format.value && (
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-primary" />
+              )}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

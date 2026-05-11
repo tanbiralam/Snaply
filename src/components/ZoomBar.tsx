@@ -27,15 +27,15 @@ export const ZoomBar = ({ zoom, autoFitScale, onZoomChange }: ZoomBarProps) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-1 rounded-xl border border-border/50",
-        "bg-card/90 backdrop-blur-sm shadow-lg px-1.5 py-1 select-none"
+        "flex items-center gap-1 rounded-xl border border-border",
+        "bg-card/95 backdrop-blur-sm shadow-sm px-1.5 py-1 select-none"
       )}
     >
       <button
         type="button"
         onClick={() => step(-ZOOM_STEP)}
         disabled={effectiveScale <= ZOOM_MIN}
-        className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground disabled:opacity-30"
+        className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-30"
         title="Zoom out"
       >
         <ZoomOut className="h-3.5 w-3.5" />
@@ -49,13 +49,13 @@ export const ZoomBar = ({ zoom, autoFitScale, onZoomChange }: ZoomBarProps) => {
         type="button"
         onClick={() => step(ZOOM_STEP)}
         disabled={effectiveScale >= ZOOM_MAX}
-        className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground disabled:opacity-30"
+        className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:opacity-30"
         title="Zoom in"
       >
         <ZoomIn className="h-3.5 w-3.5" />
       </button>
 
-      <div className="mx-0.5 h-4 w-px bg-border/60" />
+      <div className="mx-0.5 h-4 w-px bg-border" />
 
       <button
         type="button"
@@ -64,7 +64,7 @@ export const ZoomBar = ({ zoom, autoFitScale, onZoomChange }: ZoomBarProps) => {
           "flex h-6 items-center justify-center rounded-lg px-2 text-[10px] font-semibold transition-colors",
           isAuto
             ? "bg-primary/15 text-primary"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
         )}
         title="Fit to screen"
       >
@@ -78,7 +78,7 @@ export const ZoomBar = ({ zoom, autoFitScale, onZoomChange }: ZoomBarProps) => {
           "flex h-6 items-center justify-center rounded-lg px-2 text-[10px] font-semibold transition-colors",
           !isAuto && Math.abs(effectiveScale - 1) < 0.01
             ? "bg-primary/15 text-primary"
-            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            : "text-muted-foreground hover:bg-secondary hover:text-foreground"
         )}
         title="100% — actual pixel size"
       >
