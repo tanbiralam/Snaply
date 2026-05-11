@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { StyleSettings, defaultSettings, Preset } from "@/types";
 import { CanvasRenderer, CanvasRendererRef } from "@/components/CanvasRenderer";
 import { ExportButton } from "@/components/ExportButton";
+import { ShareMenu } from "@/components/ShareMenu";
 import { ImageUpload } from "@/components/ImageUpload";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { StylePresets } from "@/components/StylePresets";
@@ -144,6 +145,7 @@ export default function Home() {
                 </button>
 
                 <ExportButton onExport={handleExport} disabled={!image} />
+                <ShareMenu onExport={handleExport} disabled={!image} />
               </div>
             </div>
           ) : (
