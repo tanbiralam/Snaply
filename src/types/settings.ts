@@ -1,6 +1,6 @@
 import { DeviceMockup } from "./devices";
 
-export type AspectRatio = "free" | "16:9" | "4:3" | "1:1" | "9:16";
+export type AspectRatio = "free" | "16:9" | "4:3" | "1:1" | "9:16" | "4:5";
 
 export interface StyleSettings {
   padding: number;
