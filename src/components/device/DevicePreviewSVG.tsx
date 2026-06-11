@@ -73,19 +73,6 @@ export const DevicePreviewSVG = ({
         </svg>
       );
 
-    case "iphone-landscape":
-      return (
-        <svg width="52" height="30" viewBox="0 0 52 30" fill="none">
-          <rect x="1" y="1" width="50" height="28" rx="6" stroke={stroke} strokeWidth="1.2" fill={fill} />
-          <rect x="2.5" y="10" width="4"  height="10" rx="2" fill={stroke} fillOpacity="0.4" />
-          <rect x="10"  y="3"  width="30" height="24" rx="1" fill={stroke} fillOpacity="0.08" />
-          <rect x="12"  y="7"  width="18" height="2" rx="1" fill={stroke} fillOpacity="0.20" />
-          <rect x="12"  y="11" width="14" height="2" rx="1" fill={stroke} fillOpacity="0.15" />
-          <rect x="12"  y="15" width="16" height="2" rx="1" fill={stroke} fillOpacity="0.15" />
-          <rect x="46"  y="12" width="3"  height="6" rx="1.5" fill={stroke} fillOpacity="0.30" />
-        </svg>
-      );
-
     case "android":
       return (
         <svg width="30" height="52" viewBox="0 0 30 52" fill="none">
@@ -98,21 +85,6 @@ export const DevicePreviewSVG = ({
           <rect x="9"  y="44" width="4" height="4" rx="1"   fill={stroke} fillOpacity="0.20" />
           <circle cx="15" cy="46" r="2" stroke={stroke} strokeWidth="0.8" />
           <rect x="17" y="44" width="4" height="4" rx="1"   fill={stroke} fillOpacity="0.20" />
-        </svg>
-      );
-
-    case "android-landscape":
-      return (
-        <svg width="52" height="30" viewBox="0 0 52 30" fill="none">
-          <rect x="1" y="1" width="50" height="28" rx="4" stroke={stroke} strokeWidth="1.2" fill={fill} />
-          <circle cx="26" cy="4" r="1.5" fill={stroke} fillOpacity="0.5" />
-          <rect x="10" y="3"  width="32" height="24" rx="1" fill={stroke} fillOpacity="0.08" />
-          <rect x="12" y="7"  width="18" height="2" rx="1" fill={stroke} fillOpacity="0.20" />
-          <rect x="12" y="11" width="14" height="2" rx="1" fill={stroke} fillOpacity="0.15" />
-          <rect x="12" y="15" width="16" height="2" rx="1" fill={stroke} fillOpacity="0.15" />
-          <rect x="44" y="11" width="4"  height="2" rx="1" fill={stroke} fillOpacity="0.20" />
-          <circle cx="46" cy="16" r="1.5" stroke={stroke} strokeWidth="0.8" />
-          <rect x="44" y="19" width="4"  height="2" rx="1" fill={stroke} fillOpacity="0.20" />
         </svg>
       );
 

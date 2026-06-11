@@ -2,7 +2,7 @@ import MockScreenshot from "./MockScreenshot";
 
 const BeforeAfter = () => {
   return (
-    <section >
+    <section id="demo" className="scroll-mt-20">
       <div className="container py-16 sm:py-20">
         {/* Section header */}
         <div className="max-w-2xl mb-10">
@@ -26,9 +26,9 @@ const BeforeAfter = () => {
             </div>
           </div>
 
-          {/* BEFORE (clipped overlay) */}
+          {/* BEFORE (clipped overlay) — clip boundary animates in sync with the handle */}
           <div
-            className="absolute inset-0 overflow-hidden"
+            className="absolute inset-0 overflow-hidden animate-clip-compare"
             style={{ clipPath: "inset(0 0 0 50%)" }}
             id="before-clip"
           >

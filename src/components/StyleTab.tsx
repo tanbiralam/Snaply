@@ -113,9 +113,10 @@ const LayoutSection = ({ settings, updateSetting }: StyleTabProps) => (
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="auto">Auto</SelectItem>
+          <SelectItem value="free">Auto</SelectItem>
           <SelectItem value="1:1">1:1 — Square</SelectItem>
           <SelectItem value="16:9">16:9 — Landscape</SelectItem>
+          <SelectItem value="4:3">4:3 — Classic</SelectItem>
           <SelectItem value="4:5">4:5 — Portrait</SelectItem>
           <SelectItem value="9:16">9:16 — Story</SelectItem>
         </SelectContent>

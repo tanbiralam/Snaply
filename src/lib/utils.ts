@@ -28,7 +28,8 @@ export function convertBlobToPng(blob: Blob): Promise<Blob> {
       c.toBlob(
         (b) => {
           URL.revokeObjectURL(url);
-          b ? resolve(b) : reject(new Error("toBlob failed"));
+          if (b) resolve(b);
+          else reject(new Error("toBlob failed"));
         },
         "image/png"
       );

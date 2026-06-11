@@ -69,7 +69,8 @@ export const ExportButton = ({ onExport, disabled }: ExportButtonProps) => {
     setIsExporting(true);
     setDropdownOpen(false);
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    // Yield one frame so the spinner paints before the synchronous canvas export.
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     const dataUrl = onExport(format);
     if (!dataUrl) {

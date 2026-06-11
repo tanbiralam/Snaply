@@ -8,11 +8,12 @@ const Footer = () => {
           <span className="grid place-items-center w-6 h-6 rounded-md bg-foreground text-background font-semibold text-xs">S</span>
           <span className="text-sm text-muted-foreground">© {new Date().getFullYear()} Snaply</span>
         </div>
+        {/* Placeholder links — non-navigating until real destinations are wired up. */}
         <div className="flex items-center gap-6 text-sm text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-          <a href="#" className="hover:text-foreground transition-colors">Changelog</a>
-          <a href="#" aria-label="GitHub" className="hover:text-foreground transition-colors"><Github className="w-4 h-4" /></a>
-          <a href="#" aria-label="Twitter" className="hover:text-foreground transition-colors"><Twitter className="w-4 h-4" /></a>
+          <span className="cursor-default select-none" aria-disabled="true">Privacy</span>
+          <span className="cursor-default select-none" aria-disabled="true">Changelog</span>
+          <span className="cursor-default select-none" aria-label="GitHub" role="img"><Github className="w-4 h-4" /></span>
+          <span className="cursor-default select-none" aria-label="Twitter" role="img"><Twitter className="w-4 h-4" /></span>
         </div>
       </div>
     </footer>

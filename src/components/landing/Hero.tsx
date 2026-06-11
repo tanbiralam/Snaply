@@ -1,4 +1,12 @@
-import { ArrowRight, Clipboard, Image as ImageIcon, Smartphone, Monitor, Square, Download } from "lucide-react";
+import {
+  ArrowRight,
+  Clipboard,
+  Image as ImageIcon,
+  Smartphone,
+  Monitor,
+  Square,
+  Download,
+} from "lucide-react";
 import Link from "next/link";
 import MockScreenshot from "./MockScreenshot";
 
@@ -12,7 +20,8 @@ const Hero = () => {
           <div className="lg:col-span-6">
             <div className="reveal inline-flex items-center gap-2 text-xs text-muted-foreground border hairline rounded-full px-3 py-1 mb-6 bg-background/70 backdrop-blur">
               <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-              No login. No setup. Just <kbd className="font-medium text-foreground">⌘V</kbd>.
+              No login. No setup. Just{" "}
+              <kbd className="font-medium text-foreground">⌘V</kbd>.
             </div>
             <h1 className="reveal reveal-delay-1 font-serif-display text-5xl sm:text-6xl md:text-[64px] leading-[1.02] tracking-tight">
               Paste a screenshot.
@@ -20,7 +29,8 @@ const Hero = () => {
               <span className="italic">Get a polished visual</span> instantly.
             </h1>
             <p className="reveal reveal-delay-2 mt-6 text-lg text-muted-foreground max-w-xl leading-relaxed">
-              Snaply turns flat screenshots into share-ready images — gradients, device frames, shadows, and export. All in your browser.
+              Snaply turns flat screenshots into share-ready images — gradients,
+              device frames, shadows, and export. All in your browser.
             </p>
             <div className="reveal reveal-delay-3 mt-8 flex flex-wrap items-center gap-3">
               <Link
@@ -30,16 +40,14 @@ const Hero = () => {
                 Try Snaply
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
-              <a
-                href="#demo"
+              <Link
+                href="https://github.com/tanbiralam/Snaply-Screenshot-Stylizer"
                 className="inline-flex items-center gap-2 h-12 px-5 rounded-xl border hairline text-foreground hover:bg-secondary transition-colors"
+                target="_blank"
               >
-                See the editor
-              </a>
+                Github
+              </Link>
             </div>
-            <p className="reveal reveal-delay-4 mt-4 text-sm text-muted-foreground">
-              Free · No signup · Works offline-first
-            </p>
           </div>
 
           {/* Right: app-like editor preview */}
@@ -59,12 +67,20 @@ const AppPreview = () => {
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b hairline bg-secondary/40">
         <div className="flex items-center gap-2">
-          <span className="grid place-items-center w-6 h-6 rounded-md bg-foreground text-background text-[11px] font-semibold">S</span>
-          <span className="text-[13px] font-semibold tracking-tight">Snaply</span>
-          <span className="hidden sm:inline text-[11px] text-muted-foreground ml-1">— Screenshot Stylizer</span>
+          <span className="grid place-items-center w-6 h-6 rounded-md bg-foreground text-background text-[11px] font-semibold">
+            S
+          </span>
+          <span className="text-[13px] font-semibold tracking-tight">
+            Snaply
+          </span>
+          <span className="hidden sm:inline text-[11px] text-muted-foreground ml-1">
+            — Screenshot Stylizer
+          </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="hidden sm:inline text-[11px] px-2 py-1 rounded-md border hairline bg-background text-muted-foreground">Copy link</span>
+          <span className="hidden sm:inline text-[11px] px-2 py-1 rounded-md border hairline bg-background text-muted-foreground">
+            Copy link
+          </span>
           <span className="w-6 h-6 rounded-full bg-secondary border hairline" />
         </div>
       </div>
@@ -73,7 +89,9 @@ const AppPreview = () => {
       <div className="grid grid-cols-[110px_1fr_140px]">
         {/* Left presets */}
         <aside className="border-r hairline p-3 space-y-2 bg-background">
-          <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">Presets</p>
+          <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1">
+            Presets
+          </p>
           {["Gradients", "Minimal", "Glass", "Grainy"].map((p, i) => (
             <div
               key={p}
@@ -103,7 +121,9 @@ const AppPreview = () => {
         {/* Right controls */}
         <aside className="border-l hairline p-3 space-y-3 bg-background">
           <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5">Style</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5">
+              Style
+            </p>
             <div className="space-y-2">
               <Slider label="Padding" value={62} />
               <Slider label="Radius" value={30} />
@@ -111,10 +131,15 @@ const AppPreview = () => {
             </div>
           </div>
           <div>
-            <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5">Frame</p>
+            <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5">
+              Frame
+            </p>
             <div className="grid grid-cols-3 gap-1">
               {[Monitor, Smartphone, Square].map((Icon, i) => (
-                <div key={i} className={`grid place-items-center h-7 rounded-md border hairline ${i === 0 ? "bg-secondary text-foreground" : "text-muted-foreground"}`}>
+                <div
+                  key={i}
+                  className={`grid place-items-center h-7 rounded-md border hairline ${i === 0 ? "bg-secondary text-foreground" : "text-muted-foreground"}`}
+                >
                   <Icon className="w-3 h-3" />
                 </div>
               ))}
@@ -127,7 +152,11 @@ const AppPreview = () => {
       <div className="flex items-center justify-between px-4 py-2.5 border-t hairline bg-secondary/40">
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
           <Clipboard className="w-3 h-3" />
-          Press <kbd className="px-1 rounded border hairline bg-background text-foreground">⌘V</kbd> to paste
+          Press{" "}
+          <kbd className="px-1 rounded border hairline bg-background text-foreground">
+            ⌘V
+          </kbd>{" "}
+          to paste
         </div>
         <div className="inline-flex items-center gap-1.5 h-7 px-3 rounded-md bg-primary text-primary-foreground text-[11px] font-medium">
           <Download className="w-3 h-3" />
@@ -145,8 +174,14 @@ const Slider = ({ label, value }: { label: string; value: number }) => (
       <span className="text-foreground font-medium">{value}</span>
     </div>
     <div className="h-1 rounded-full bg-secondary relative">
-      <div className="absolute inset-y-0 left-0 rounded-full bg-foreground" style={{ width: `${value}%` }} />
-      <div className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-background border hairline shadow-soft" style={{ left: `calc(${value}% - 5px)` }} />
+      <div
+        className="absolute inset-y-0 left-0 rounded-full bg-foreground"
+        style={{ width: `${value}%` }}
+      />
+      <div
+        className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-background border hairline shadow-soft"
+        style={{ left: `calc(${value}% - 5px)` }}
+      />
     </div>
   </div>
 );

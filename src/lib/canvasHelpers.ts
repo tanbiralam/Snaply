@@ -44,6 +44,11 @@ export const getAspectRatioDimensions = (
       const height = Math.max(contentHeight, (contentWidth * 9) / 16);
       return { width, height };
     }
+    case "4:3": {
+      const width = Math.max(contentWidth, (contentHeight * 4) / 3);
+      const height = Math.max(contentHeight, (contentWidth * 3) / 4);
+      return { width, height };
+    }
     case "4:5": {
       const width = Math.max(contentWidth, (contentHeight * 4) / 5);
       const height = Math.max(contentHeight, (contentWidth * 5) / 4);
@@ -60,6 +65,48 @@ export const getAspectRatioDimensions = (
 };
 
 // ─── Drawing primitives ───────────────────────────────────────────────────────
+
+/**
+ * Converts a CSS-style gradient angle (degrees, 0 = upward) to the four
+ * x0,y0 → x1,y1 coordinates expected by CanvasRenderingContext2D.createLinearGradient.
+ *
+ * The approach uses the same formula as CSS: the gradient line runs through
+ * the centre of the rectangle at the given angle, stretching to the corners.
+ */
+export function angleToGradientPoints(
+  angleDeg: number,
+  w: number,
+  h: number
+): [number, number, number, number] {
+  // CSS: 0deg = bottom→top. Canvas rotation: 0 = right. Offset by 90° and flip.
+  const rad = ((angleDeg - 90) * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  const hw = w / 2;
+  const hh = h / 2;
+  const len = Math.abs(hw * cos) + Math.abs(hh * sin);
+  return [hw - len * cos, hh - len * sin, hw + len * cos, hh + len * sin];
+}
+
+/**
+ * Draws the image over the full canvas using object-fit: cover semantics
+ * (scaled up to fill, centered, overflow cropped).
+ */
+export function drawImageCover(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  canvasW: number,
+  canvasH: number
+) {
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
+  const scale = Math.max(canvasW / iw, canvasH / ih);
+  const sw = iw * scale;
+  const sh = ih * scale;
+  const sx = (canvasW - sw) / 2;
+  const sy = (canvasH - sh) / 2;
+  ctx.drawImage(img, sx, sy, sw, sh);
+}
 
 /**
  * Draws a rounded-rectangle path on the given context.

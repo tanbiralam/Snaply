@@ -22,39 +22,11 @@ import {
   roundRect,
   drawGrain,
   drawImageLetterboxed,
+  drawImageCover,
+  angleToGradientPoints,
 } from "@/lib/canvasHelpers";
 import { ZoomBar, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from "@/components/ZoomBar";
-
-// ─── Gradient angle helper ────────────────────────────────────────────────────
-
-/**
- * Converts a CSS-style gradient angle (degrees, 0 = upward) to the four
- * x0,y0 → x1,y1 coordinates expected by CanvasRenderingContext2D.createLinearGradient.
- *
- * The approach uses the same formula as CSS: the gradient line runs through
- * the centre of the rectangle at the given angle, stretching to the corners.
- */
-function angleToGradientPoints(
-  angleDeg: number,
-  w: number,
-  h: number
-): [number, number, number, number] {
-  // CSS: 0deg = bottom→top. Canvas rotation: 0 = right. Offset by 90° and flip.
-  const rad = ((angleDeg - 90) * Math.PI) / 180;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  // Half-dimensions
-  const hw = w / 2;
-  const hh = h / 2;
-  // Project the gradient line onto the rectangle.
-  const len = Math.abs(hw * cos) + Math.abs(hh * sin);
-  return [
-    hw - len * cos,
-    hh - len * sin,
-    hw + len * cos,
-    hh + len * sin,
-  ];
-}
+import { toast } from "sonner";
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -97,7 +69,13 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
           setZoomLevel(null);
           setTimeout(() => setIsLoading(false), 200);
         };
-        img.onerror = () => { setIsLoading(false); setLoadedImage(null); };
+        img.onerror = () => {
+          setIsLoading(false);
+          setLoadedImage(null);
+          toast.error("Couldn't load that image", {
+            description: "The file may be corrupted or in an unsupported format",
+          });
+        };
         img.src = image;
       } else {
         setLoadedImage(null);
@@ -115,7 +93,12 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
       }
       const bg = new Image();
       bg.onload = () => setLoadedBgImage(bg);
-      bg.onerror = () => setLoadedBgImage(null);
+      bg.onerror = () => {
+        setLoadedBgImage(null);
+        toast.error("Couldn't load background image", {
+          description: "Falling back to the gradient background",
+        });
+      };
       bg.src = src;
     }, [settings.backgroundImage]);
 
@@ -170,15 +153,7 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
 
         // 1. Background
         if (settings.backgroundImage && loadedBgImage) {
-          // Draw background image cover-style
-          const iw = loadedBgImage.naturalWidth;
-          const ih = loadedBgImage.naturalHeight;
-          const scale = Math.max(canvasW / iw, canvasH / ih);
-          const sw = iw * scale;
-          const sh = ih * scale;
-          const sx = (canvasW - sw) / 2;
-          const sy = (canvasH - sh) / 2;
-          ctx.drawImage(loadedBgImage, sx, sy, sw, sh);
+          drawImageCover(ctx, loadedBgImage, canvasW, canvasH);
         } else if (settings.useGradient) {
           const [x0, y0, x1, y1] = angleToGradientPoints(settings.gradientAngle ?? 135, canvasW, canvasH);
           const g = ctx.createLinearGradient(x0, y0, x1, y1);
@@ -255,7 +230,7 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
           layout.contentWidth, layout.contentHeight, layout.contentRadius
         );
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
       [loadedImage, loadedBgImage, settings, isDark]
     );
 

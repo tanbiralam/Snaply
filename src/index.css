@@ -180,6 +180,10 @@ All colors MUST be HSL.
     animation: slide-compare 4.5s ease-in-out infinite;
   }
 
+  .animate-clip-compare {
+    animation: clip-compare 4.5s ease-in-out infinite;
+  }
+
   .reveal {
     animation: reveal-up 0.7s ease-out both;
   }
@@ -215,6 +219,15 @@ All colors MUST be HSL.
     }
     50% {
       left: 58%;
+    }
+  }
+
+  @keyframes clip-compare {
+    0%, 100% {
+      clip-path: inset(0 0 0 42%);
+    }
+    50% {
+      clip-path: inset(0 0 0 58%);
     }
   }
 

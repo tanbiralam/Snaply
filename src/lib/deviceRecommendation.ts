@@ -31,7 +31,7 @@ export function classifyImageRatio(ratio: number): DeviceCompatibility {
       imageClass: "portrait",
       recommendation: "Portrait image — iPhone or Android frames look great",
       preferredDevices: ["iphone", "android", "none"],
-      incompatibleDevices: ["browser", "macos", "ipad", "iphone-landscape", "android-landscape"],
+      incompatibleDevices: ["browser", "macos", "ipad"],
     };
   }
 
@@ -51,7 +51,7 @@ export function classifyImageRatio(ratio: number): DeviceCompatibility {
       imageClass: "tablet",
       recommendation: "Tablet-ratio image — iPad frame is a great fit",
       preferredDevices: ["ipad", "none", "browser"],
-      incompatibleDevices: ["iphone", "android", "iphone-landscape", "android-landscape"],
+      incompatibleDevices: ["iphone", "android"],
     };
   }
 
@@ -59,7 +59,7 @@ export function classifyImageRatio(ratio: number): DeviceCompatibility {
   return {
     imageClass: "landscape",
     recommendation: "Desktop screenshot — Browser or macOS frame recommended",
-    preferredDevices: ["browser", "macos", "none", "iphone-landscape", "android-landscape"],
+    preferredDevices: ["browser", "macos", "none"],
     incompatibleDevices: ["iphone", "android", "ipad"],
   };
 }

@@ -128,7 +128,7 @@ const TestimonialCard = ({ t }: { t: (typeof testimonials)[0] }) => {
 
 const UseCases = () => {
   return (
-    <section id="use-cases">
+    <section id="use-cases" className="scroll-mt-20">
       <div className="container py-20 sm:py-28">
         {/* ── Who it's for ─────────────────────────────── */}
         <div className="max-w-2xl mb-14">

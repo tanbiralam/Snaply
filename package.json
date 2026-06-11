@@ -1,12 +1,12 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "snaply-screenshot-stylizer",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "lint": "next lint",
+    "lint": "eslint src",
     "start": "next start"
   },
   "dependencies": {

@@ -15,6 +15,8 @@ import {
   type TokenizedCode,
 } from "@/lib/codeHighlighter";
 import { ZoomBar, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from "@/components/ZoomBar";
+import { angleToGradientPoints, drawImageCover } from "@/lib/canvasHelpers";
+import { toast } from "sonner";
 
 
 const TITLE_BAR_HEIGHT = 40;
@@ -25,21 +27,6 @@ const CODE_PAD_X = 20;
 const CODE_PAD_Y = 14;
 const LINE_NUM_PAD = 12;
 const FONT_FAMILY = "'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', 'Consolas', monospace";
-
-
-function angleToGradientPoints(
-  angleDeg: number,
-  w: number,
-  h: number
-): [number, number, number, number] {
-  const rad = ((angleDeg - 90) * Math.PI) / 180;
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  const hw = w / 2;
-  const hh = h / 2;
-  const len = Math.abs(hw * cos) + Math.abs(hh * sin);
-  return [hw - len * cos, hh - len * sin, hw + len * cos, hh + len * sin];
-}
 
 
 interface CodeCanvasRendererProps {
@@ -59,6 +46,7 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
     const autoFitScaleRef = useRef(1);
 
     const [tokenized, setTokenized] = useState<TokenizedCode | null>(null);
+    const [loadedBgImage, setLoadedBgImage] = useState<HTMLImageElement | null>(null);
     const [canvasSize, setCanvasSize] = useState({ width: 800, height: 500 });
     const [containerWidth, setContainerWidth] = useState(700);
     const [containerHeight, setContainerHeight] = useState(500);
@@ -80,6 +68,24 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
       );
       return () => { cancelled = true; };
     }, [code, codeSettings.codeLanguage, codeSettings.codeTheme, hasCode]);
+
+    // ── Load background image (for image-based presets) ─────────────────────
+    useEffect(() => {
+      const src = settings.backgroundImage;
+      if (!src) {
+        setLoadedBgImage(null);
+        return;
+      }
+      const bg = new Image();
+      bg.onload = () => setLoadedBgImage(bg);
+      bg.onerror = () => {
+        setLoadedBgImage(null);
+        toast.error("Couldn't load background image", {
+          description: "Falling back to the gradient background",
+        });
+      };
+      bg.src = src;
+    }, [settings.backgroundImage]);
 
     useEffect(() => {
       const updateSize = () => {
@@ -150,9 +156,8 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
       (ctx: CanvasRenderingContext2D, canvasW: number, canvasH: number) => {
         ctx.clearRect(0, 0, canvasW, canvasH);
 
-        if (settings.backgroundImage) {
-          ctx.fillStyle = "#1a1a2e";
-          ctx.fillRect(0, 0, canvasW, canvasH);
+        if (settings.backgroundImage && loadedBgImage) {
+          drawImageCover(ctx, loadedBgImage, canvasW, canvasH);
         } else if (settings.useGradient) {
           const [x0, y0, x1, y1] = angleToGradientPoints(settings.gradientAngle ?? 135, canvasW, canvasH);
           const g = ctx.createLinearGradient(x0, y0, x1, y1);
@@ -260,8 +265,8 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
 
         ctx.restore();
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [tokenized, settings, codeSettings, hasCode]
+       
+      [tokenized, loadedBgImage, settings, codeSettings, hasCode]
     );
 
     useEffect(() => {

@@ -1,8 +1,6 @@
 "use client";
 
-import { StyleSettings, DeviceMockup } from "@/types";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { DeviceMockup } from "@/types";
 import { cn } from "@/lib/utils";
 import { AlertTriangle } from "lucide-react";
 import { DevicePreviewSVG } from "./DevicePreviewSVG";
@@ -63,68 +61,3 @@ export const DeviceCard = ({
   </button>
 );
 
-// ─── Contextual option panels ─────────────────────────────────────────────────
-
-const OptionRow = ({ label, defaultChecked }: { label: string; defaultChecked?: boolean }) => (
-  <div className="flex items-center justify-between">
-    <Label className="text-xs font-medium">{label}</Label>
-    <Switch defaultChecked={defaultChecked} />
-  </div>
-);
-
-const BrowserOptions = () => (
-  <div className="space-y-3">
-    <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Browser options</p>
-    <OptionRow label="Show URL bar" defaultChecked />
-    <OptionRow label="Traffic lights" defaultChecked />
-  </div>
-);
-
-const MacOSOptions = () => (
-  <div className="space-y-3">
-    <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">macOS options</p>
-    <OptionRow label="Traffic lights" defaultChecked />
-    <OptionRow label="Window title" />
-  </div>
-);
-
-const PhoneOptions = ({ label }: { label: string }) => (
-  <div className="space-y-3">
-    <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label} options</p>
-    <OptionRow label="Show notch" defaultChecked />
-    <OptionRow label="Home indicator" defaultChecked />
-  </div>
-);
-
-const IPadOptions = () => (
-  <div className="space-y-3">
-    <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">iPad options</p>
-    <OptionRow label="Home button" defaultChecked />
-    <OptionRow label="Camera dot" defaultChecked />
-  </div>
-);
-
-// ─── Contextual options dispatcher ────────────────────────────────────────────
-
-export const DeviceContextOptions = ({
-  device,
-  settings,
-  onChange,
-}: {
-  device: DeviceMockup;
-  settings: StyleSettings;
-  onChange: (s: StyleSettings) => void;
-}) => {
-  if (device === "none") return null;
-  return (
-    <div className="rounded-lg border hairline bg-secondary/40 p-3">
-      {device === "browser"           && <BrowserOptions />}
-      {device === "macos"             && <MacOSOptions />}
-      {device === "iphone"            && <PhoneOptions label="iPhone" />}
-      {device === "iphone-landscape"  && <PhoneOptions label="iPhone landscape" />}
-      {device === "android"           && <PhoneOptions label="Android" />}
-      {device === "android-landscape" && <PhoneOptions label="Android landscape" />}
-      {device === "ipad"              && <IPadOptions />}
-    </div>
-  );
-};

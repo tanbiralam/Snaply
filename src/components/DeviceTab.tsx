@@ -8,7 +8,7 @@ import {
   type DeviceCompatibility,
 } from "@/lib/deviceRecommendation";
 import { AlertTriangle, Sparkles } from "lucide-react";
-import { DeviceCard, DeviceContextOptions } from "./device/DeviceCard";
+import { DeviceCard } from "./device/DeviceCard";
 
 interface DeviceTabProps {
   settings: StyleSettings;
@@ -19,7 +19,6 @@ interface DeviceTabProps {
 // Device groupings
 const WIDE_DEVICES: DeviceMockup[]      = ["none", "browser", "macos", "ipad"];
 const PORTRAIT_PHONES: DeviceMockup[]   = ["iphone", "android"];
-const LANDSCAPE_PHONES: DeviceMockup[]  = ["iphone-landscape", "android-landscape"];
 
 export const DeviceTab = ({ settings, onSettingsChange, imageAspectRatio }: DeviceTabProps) => {
   const updateDevice = (value: DeviceMockup) =>
@@ -69,7 +68,6 @@ export const DeviceTab = ({ settings, onSettingsChange, imageAspectRatio }: Devi
 
       <DeviceGrid devices={WIDE_DEVICES}      title="Wide frames" />
       <DeviceGrid devices={PORTRAIT_PHONES}   title="Phone · Portrait" />
-      <DeviceGrid devices={LANDSCAPE_PHONES}  title="Phone · Landscape" />
 
       {/* Incompatibility warning for the currently selected device */}
       {selectedIsIncompat && (
@@ -80,12 +78,6 @@ export const DeviceTab = ({ settings, onSettingsChange, imageAspectRatio }: Devi
           </p>
         </div>
       )}
-
-      <DeviceContextOptions
-        device={settings.deviceMockup}
-        settings={settings}
-        onChange={onSettingsChange}
-      />
 
       {settings.deviceMockup !== "none" && (
         <p className="text-[11px] leading-relaxed text-muted-foreground">

@@ -19,15 +19,14 @@ const Nav = () => {
         </nav>
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <a
-            href="https://github.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          {/* Placeholder — non-navigating until a real GitHub URL is wired up. */}
+          <span
             aria-label="GitHub"
-            className="hidden sm:grid place-items-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors border hairline"
+            role="img"
+            className="hidden sm:grid place-items-center w-9 h-9 rounded-lg text-muted-foreground border hairline cursor-default select-none"
           >
             <Github className="w-4 h-4" />
-          </a>
+          </span>
           <Link
             href="/editor"
             className="inline-flex items-center h-9 px-4 rounded-lg bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"

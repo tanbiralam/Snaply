@@ -68,7 +68,8 @@ export const ShareMenu = ({ onExport, disabled }: ShareMenuProps) => {
       }
 
       setBusy(target.id);
-      await new Promise((r) => setTimeout(r, 150));
+      // Yield one frame so the spinner paints before the synchronous canvas export.
+      await new Promise((r) => setTimeout(r, 50));
 
       // Generate PNG export
       const dataUrl = onExport("png");
