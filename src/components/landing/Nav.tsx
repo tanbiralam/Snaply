@@ -28,7 +28,7 @@ const Nav = () => {
             <Github className="w-4 h-4" />
           </span>
           <Link
-            href="/editor"
+            href="/create/screenshot"
             className="inline-flex items-center h-9 px-4 rounded-lg bg-foreground text-background text-sm font-medium hover:opacity-90 transition-opacity"
           >
             Try Snaply

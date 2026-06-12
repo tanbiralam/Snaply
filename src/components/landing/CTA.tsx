@@ -15,7 +15,7 @@ const CTA = () => {
               Free. No signup. Open it, paste, share.
             </p>
             <Link
-              href="/editor"
+              href="/create/screenshot"
               className="mt-9 inline-flex items-center gap-2 h-12 px-7 rounded-xl bg-background text-foreground font-medium hover:opacity-90 transition-opacity group"
             >
               Try Snaply

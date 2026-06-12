@@ -34,7 +34,7 @@ const Hero = () => {
             </p>
             <div className="reveal reveal-delay-3 mt-8 flex flex-wrap items-center gap-3">
               <Link
-                href="/editor"
+                href="/create/screenshot"
                 className="group inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-foreground text-background font-medium shadow-soft hover:opacity-90 transition-all"
               >
                 Try Snaply

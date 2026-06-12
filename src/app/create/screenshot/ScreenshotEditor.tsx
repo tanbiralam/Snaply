@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 
-export default function Home() {
+export default function ScreenshotEditor() {
   const imageCanvasRef = useRef<CanvasRendererRef>(null);
   const codeCanvasRef = useRef<CodeCanvasRendererRef>(null);
 
