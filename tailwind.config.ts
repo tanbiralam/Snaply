@@ -22,7 +22,8 @@ export default {
               foreground: 'hsl(var(--foreground))',
               primary: {
                   DEFAULT: 'hsl(var(--primary))',
-                  foreground: 'hsl(var(--primary-foreground))'
+                  foreground: 'hsl(var(--primary-foreground))',
+                  hover: 'var(--accent-hover)'
               },
               secondary: {
                   DEFAULT: 'hsl(var(--secondary))',
@@ -130,8 +131,38 @@ export default {
           },
           fontFamily: {
               sans: ['var(--font-sans)'],
-              serif: ['var(--font-serif)'],
               mono: ['var(--font-mono)']
+          },
+          /* Type scale from ui-context.md (sizes, line heights, tracking;
+             weights applied via font-* utilities). 2xs is the 11px mono
+             metadata size. */
+          fontSize: {
+              '2xs': ['11px', { lineHeight: '16px' }],
+              xs: ['12px', { lineHeight: '16px' }],
+              sm: ['14px', { lineHeight: '20px' }],
+              base: ['16px', { lineHeight: '24px' }],
+              lg: ['18px', { lineHeight: '26px', letterSpacing: '-0.005em' }],
+              xl: ['20px', { lineHeight: '28px', letterSpacing: '-0.01em' }],
+              '2xl': ['24px', { lineHeight: '32px', letterSpacing: '-0.01em' }],
+              '3xl': ['30px', { lineHeight: '38px', letterSpacing: '-0.02em' }],
+              '5xl': ['48px', { lineHeight: '53px', letterSpacing: '-0.02em' }]
+          },
+          borderColor: {
+              strong: 'var(--border-strong)'
+          },
+          /* Motion durations from the ui-context.md motion table. */
+          transitionDuration: {
+              '120': '120ms',
+              '160': '160ms'
+          },
+          /* Layout sizes from ui-context.md. */
+          maxWidth: {
+              content: '1200px',
+              hero: '680px'
+          },
+          /* Tool grid: 260px min cards, auto-fill (ui-context.md). */
+          gridTemplateColumns: {
+              tools: 'repeat(auto-fill, minmax(260px, 1fr))'
           }
       }
   },

@@ -2,41 +2,41 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "../index.css";
+import { site } from "@/lib/site";
 import { Providers } from "./providers";
 
-const siteUrl = "https://snaply.app";
 const ogImage =
   "/images/86f576610d0cd0d6a2e2b54a08a391238ac75434-1200x630.webp";
-const title = "Snaply — Turn flat screenshots into share-ready visuals";
-const description =
-  "Snaply turns flat screenshots into polished, share-ready images — gradients, device frames, shadows, and export. Free, no login, right in your browser.";
+const title = `${site.name} — ${site.tagline}`;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title,
-  description,
-  authors: [{ name: "Snaply" }],
+  metadataBase: new URL(site.url),
+  title: {
+    default: title,
+    template: `%s — ${site.name}`,
+  },
+  description: site.description,
+  authors: [{ name: site.name }],
   icons: { icon: "/favicon.ico" },
-  alternates: { canonical: "/" },
   openGraph: {
     title,
-    description,
+    description: site.description,
     type: "website",
     url: "/",
-    siteName: "Snaply",
+    siteName: site.name,
     images: [
       {
         url: ogImage,
         width: 1200,
         height: 630,
-        alt: "Snaply — Screenshot Stylizer",
+        alt: title,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title,
-    description,
+    description: site.description,
     images: [ogImage],
   },
 };

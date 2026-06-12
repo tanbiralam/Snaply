@@ -9,9 +9,18 @@ change.
 
 ## Current Goal
 
-- Units 1–2 complete. Next is Unit 3 (landing page rebuild).
+- Units 1–3 complete. Next is Unit 4 (/tools directory).
 
 ## Completed
+
+- **Unit 3 — Landing page rebuild** (2026-06-13)
+  - Carry-over fixes: `Tool.featured?: boolean` + `getFeaturedTools()` added to the registry (featured = screenshot, redact, remove-background, compress); theme provider switched to `defaultTheme="system"`; `src/lib/site.ts` created as the single branding source (`{ name, tagline, description, url }`).
+  - `/` rebuilt registry-driven in both themes: navbar (56px, "All tools" → `/#tools` until unit 4), hero (text-5xl/3xl, max 680px, "Browse tools" accent CTA → `#tools`, ghost CTA → screenshot tool), featured grid (`id="tools"`, exactly 4 cards from `getFeaturedTools()`, 260px auto-fill, card anatomy per ui-context with mono metadata + SOON badges), pill strip (the 6 non-featured tools, all currently soon/non-interactive), privacy/free-forever 3-prop section, registry-generated footer (3 category columns, soon tools unlinked).
+  - New shared shell components: `Navbar`, `Footer`, `ToolCard`, `ToolPill`, `ToolIcon` (icon-name → Lucide resolver map). Card hover: border → strong, −2px lift via `motion-safe:`, 120ms ease-out.
+  - Tailwind tokens added per ui-context scales: full `fontSize` remap (sizes/line-heights/tracking, plus `2xs` 11px for mono metadata), `borderColor.strong`, `transitionDuration` 120/160, `maxWidth.content` (1200px) / `maxWidth.hero` (680px), `gridTemplateColumns.tools`, `colors.primary.hover` (← `--accent-hover`).
+  - Root metadata now generated from `site.ts` with a `%s — name` title template; the screenshot page title is just the registry tool name. The product name appears in code only in `site.ts` (editor header and ShareMenu share-text now read `site.name`).
+  - Legacy landing deleted: `src/components/landing/*` (9 components), `NavLink.tsx`, EB Garamond import, `--font-serif`, `.font-serif-display`, and all orphaned decorative utilities/keyframes (`bg-paper-glow`, `bg-gradient-canvas*`, `shadow-soft/frame`, `reveal*`, compare/float animations). `.hairline` kept (editor uses it).
+  - Verified: build passes; prod smoke test confirms exactly 4 featured cards, 9 SOON markers (3 cards + 6 pills), all 10 tool names registry-rendered, `#tools` anchor, `/create/screenshot` links, EB Garamond gone, OG site name from config.
 
 - **Unit 2 — Jade theme implementation** (2026-06-13)
   - `src/index.css` now defines the full Jade token set from `ui-context.md` — all 16 color tokens as hex CSS custom properties plus `--shadow-card`/`--shadow-modal` — under `:root[data-theme="dark"]` (also bare `:root`, so dark is the no-JS fallback) and `:root[data-theme="light"]`.
@@ -38,19 +47,22 @@ change.
 
 ## Next Up
 
-- Unit 3 — landing page rebuild.
+- Unit 4 — `/tools` searchable directory (then repoint the navbar "All tools" link from `/#tools` to `/tools`).
 
 ## Open Questions
-
-- **Token name collision**: `ui-context.md` names two semantic tokens `--accent-foreground` and `--ring`, but shadcn's variable layer already uses those exact names (as HSL triplets). The hex tokens are exposed as `--accent-foreground-token` and `--ring-token` instead. If a different convention is preferred (e.g. prefixing all Jade tokens), `ui-context.md` should be updated to match.
-- **shadcn vars with no Jade source named in the spec**: `--secondary`/`--muted` were mapped to `--bg-surface`, shadcn's `--accent` (hover surface for menus/selects) to `--bg-hover`, and `--destructive-foreground` follows the accent-foreground flip (dark ink on the bright dark-mode red, white on the deep light-mode red). The unused `--chart-*` variables were dropped. Flag if any of these should map differently.
-- **Default vs system theme**: the brief asks for both `defaultTheme="dark"` and "system preference respected on first visit". With next-themes these are mutually exclusive — `defaultTheme="dark"` means a light-OS first-time visitor gets dark, not light. Implemented as specified (`defaultTheme="dark"`, `enableSystem`); switch to `defaultTheme="system"` if first-visit system detection should win.
-- Social brand colors in `ShareMenu` (LinkedIn blue, Instagram pink hover tints) were kept as brand colors, not tokenized.
 
 - **Branding mismatch**: `project-overview.md` names the product **Pixltly**, but the codebase (layout metadata, landing copy, editor header) still says **Snaply**. Unit 1 kept existing branding untouched; a later unit should resolve which name ships and update metadata/copy accordingly.
 - The current editor includes a built-in "Code" mode (mode toggle in its header). The registry lists Code Card as a separate `soon` tool at `/create/code`. When `/create/code` is built, decide whether the screenshot editor's code mode is removed or redirected.
 
 ## Architecture Decisions
+
+- **Unit-2 open questions closed as decisions (unit 3)**:
+  - Theme default is `system` — system preference wins on first visit; the toggle persists an explicit choice.
+  - Jade hex tokens that collide with shadcn variable names stay suffixed: `--accent-foreground-token`, `--ring-token`.
+  - shadcn mappings stand: `--secondary`/`--muted` ← `--bg-surface`, `--accent` ← `--bg-hover`, `--destructive-foreground` flips ink like the accent; `--chart-*` removed.
+  - `ShareMenu` social hover tints remain brand colors (not tokens).
+- **Branding is still TBD** (Pixltly vs Snaply) but is now fully isolated to `src/lib/site.ts` — renaming the product is a one-line change.
+- `ToolIcon` resolves the registry's Lucide icon-name strings through an explicit import map (keeps the bundle tree-shaken vs importing the full lucide icon set); adding a tool with a new icon means adding one import there.
 
 - The registry stores the Lucide **icon name as a string** (per `ui-context.md`: "Each tool's registry entry carries its own Lucide icon name") rather than importing icon components, keeping the registry dependency-free for server-side consumers (sitemap, metadata).
 - Unbuilt tools have **no route segments**; their existence is carried solely by `status: "soon"` in the registry, so nav surfaces can render them without dead links.

@@ -5,7 +5,7 @@ import ScreenshotEditor from "./ScreenshotEditor";
 const tool = getTool("create", "screenshot");
 
 export const metadata: Metadata = {
-  title: tool ? `${tool.name} — Snaply` : "Snaply",
+  title: tool?.name,
   description: tool?.description,
   alternates: { canonical: tool ? toolPath(tool) : undefined },
 };

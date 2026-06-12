@@ -14,6 +14,8 @@ export interface Tool {
   icon: string;
   /** "live" tools have a route; "soon" tools exist only in the registry. */
   status: ToolStatus;
+  /** Featured tools appear as cards on the landing page. */
+  featured?: boolean;
 }
 
 export const CATEGORY_LABELS: Record<ToolCategory, string> = {
@@ -42,6 +44,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Image",
     status: "live",
+    featured: true,
   },
   {
     slug: "code",
@@ -100,6 +103,7 @@ export const tools: readonly Tool[] = [
     keywords: ["redact", "blur", "pixelate", "censor", "hide", "privacy"],
     icon: "EyeOff",
     status: "soon",
+    featured: true,
   },
   {
     slug: "remove-background",
@@ -115,6 +119,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Eraser",
     status: "soon",
+    featured: true,
   },
   {
     slug: "watermark",
@@ -137,6 +142,7 @@ export const tools: readonly Tool[] = [
     keywords: ["compress", "shrink", "file size", "quality", "reduce", "kb"],
     icon: "Minimize2",
     status: "soon",
+    featured: true,
   },
   {
     slug: "convert",
@@ -173,4 +179,8 @@ export function getToolsByCategory(category: ToolCategory): Tool[] {
 
 export function getLiveTools(): Tool[] {
   return tools.filter((t) => t.status === "live");
+}
+
+export function getFeaturedTools(): Tool[] {
+  return tools.filter((t) => t.featured);
 }

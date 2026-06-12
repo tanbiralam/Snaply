@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { cn, dataUrlToBlob, copyImageToClipboard } from "@/lib/utils";
+import { site } from "@/lib/site";
 import { XIcon, LinkedInIcon, InstagramIcon } from "@/lib/icons";
 
 
@@ -85,7 +86,7 @@ export const ShareMenu = ({ onExport, disabled }: ShareMenuProps) => {
 
         const url =
           target.id === "x"
-            ? `${target.composeUrl}${encodeURIComponent("Check out my styled screenshot, made with Snaply ✨")}`
+            ? `${target.composeUrl}${encodeURIComponent(`Check out my styled screenshot, made with ${site.name} ✨`)}`
             : target.composeUrl;
 
         window.open(url, "_blank", "noopener,noreferrer");

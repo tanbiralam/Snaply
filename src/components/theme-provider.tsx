@@ -9,7 +9,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   return (
     <NextThemesProvider
       attribute="data-theme"
-      defaultTheme="dark"
+      defaultTheme="system"
       enableSystem
       enableColorScheme
     >

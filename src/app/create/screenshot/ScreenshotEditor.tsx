@@ -24,6 +24,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { ImageIcon, Code } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { site } from "@/lib/site";
 import Link from "next/link";
 
 
@@ -131,9 +132,9 @@ export default function ScreenshotEditor() {
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <span className="grid place-items-center w-7 h-7 rounded-lg bg-foreground text-background font-semibold text-sm">
-            S
+            {site.name.charAt(0)}
           </span>
-          <span className="font-semibold tracking-tight text-[15px]">Snaply</span>
+          <span className="font-semibold tracking-tight text-[15px]">{site.name}</span>
         </Link>
 
         <div className="flex items-center gap-1 rounded-lg border hairline p-0.5 bg-secondary/40">
