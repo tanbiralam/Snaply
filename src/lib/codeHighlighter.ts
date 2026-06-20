@@ -7,21 +7,15 @@ import type { CodeLanguage, CodeTheme } from "@/types";
 
 let highlighterPromise: Promise<Highlighter> | null = null;
 
-const ALL_LANGS: CodeLanguage[] = [
-  "typescript", "javascript", "python", "json",
-  "html", "css", "bash", "go", "rust", "java", "cpp", "sql",
-];
-
-const ALL_THEMES: CodeTheme[] = [
-  "github-dark", "github-light", "dracula", "nord",
-  "vitesse-dark", "one-dark-pro", "catppuccin-mocha", "min-dark", "slack-dark",
-];
-
+// ponytail: start empty, load only the lang/theme actually used (on demand).
+// Avoids pulling all 12 grammars + 9 themes on first tokenize.
 function getHighlighter(): Promise<Highlighter> {
   if (!highlighterPromise) {
-    highlighterPromise = createHighlighter({
-      themes: ALL_THEMES,
-      langs: ALL_LANGS,
+    // Reset the cache on failure so a transient error doesn't permanently
+    // wedge code mode — the next call retries instead of replaying the rejection.
+    highlighterPromise = createHighlighter({ themes: [], langs: [] }).catch((err) => {
+      highlighterPromise = null;
+      throw err;
     });
   }
   return highlighterPromise;
@@ -51,6 +45,13 @@ export async function tokenizeCode(
   theme: CodeTheme
 ): Promise<TokenizedCode> {
   const highlighter = await getHighlighter();
+
+  if (!highlighter.getLoadedLanguages().includes(language)) {
+    await highlighter.loadLanguage(language);
+  }
+  if (!highlighter.getLoadedThemes().includes(theme)) {
+    await highlighter.loadTheme(theme);
+  }
 
   const result = highlighter.codeToTokens(code, {
     lang: language,

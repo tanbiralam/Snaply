@@ -140,6 +140,44 @@ export function roundRect(
  * The screenshot content rectangle is excluded via an even-odd clip so the
  * actual screenshot pixel data is never touched.
  */
+// ponytail: single-entry cache keyed by size + intensity. Regenerating the
+// noise (Math.random 4×/pixel) on every redraw is what made slider drags janky;
+// caching means only an actual size/intensity change rebuilds it. Every other
+// slider (padding, radius, shadow…) reuses the cached canvas and stays smooth.
+// Intensity is baked into per-pixel alpha (not applied via globalAlpha) because
+// globalAlpha doesn't compose reliably with the "overlay" blend used below.
+// ponytail: dragging the grain slider still regenerates per tick — acceptable
+// for one slider; upgrade to an alpha LUT if that ever feels slow.
+let grainCache: { key: string; canvas: HTMLCanvasElement } | null = null;
+
+function getNoiseCanvas(nw: number, nh: number, intensity: number): HTMLCanvasElement | null {
+  const key = `${nw}x${nh}x${intensity}`;
+  if (grainCache && grainCache.key === key) return grainCache.canvas;
+
+  const noiseCanvas = document.createElement("canvas");
+  noiseCanvas.width = nw;
+  noiseCanvas.height = nh;
+  const nc = noiseCanvas.getContext("2d");
+  if (!nc) return null;
+
+  const imageData = nc.createImageData(nw, nh);
+  const data = imageData.data;
+  // Map 0–100 → max per-pixel alpha 0–0.55 so grain is never overpowering.
+  const maxAlpha = (intensity / 100) * 0.55;
+
+  for (let i = 0; i < data.length; i += 4) {
+    const luma = Math.random() * 255;
+    data[i]     = Math.max(0, Math.min(255, luma + (Math.random() - 0.5) * 14));
+    data[i + 1] = luma;
+    data[i + 2] = Math.max(0, Math.min(255, luma + (Math.random() - 0.5) * 14));
+    data[i + 3] = Math.random() * maxAlpha * 255;
+  }
+  nc.putImageData(imageData, 0, 0);
+
+  grainCache = { key, canvas: noiseCanvas };
+  return noiseCanvas;
+}
+
 export function drawGrain(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -158,25 +196,8 @@ export function drawGrain(
   const nw = Math.ceil(w / scale);
   const nh = Math.ceil(h / scale);
 
-  const noiseCanvas = document.createElement("canvas");
-  noiseCanvas.width = nw;
-  noiseCanvas.height = nh;
-  const nc = noiseCanvas.getContext("2d");
-  if (!nc) return;
-
-  const imageData = nc.createImageData(nw, nh);
-  const data = imageData.data;
-  // Map 0–100 → max per-pixel alpha 0–0.55 so grain is never overpowering.
-  const maxAlpha = (intensity / 100) * 0.55;
-
-  for (let i = 0; i < data.length; i += 4) {
-    const luma = Math.random() * 255;
-    data[i]     = Math.max(0, Math.min(255, luma + (Math.random() - 0.5) * 14));
-    data[i + 1] = luma;
-    data[i + 2] = Math.max(0, Math.min(255, luma + (Math.random() - 0.5) * 14));
-    data[i + 3] = Math.random() * maxAlpha * 255;
-  }
-  nc.putImageData(imageData, 0, 0);
+  const noiseCanvas = getNoiseCanvas(nw, nh, intensity);
+  if (!noiseCanvas) return;
 
   ctx.save();
   // Clip path: full canvas minus the screenshot rect (even-odd rule).

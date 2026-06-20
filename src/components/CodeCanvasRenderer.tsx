@@ -4,6 +4,7 @@ import {
   useRef,
   useEffect,
   useState,
+  useMemo,
   forwardRef,
   useImperativeHandle,
   useCallback,
@@ -44,6 +45,7 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const autoFitScaleRef = useRef(1);
+    const measureCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
     const [tokenized, setTokenized] = useState<TokenizedCode | null>(null);
     const [loadedBgImage, setLoadedBgImage] = useState<HTMLImageElement | null>(null);
@@ -61,12 +63,22 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
         return;
       }
       let cancelled = false;
-      tokenizeCode(code, codeSettings.codeLanguage, codeSettings.codeTheme).then(
-        (result) => {
-          if (!cancelled) setTokenized(result);
-        }
-      );
-      return () => { cancelled = true; };
+      // ponytail: debounce so typing doesn't re-run Shiki on every keystroke.
+      const t = setTimeout(() => {
+        tokenizeCode(code, codeSettings.codeLanguage, codeSettings.codeTheme)
+          .then((result) => {
+            if (!cancelled) setTokenized(result);
+          })
+          .catch(() => {
+            // Keep the previous render; just surface that highlighting failed.
+            if (!cancelled) {
+              toast.error("Couldn't highlight code", {
+                description: "Syntax highlighting failed to load",
+              });
+            }
+          });
+      }, 150);
+      return () => { cancelled = true; clearTimeout(t); };
     }, [code, codeSettings.codeLanguage, codeSettings.codeTheme, hasCode]);
 
     // ── Load background image (for image-based presets) ─────────────────────
@@ -100,40 +112,49 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
       return () => ro.disconnect();
     }, []);
 
-    useEffect(() => {
-      if (!tokenized || !hasCode) return;
-
-      const tmp = document.createElement("canvas");
-      const ctx = tmp.getContext("2d");
-      if (!ctx) return;
+    // ponytail: measure every token once here (was measured 3× per redraw —
+    // size effect + draw bounds + draw advance). Carries per-token x offsets so
+    // the draw loop never calls measureText again.
+    const layout = useMemo(() => {
+      if (!tokenized) return null;
+      const canvas =
+        measureCanvasRef.current ??
+        (measureCanvasRef.current = document.createElement("canvas"));
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return null;
 
       const fontSize = codeSettings.codeFontSize;
       ctx.font = `${fontSize}px ${FONT_FAMILY}`;
-
-      const lines = tokenized.lines;
       const lineHeight = Math.round(fontSize * 1.7);
 
       let maxLineWidth = 0;
-      for (const lineTokens of lines) {
-        let lineWidth = 0;
-        for (const token of lineTokens) {
-          lineWidth += ctx.measureText(token.content).width;
-        }
-        maxLineWidth = Math.max(maxLineWidth, lineWidth);
-      }
+      const lines = tokenized.lines.map((lineTokens) => {
+        let x = 0;
+        const tokens = lineTokens.map((token) => {
+          const entry = { content: token.content, color: token.color, x };
+          x += ctx.measureText(token.content).width;
+          return entry;
+        });
+        maxLineWidth = Math.max(maxLineWidth, x);
+        return tokens;
+      });
 
       const lineNumWidth = codeSettings.codeShowLineNumbers
         ? ctx.measureText(String(lines.length)).width + LINE_NUM_PAD * 2
         : 0;
 
-      const codeBlockW = Math.ceil(lineNumWidth + maxLineWidth + CODE_PAD_X * 2);
-      const codeBlockH = Math.ceil(lines.length * lineHeight + CODE_PAD_Y * 2 + TITLE_BAR_HEIGHT);
+      const blockW = Math.ceil(lineNumWidth + maxLineWidth + CODE_PAD_X * 2);
+      const blockH = Math.ceil(lines.length * lineHeight + CODE_PAD_Y * 2 + TITLE_BAR_HEIGHT);
 
-      const w = codeBlockW + settings.padding * 2;
-      const h = codeBlockH + settings.padding * 2;
+      return { lines, lineHeight, lineNumWidth, blockW, blockH };
+    }, [tokenized, codeSettings.codeFontSize, codeSettings.codeShowLineNumbers]);
 
+    useEffect(() => {
+      if (!layout || !hasCode) return;
+      const w = layout.blockW + settings.padding * 2;
+      const h = layout.blockH + settings.padding * 2;
       setCanvasSize({ width: Math.max(400, w), height: Math.max(200, h) });
-    }, [tokenized, codeSettings.codeFontSize, codeSettings.codeShowLineNumbers, settings.padding, hasCode]);
+    }, [layout, settings.padding, hasCode]);
 
     useEffect(() => {
       const el = containerRef.current;
@@ -170,29 +191,12 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
           ctx.fillRect(0, 0, canvasW, canvasH);
         }
 
-        if (!tokenized || !hasCode) return;
+        if (!tokenized || !layout || !hasCode) return;
 
         const fontSize = codeSettings.codeFontSize;
-        const lineHeight = Math.round(fontSize * 1.7);
         ctx.font = `${fontSize}px ${FONT_FAMILY}`;
 
-        const lines = tokenized.lines;
-
-        let maxLineWidth = 0;
-        for (const lineTokens of lines) {
-          let lineWidth = 0;
-          for (const token of lineTokens) {
-            lineWidth += ctx.measureText(token.content).width;
-          }
-          maxLineWidth = Math.max(maxLineWidth, lineWidth);
-        }
-
-        const lineNumWidth = codeSettings.codeShowLineNumbers
-          ? ctx.measureText(String(lines.length)).width + LINE_NUM_PAD * 2
-          : 0;
-
-        const blockW = Math.ceil(lineNumWidth + maxLineWidth + CODE_PAD_X * 2);
-        const blockH = Math.ceil(lines.length * lineHeight + CODE_PAD_Y * 2 + TITLE_BAR_HEIGHT);
+        const { lines, lineHeight, lineNumWidth, blockW, blockH } = layout;
 
         const blockX = Math.round((canvasW - blockW) / 2);
         const blockY = Math.round((canvasH - blockH) / 2);
@@ -255,18 +259,17 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
             ctx.textAlign = "start";
           }
 
-          let x = codeStartX + lineNumWidth;
+          const lineX = codeStartX + lineNumWidth;
           for (const token of lineTokens) {
             ctx.fillStyle = token.color;
-            ctx.fillText(token.content, x, y);
-            x += ctx.measureText(token.content).width;
+            ctx.fillText(token.content, lineX + token.x, y);
           }
         });
 
         ctx.restore();
       },
        
-      [tokenized, loadedBgImage, settings, codeSettings, hasCode]
+      [tokenized, layout, loadedBgImage, settings, codeSettings, hasCode]
     );
 
     useEffect(() => {
