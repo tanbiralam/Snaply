@@ -220,7 +220,7 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
 
         // 4. Device frame chrome
         if (settings.deviceMockup !== "none") {
-          drawDeviceFrame(ctx, settings.deviceMockup, frameX, frameY, layout, getDeviceColors(isDark), frameOuterRadius);
+          drawDeviceFrame(ctx, settings.deviceMockup, frameX, frameY, layout, getDeviceColors(isDark), frameOuterRadius, settings.browserUrl);
         }
 
         // 5. Screenshot — letterboxed

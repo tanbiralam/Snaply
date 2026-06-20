@@ -13,6 +13,10 @@ change.
 
 ## Completed
 
+- **Editor: reset style + editable browser URL** (2026-06-20)
+  - `ScreenshotEditor` action bar (both image and code modes) gained a **Reset** button → restores `defaultSettings` and clears the active preset (image/code content preserved).
+  - Browser device frame address bar is now editable. Added `browserUrl: string` to `StyleSettings` (default `"yoursite.com"`, replacing the hardcoded `snaply.app`); `drawDeviceFrame` takes an optional `browserUrl` param and renders `🔒  {url}` (lock-only when blank). Text input in `DeviceTab` shown only when the browser frame is active. Marketing rationale: hardcoding our domain into user exports hurts the user and isn't real brand exposure; attribution should be a separate optional watermark.
+
 - **Landing visual polish** (2026-06-20)
   - `HeroVisual` rewritten to use real product imagery (`public/landing/hero-before.png` 1496×960, `hero-after.png` 3376×2304) via `next/image` (first use of next/image in the app; `priority` + `sizes` cap the 3.4MB after-PNG). Replaced the gray `MockWindow` before/after — now an overlapping editorial composition: styled "after" dominant, flat "before" tucked tilted (`-rotate-3`) into the corner. A wipe-slider was rejected because the two images aren't co-framed (the after reframes the screenshot onto a backdrop) so content would jump.
   - Visual texture: subtle CSS dot grid (`radial-gradient(hsl(var(--border)) 1px, transparent 1px)`, 22px) on the page root in `src/app/page.tsx` — theme-aware, no asset/dep. Runs uniformly across all sections; section-level `bg-secondary` bands were tried then removed because they covered the dots and read as inconsistent. Cards/panels (`bg-card`) inside sections are kept as raised surfaces over the dots.

@@ -17,6 +17,8 @@ export interface StyleSettings {
   grainIntensity: number;
   /** Path to a public background image, e.g. "/backgrounds/bokeh-dark.jpg" */
   backgroundImage: string | null;
+  /** Address-bar text shown in the browser device frame */
+  browserUrl: string;
 }
 
 export const defaultSettings: StyleSettings = {
@@ -33,4 +35,5 @@ export const defaultSettings: StyleSettings = {
   deviceMockup: "none",
   grainIntensity: 0,
   backgroundImage: null,
+  browserUrl: "yoursite.com",
 };

@@ -192,7 +192,8 @@ export function drawDeviceFrame(
   originY: number,
   layout: DeviceFrameLayout,
   colors: DeviceThemeColors,
-  outerRadius: number
+  outerRadius: number,
+  browserUrl = "yoursite.com"
 ) {
   const { frameWidth, frameHeight } = layout;
 
@@ -242,11 +243,12 @@ export function drawDeviceFrame(
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // Placeholder URL text.
+      // Address-bar text (editable).
       ctx.fillStyle = colors.urlBarText;
       ctx.font = "500 11px -apple-system, system-ui, sans-serif";
       ctx.textBaseline = "middle";
-      ctx.fillText("🔒  snaply.app", urlBarX + 10, cy + 1);
+      const urlLabel = browserUrl.trim() ? `🔒  ${browserUrl.trim()}` : "🔒";
+      ctx.fillText(urlLabel, urlBarX + 10, cy + 1);
       break;
     }
 

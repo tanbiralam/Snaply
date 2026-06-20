@@ -22,7 +22,7 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { StylePresets } from "@/components/StylePresets";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
-import { ImageIcon, Code } from "lucide-react";
+import { ImageIcon, Code, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { site } from "@/lib/site";
 import Link from "next/link";
@@ -58,6 +58,12 @@ export default function ScreenshotEditor() {
 
   const handleCodeSettingsChange = useCallback((newCodeSettings: CodeSettings) => {
     setCodeSettings(newCodeSettings);
+  }, []);
+
+  const handleResetStyle = useCallback(() => {
+    setSettings(defaultSettings);
+    setActivePreset(null);
+    toast.success("Style reset");
   }, []);
 
   const handleImageUpload = useCallback((dataUrl: string) => {
@@ -207,6 +213,14 @@ export default function ScreenshotEditor() {
                     <ImageIcon className="h-3.5 w-3.5" />
                     Replace
                   </button>
+                  <button
+                    type="button"
+                    onClick={handleResetStyle}
+                    className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg border hairline text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Reset
+                  </button>
                   <ExportButton onExport={handleExport} disabled={!image} />
                   <ShareMenu onExport={handleExport} disabled={!image} />
                 </div>
@@ -234,6 +248,14 @@ export default function ScreenshotEditor() {
                   >
                     <Code className="h-3.5 w-3.5" />
                     Edit Code
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResetStyle}
+                    className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg border hairline text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    Reset
                   </button>
                   <ExportButton onExport={handleExport} disabled={!hasCode} />
                   <ShareMenu onExport={handleExport} disabled={!hasCode} />

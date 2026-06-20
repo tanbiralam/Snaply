@@ -69,6 +69,25 @@ export const DeviceTab = ({ settings, onSettingsChange, imageAspectRatio }: Devi
       <DeviceGrid devices={WIDE_DEVICES}      title="Wide frames" />
       <DeviceGrid devices={PORTRAIT_PHONES}   title="Phone · Portrait" />
 
+      {settings.deviceMockup === "browser" && (
+        <div className="space-y-2">
+          <label
+            htmlFor="browser-url"
+            className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground"
+          >
+            Address bar
+          </label>
+          <input
+            id="browser-url"
+            type="text"
+            value={settings.browserUrl ?? ""}
+            onChange={(e) => onSettingsChange({ ...settings, browserUrl: e.target.value })}
+            placeholder="yoursite.com"
+            className="w-full rounded-lg border hairline bg-secondary/40 px-3 py-2 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-foreground/30"
+          />
+        </div>
+      )}
+
       {/* Incompatibility warning for the currently selected device */}
       {selectedIsIncompat && (
         <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 px-3 py-2">
