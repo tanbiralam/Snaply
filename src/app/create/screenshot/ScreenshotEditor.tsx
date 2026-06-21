@@ -71,7 +71,7 @@ export default function ScreenshotEditor() {
   const handleImageUpload = useCallback((dataUrl: string) => {
     setImage(dataUrl);
     setImageAspectRatio(null);
-    const img = new Image();
+    const img = new window.Image();
     img.onload = () => setImageAspectRatio(img.width / img.height);
     img.src = dataUrl;
   }, []);
