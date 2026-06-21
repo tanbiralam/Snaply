@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { site } from "@/lib/site";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -7,12 +8,14 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="mx-auto flex h-14 max-w-content items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2">
-          <span
-            aria-hidden="true"
-            className="grid h-7 w-7 place-items-center rounded-md bg-foreground text-sm font-semibold text-background"
-          >
-            {site.name.charAt(0)}
-          </span>
+          <Image
+            src="/logo.png"
+            alt={`${site.name} logo`}
+            width={28}
+            height={28}
+            className="h-7 w-7 rounded-md"
+            priority
+          />
           <span className="text-base font-semibold tracking-tight">
             {site.name}
           </span>

@@ -22,10 +22,11 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { StylePresets } from "@/components/StylePresets";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
-import { ImageIcon, Code, RotateCcw } from "lucide-react";
+import { ImageIcon, Code, RotateCcw, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { site } from "@/lib/site";
 import Link from "next/link";
+import Image from "next/image";
 
 
 export default function ScreenshotEditor() {
@@ -38,6 +39,7 @@ export default function ScreenshotEditor() {
   const [codeSettings, setCodeSettings] = useState<CodeSettings>(defaultCodeSettings);
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const hasCode = codeSettings.codeContent.trim().length > 0;
 
@@ -137,9 +139,14 @@ export default function ScreenshotEditor() {
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <span className="grid place-items-center w-7 h-7 rounded-lg bg-foreground text-background font-semibold text-sm">
-            {site.name.charAt(0)}
-          </span>
+          <Image
+            src="/logo.png"
+            alt={`${site.name} logo`}
+            width={28}
+            height={28}
+            className="h-7 w-7 rounded-lg"
+            priority
+          />
           <span className="font-semibold tracking-tight text-[15px]">{site.name}</span>
         </Link>
 
@@ -283,6 +290,58 @@ export default function ScreenshotEditor() {
           </div>
         </aside>
       </div>
+
+      {/* Mobile editing controls — desktop uses the fixed asides above */}
+      <button
+        type="button"
+        onClick={() => setSheetOpen(true)}
+        className="md:hidden fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 h-11 px-5 rounded-full bg-foreground text-background text-sm font-medium shadow-lg"
+      >
+        <SlidersHorizontal className="h-4 w-4" />
+        Edit
+      </button>
+
+      {sheetOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setSheetOpen(false)}
+          />
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl border-t hairline bg-background">
+            <div className="flex shrink-0 items-center justify-between border-b hairline px-4 py-3">
+              <span className="text-sm font-semibold">Edit</span>
+              <button
+                type="button"
+                onClick={() => setSheetOpen(false)}
+                className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {editorMode === "image" && (
+                <div className="border-b hairline p-3">
+                  <p className="mb-3 px-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                    Presets
+                  </p>
+                  <StylePresets
+                    activePreset={activePreset}
+                    onSelectPreset={handlePresetSelect}
+                  />
+                </div>
+              )}
+              <SettingsPanel
+                settings={settings}
+                onSettingsChange={handleSettingsChange}
+                imageAspectRatio={imageAspectRatio}
+                editorMode={editorMode}
+                codeSettings={codeSettings}
+                onCodeSettingsChange={handleCodeSettingsChange}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

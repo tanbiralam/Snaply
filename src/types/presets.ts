@@ -19,7 +19,6 @@ export const presetCategories: PresetCategory[] = [
     id: "image-backgrounds",
     label: "Image Backgrounds",
     presets: [
-
       {
         id: "img-pastel-mesh",
         name: "Pastel Dream",
@@ -93,7 +92,7 @@ export const presetCategories: PresetCategory[] = [
           borderRadius: 14,
           shadowIntensity: 30,
           useGradient: false,
-          backgroundImage: "/backgrounds/windows-ghibli.png",
+          backgroundImage: "/backgrounds/windows-ghibli.webp",
           blurBackground: false,
           grainIntensity: 0,
         },
