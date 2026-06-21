@@ -5,12 +5,19 @@ import {
   AlignCenter,
   AlignLeft,
   Check,
+  Code2,
   Copy,
   Download,
   Image as ImageLucide,
+  Linkedin,
   Loader2,
+  Monitor,
   PanelRight,
   RotateCcw,
+  Search,
+  Slack,
+  Sparkles,
+  Twitter,
   Upload,
   X,
 } from "lucide-react";
@@ -24,18 +31,55 @@ import { cn } from "@/lib/utils";
 import {
   drawOg,
   defaultOg,
+  FONT_CHOICES,
+  FONT_PRELOAD,
   OG_GRADIENTS,
+  OG_MESH,
   OG_W,
   OG_H,
   type OgImages,
   type OgSettings,
   type OgTemplate,
+  type Rect,
 } from "@/lib/ogRender";
 
 const TEMPLATES: { id: OgTemplate; label: string; icon: typeof AlignLeft }[] = [
   { id: "spotlight", label: "Spotlight", icon: AlignLeft },
   { id: "centered", label: "Centered", icon: AlignCenter },
   { id: "showcase", label: "Showcase", icon: PanelRight },
+];
+
+// One-click looks: each sets template + font + background + colours together.
+const RECIPES: { label: string; patch: Partial<OgSettings> }[] = [
+  {
+    label: "Blog post",
+    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 3, eyebrow: "ARTICLE", accent: "#c4b5fd", textColor: "#ffffff", grain: 14 },
+  },
+  {
+    label: "Product launch",
+    patch: { template: "spotlight", font: "display", bgType: "mesh", meshIndex: 0, eyebrow: "NOW LIVE", accent: "#818cf8", textColor: "#ffffff", grain: 10 },
+  },
+  {
+    label: "Changelog",
+    patch: { template: "spotlight", font: "grotesk", bgType: "solid", solidColor: "#0b0f19", eyebrow: "CHANGELOG", accent: "#34d399", textColor: "#ffffff", grain: 8 },
+  },
+  {
+    label: "Quote",
+    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 1, eyebrow: "", accent: "#fda4af", textColor: "#ffffff", grain: 16 },
+  },
+  {
+    label: "Minimal",
+    patch: { template: "spotlight", font: "sans", bgType: "solid", solidColor: "#0f172a", eyebrow: "", accent: "#38bdf8", textColor: "#ffffff", grain: 0 },
+  },
+];
+
+type Platform = "none" | "x" | "linkedin" | "slack" | "google";
+const PLATFORMS: { id: Platform; label: string; icon: typeof Twitter }[] = [
+  { id: "none", label: "Card", icon: Monitor },
+  { id: "x", label: "X", icon: Twitter },
+  { id: "linkedin", label: "LinkedIn", icon: Linkedin },
+  { id: "slack", label: "Slack", icon: Slack },
+  { id: "google", label: "Google", icon: Search },
 ];
 
 function useLoadedImage(src: string | null): HTMLImageElement | null {
@@ -71,9 +115,15 @@ export default function OgImageEditor() {
   const [logoSrc, setLogoSrc] = useState<string | null>(null);
   const [shotSrc, setShotSrc] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [metaCopied, setMetaCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [fontsReady, setFontsReady] = useState(0);
+  const [platform, setPlatform] = useState<Platform>("none");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const shotRectRef = useRef<Rect | null>(null);
+  const dragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+  const [dragging, setDragging] = useState(false);
   const bg = useLoadedImage(bgSrc);
   const logo = useLoadedImage(logoSrc);
   const shot = useLoadedImage(shotSrc);
@@ -82,15 +132,66 @@ export default function OgImageEditor() {
     setS((prev) => ({ ...prev, [key]: val }));
   }, []);
 
-  // Redraw whenever anything changes.
+  // Preload the self-hosted fonts, then bump a counter to redraw with them.
+  useEffect(() => {
+    if (!("fonts" in document)) return;
+    let alive = true;
+    Promise.all(FONT_PRELOAD.map((f) => document.fonts.load(f)))
+      .then(() => alive && setFontsReady((n) => n + 1))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Redraw whenever anything changes (incl. once fonts finish loading, and the
+  // platform frame so the canvas stays drawn if it remounts inside the mock).
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const imgs: OgImages = { bg, logo, shot };
-    drawOg(ctx, s, imgs);
-  }, [s, bg, logo, shot]);
+    shotRectRef.current = drawOg(ctx, s, imgs).shotRect;
+  }, [s, bg, logo, shot, fontsReady, platform]);
+
+  // ── Drag the screenshot in the preview ──────────────────────────────────────
+  const toOg = useCallback((clientX: number, clientY: number) => {
+    const r = canvasRef.current!.getBoundingClientRect();
+    const ratio = OG_W / r.width;
+    return { x: (clientX - r.left) * ratio, y: (clientY - r.top) * ratio };
+  }, []);
+
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>) => {
+      const rect = shotRectRef.current;
+      if (!rect) return;
+      const p = toOg(e.clientX, e.clientY);
+      if (p.x >= rect.x && p.x <= rect.x + rect.w && p.y >= rect.y && p.y <= rect.y + rect.h) {
+        dragRef.current = { px: p.x, py: p.y, ox: s.shotX, oy: s.shotY };
+        setDragging(true);
+        canvasRef.current?.setPointerCapture(e.pointerId);
+      }
+    },
+    [toOg, s.shotX, s.shotY]
+  );
+
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLCanvasElement>) => {
+      const d = dragRef.current;
+      if (!d) return;
+      const p = toOg(e.clientX, e.clientY);
+      setS((prev) => ({ ...prev, shotX: d.ox + (p.x - d.px), shotY: d.oy + (p.y - d.py) }));
+    },
+    [toOg]
+  );
+
+  const endDrag = useCallback((e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    setDragging(false);
+    canvasRef.current?.releasePointerCapture(e.pointerId);
+  }, []);
 
   const exportBlob = useCallback(
     (): Promise<Blob | null> =>
@@ -132,6 +233,28 @@ export default function OgImageEditor() {
     }
   }, [exportBlob]);
 
+  const copyMeta = useCallback(async () => {
+    const url = "https://your-site.com/og.png";
+    const esc = (t: string) => t.replace(/"/g, "&quot;").replace(/\s+/g, " ").trim();
+    const snippet = [
+      `<meta property="og:title" content="${esc(s.title)}" />`,
+      `<meta property="og:description" content="${esc(s.subtitle)}" />`,
+      `<meta property="og:image" content="${url}" />`,
+      `<meta property="og:image:width" content="1200" />`,
+      `<meta property="og:image:height" content="630" />`,
+      `<meta name="twitter:card" content="summary_large_image" />`,
+      `<meta name="twitter:image" content="${url}" />`,
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(snippet);
+      setMetaCopied(true);
+      setTimeout(() => setMetaCopied(false), 2000);
+      toast.success("Meta tags copied", { description: "Swap in your hosted image URL" });
+    } catch {
+      toast.error("Copy failed");
+    }
+  }, [s.title, s.subtitle]);
+
   const reset = useCallback(() => {
     setS(defaultOg);
     setBgSrc(null);
@@ -150,6 +273,31 @@ export default function OgImageEditor() {
     }));
   }, []);
 
+  const canvasEl = (
+    <canvas
+      ref={canvasRef}
+      width={OG_W}
+      height={OG_H}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={endDrag}
+      onPointerCancel={endDrag}
+      className={cn(
+        "block h-auto w-full",
+        shot && "touch-none",
+        shot && (dragging ? "cursor-grabbing" : "cursor-grab")
+      )}
+    />
+  );
+
+  const meta = {
+    title: s.title || "Untitled",
+    description: s.subtitle,
+    domain: (s.handle || s.brand || "yoursite.com").replace(/^https?:\/\//, "").replace(/\/$/, ""),
+    brand: s.brand || site.name,
+    accent: s.accent,
+  };
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
@@ -164,14 +312,37 @@ export default function OgImageEditor() {
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:flex-row lg:overflow-hidden">
         {/* Preview — sticky on mobile so it stays visible while scrolling controls */}
         <main className="sticky top-0 z-10 flex shrink-0 flex-col items-center justify-center gap-4 border-b bg-muted p-4 hairline md:p-8 lg:static lg:z-auto lg:min-h-0 lg:flex-1 lg:overflow-auto lg:border-b-0 lg:bg-muted/60">
-          <div className="w-full max-w-3xl overflow-hidden rounded-xl shadow-modal ring-1 ring-border/60">
-            <canvas
-              ref={canvasRef}
-              width={OG_W}
-              height={OG_H}
-              className="block h-auto w-full"
-            />
+          {/* Platform preview switcher */}
+          <div className="flex items-center gap-1 rounded-lg border hairline bg-background/60 p-0.5">
+            {PLATFORMS.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setPlatform(p.id)}
+                title={p.label}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+                  platform === p.id
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <p.icon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{p.label}</span>
+              </button>
+            ))}
           </div>
+
+          {platform === "none" ? (
+            <div className="w-full max-w-3xl overflow-hidden rounded-xl shadow-modal ring-1 ring-border/60">
+              {canvasEl}
+            </div>
+          ) : (
+            <PreviewMock platform={platform} meta={meta}>
+              {canvasEl}
+            </PreviewMock>
+          )}
+
           <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="mr-1 hidden text-xs text-muted-foreground sm:inline">
               1200 × 630 · Open Graph
@@ -207,6 +378,23 @@ export default function OgImageEditor() {
         {/* Controls */}
         <aside className="w-full shrink-0 border-t hairline lg:w-96 lg:overflow-y-auto lg:border-l lg:border-t-0">
           <div className="flex flex-col gap-6 p-5">
+            {/* Recipes — one-click starting points */}
+            <Section title="Recipes">
+              <div className="flex flex-wrap gap-1.5">
+                {RECIPES.map((r) => (
+                  <button
+                    key={r.label}
+                    type="button"
+                    onClick={() => setS((prev) => ({ ...prev, ...r.patch }))}
+                    className="inline-flex items-center gap-1 rounded-full border hairline bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-strong hover:text-foreground"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </Section>
+
             {/* Template */}
             <Section title="Template">
               <div className="grid grid-cols-3 gap-2">
@@ -226,6 +414,30 @@ export default function OgImageEditor() {
                     >
                       <t.icon className="h-4 w-4" />
                       {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Section>
+
+            {/* Typeface */}
+            <Section title="Typeface">
+              <div className="grid grid-cols-4 gap-2">
+                {FONT_CHOICES.map((f) => {
+                  const active = s.font === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => set("font", f.id)}
+                      className={cn(
+                        "rounded-lg border py-2 text-xs font-semibold transition-all",
+                        active
+                          ? "border-primary bg-primary/5 text-primary ring-1 ring-primary/30"
+                          : "hairline text-muted-foreground hover:border-strong hover:text-foreground"
+                      )}
+                    >
+                      {f.label}
                     </button>
                   );
                 })}
@@ -298,12 +510,56 @@ export default function OgImageEditor() {
               <p className="text-2xs text-muted-foreground">
                 Screenshot shows in the Spotlight &amp; Showcase templates.
               </p>
+
+              {shotSrc && s.template !== "centered" && (
+                <div className="flex flex-col gap-3 rounded-lg border hairline bg-secondary/30 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium">Adjust screenshot</span>
+                    <button
+                      type="button"
+                      onClick={() => setS((p) => ({ ...p, shotX: 0, shotY: 0, shotScale: 1 }))}
+                      className="text-2xs text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      Reset position
+                    </button>
+                  </div>
+                  <div className="flex gap-1 rounded-lg border hairline p-0.5">
+                    {(["contain", "cover"] as const).map((f) => (
+                      <button
+                        key={f}
+                        type="button"
+                        onClick={() => set("shotFit", f)}
+                        className={cn(
+                          "flex-1 rounded-md py-1.5 text-xs font-medium capitalize transition-colors",
+                          s.shotFit === f
+                            ? "bg-foreground text-background"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+                  <Field label={`Size · ${Math.round(s.shotScale * 100)}%`}>
+                    <Slider
+                      value={[Math.round(s.shotScale * 100)]}
+                      min={50}
+                      max={160}
+                      step={5}
+                      onValueChange={([v]) => set("shotScale", v / 100)}
+                    />
+                  </Field>
+                  <p className="text-2xs text-muted-foreground">
+                    Drag the screenshot in the preview to reposition it.
+                  </p>
+                </div>
+              )}
             </Section>
 
             {/* Background */}
             <Section title="Background">
               <div className="flex gap-1 rounded-lg border hairline p-0.5">
-                {(["gradient", "solid", "image"] as const).map((t) => (
+                {(["gradient", "mesh", "solid", "image"] as const).map((t) => (
                   <button
                     key={t}
                     type="button"
@@ -319,6 +575,29 @@ export default function OgImageEditor() {
                   </button>
                 ))}
               </div>
+
+              {s.bgType === "mesh" && (
+                <div className="grid grid-cols-4 gap-2">
+                  {OG_MESH.map((m, i) => {
+                    const active = s.meshIndex === i;
+                    return (
+                      <button
+                        key={m.name}
+                        type="button"
+                        title={m.name}
+                        onClick={() => set("meshIndex", i)}
+                        className={cn(
+                          "h-10 rounded-lg ring-offset-2 ring-offset-background transition-all",
+                          active ? "ring-2 ring-primary" : "ring-1 ring-border hover:ring-strong"
+                        )}
+                        style={{
+                          background: `radial-gradient(circle at 20% 25%, ${m.blobs[0].color}, transparent 60%), radial-gradient(circle at 85% 20%, ${m.blobs[1].color}, transparent 55%), radial-gradient(circle at 60% 90%, ${m.blobs[2].color}, transparent 60%), ${m.base}`,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
 
               {s.bgType === "gradient" && (
                 <>
@@ -380,6 +659,16 @@ export default function OgImageEditor() {
                   </Field>
                 </>
               )}
+
+              <Field label={`Grain · ${s.grain}%`}>
+                <Slider
+                  value={[s.grain]}
+                  min={0}
+                  max={60}
+                  step={2}
+                  onValueChange={([v]) => set("grain", v)}
+                />
+              </Field>
             </Section>
 
             {/* Colours */}
@@ -420,8 +709,149 @@ export default function OgImageEditor() {
                 </div>
               </Field>
             </Section>
+
+            {/* Embed */}
+            <Section title="Embed">
+              <p className="text-2xs leading-relaxed text-muted-foreground">
+                Download the PNG, host it, then paste these tags in your page&apos;s{" "}
+                <code className="rounded bg-secondary px-1 font-mono">&lt;head&gt;</code>.
+              </p>
+              <button
+                type="button"
+                onClick={copyMeta}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border hairline text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                {metaCopied ? (
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                ) : (
+                  <Code2 className="h-3.5 w-3.5" />
+                )}
+                Copy meta tags
+              </button>
+            </Section>
           </div>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+// ─── Social platform preview ────────────────────────────────────────────────
+
+interface PreviewMeta {
+  title: string;
+  description: string;
+  domain: string;
+  brand: string;
+  accent: string;
+}
+
+function PreviewMock({
+  platform,
+  meta,
+  children,
+}: {
+  platform: Exclude<Platform, "none">;
+  meta: PreviewMeta;
+  children: React.ReactNode;
+}) {
+  const avatar = (
+    <div
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+      style={{ background: meta.accent }}
+    >
+      {meta.brand.charAt(0).toUpperCase()}
+    </div>
+  );
+
+  if (platform === "x") {
+    return (
+      <div className="w-full max-w-md rounded-2xl border border-[#2f3336] bg-black p-4 text-white shadow-modal">
+        <div className="flex gap-3">
+          {avatar}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1 text-sm">
+              <span className="font-bold">{meta.brand}</span>
+              <span className="text-[#71767b]">@{meta.domain.split(".")[0]} · 1h</span>
+            </div>
+            <p className="mt-0.5 text-sm">Check this out 👇</p>
+            <div className="mt-2 overflow-hidden rounded-2xl border border-[#2f3336]">
+              {children}
+              <div className="bg-black px-3 py-2">
+                <p className="text-xs text-[#71767b]">{meta.domain}</p>
+                <p className="truncate text-sm text-white">{meta.title}</p>
+                {meta.description && (
+                  <p className="line-clamp-1 text-xs text-[#71767b]">{meta.description}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (platform === "linkedin") {
+    return (
+      <div className="w-full max-w-md rounded-lg border border-black/10 bg-white text-[#000000e6] shadow-modal">
+        <div className="flex items-center gap-2 p-3">
+          {avatar}
+          <div>
+            <p className="text-sm font-semibold leading-tight">{meta.brand}</p>
+            <p className="text-xs text-[#00000099]">Promoted</p>
+          </div>
+        </div>
+        {children}
+        <div className="bg-[#f3f2ef] px-3 py-2.5">
+          <p className="truncate text-sm font-semibold">{meta.title}</p>
+          <p className="text-xs text-[#00000099]">{meta.domain}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (platform === "slack") {
+    return (
+      <div className="w-full max-w-md bg-white p-4 text-[#1d1c1d] shadow-modal">
+        <div className="flex gap-2">
+          {avatar}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold">
+              {meta.brand} <span className="ml-1 align-middle text-xs font-normal text-[#616061]">1:00 PM</span>
+            </p>
+            <div className="mt-1 border-l-4 pl-3" style={{ borderColor: meta.accent }}>
+              <p className="text-sm font-bold text-[#1264a3]">{meta.title}</p>
+              {meta.description && <p className="text-sm text-[#1d1c1d]">{meta.description}</p>}
+              <div className="mt-2 max-w-xs overflow-hidden rounded-md border border-black/10">
+                {children}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // google
+  return (
+    <div className="w-full max-w-xl rounded-lg border border-black/10 bg-white p-4 text-left shadow-modal">
+      <div className="flex items-start gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            {avatar}
+            <div>
+              <p className="text-sm text-[#202124]">{meta.brand}</p>
+              <p className="text-xs text-[#5f6368]">{meta.domain}</p>
+            </div>
+          </div>
+          <p className="mt-1 text-xl leading-snug text-[#1a0dab]">{meta.title}</p>
+          {meta.description && (
+            <p className="mt-0.5 line-clamp-2 text-sm text-[#4d5156]">{meta.description}</p>
+          )}
+        </div>
+        <div className="w-32 shrink-0 overflow-hidden rounded-lg border border-black/10">
+          {children}
+        </div>
       </div>
     </div>
   );

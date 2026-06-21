@@ -3,6 +3,43 @@
 @tailwind utilities;
 
 /*
+  Self-hosted display fonts for the OG Image Maker canvas (latin subset, woff2).
+  Declared but lazy — the browser only fetches a face when something actually
+  renders in it, so other tools/pages pay nothing. Loaded explicitly on the OG
+  page via document.fonts.load() before the canvas draws.
+*/
+@font-face {
+  font-family: "Inter OG";
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/inter-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter OG";
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/inter-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Sora OG";
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/sora-800.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Fraunces OG";
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/fraunces-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk OG";
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/space-grotesk-700.woff2") format("woff2");
+}
+
+/*
   Jade design system (see context/ui-context.md).
 
   Two layers of variables:

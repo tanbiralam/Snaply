@@ -67,28 +67,17 @@ export const tools: readonly Tool[] = [
     status: "live",
     featured: true,
   },
-  {
-    slug: "quote",
-    category: "create",
-    name: "Quote Card",
-    description:
-      "Turn text, a name, a handle, and an avatar into tweet-style quote graphics.",
-    keywords: ["quote", "tweet", "testimonial", "avatar", "handle"],
-    icon: "Quote",
-    status: "soon",
-  },
+  // {
+  //   slug: "quote",
+  //   category: "create",
+  //   name: "Quote Card",
+  //   description:
+  //     "Turn text, a name, a handle, and an avatar into tweet-style quote graphics.",
+  //   keywords: ["quote", "tweet", "testimonial", "avatar", "handle"],
+  //   icon: "Quote",
+  //   status: "soon",
+  // },
 
-  // Edit
-  {
-    slug: "resize",
-    category: "edit",
-    name: "Resize & Crop",
-    description:
-      "Resize to preset or custom dimensions, crop freeform, and lock aspect ratios.",
-    keywords: ["resize", "crop", "dimensions", "scale", "aspect ratio"],
-    icon: "Crop",
-    status: "soon",
-  },
   {
     slug: "redact",
     category: "edit",
@@ -153,24 +142,6 @@ export const tools: readonly Tool[] = [
     icon: "Minimize2",
     status: "live",
     featured: true,
-  },
-  {
-    slug: "convert",
-    category: "optimize",
-    name: "Convert",
-    description: "Convert images between PNG, JPEG, WebP, and AVIF formats.",
-    keywords: [
-      "convert",
-      "format",
-      "png",
-      "jpeg",
-      "jpg",
-      "webp",
-      "avif",
-      "png to webp",
-    ],
-    icon: "ArrowRightLeft",
-    status: "soon",
   },
 ];
 

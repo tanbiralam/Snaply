@@ -13,6 +13,15 @@ change.
 
 ## Completed
 
+- **OG Image Maker — quality upgrade** (2026-06-22)
+  - Product decision (user): free-form drag isn't the differentiator for OG cards; *opinionated quality* is. Built three upgrades; deliberately skipped device/browser frames (user said not needed).
+  - **Typography**: self-hosted display fonts as static woff2 in `public/fonts/` (Inter 400/600, Sora 800, Fraunces 600, Space Grotesk 700 — latin subset, ~110KB total). `@font-face` in `index.css` (lazy — only fetched when rendered, so other pages pay nothing). Editor preloads via `document.fonts.load(FONT_PRELOAD)` then bumps a counter to redraw. 4 heading choices (Sora/Grotesk/Fraunces/Inter) via `HEADINGS` map threaded through `fitTitle`; body text = Inter; weights restricted to shipped faces (no faux-bold). Graceful fallback to system stack if a face fails to load.
+  - **Backgrounds**: added `mesh` bg type (`OG_MESH` presets = base + 3 radial colour blobs, drawn as layered radial gradients) and a **grain** slider that reuses the screenshot tool's `drawGrain` over the whole background (content rect collapsed). Gradient/solid/image still there.
+  - **Recipes**: one-click `RECIPES` (Blog post, Product launch, Changelog, Quote, Minimal) that patch template + font + background + colours together.
+  - **Social previews**: a platform switcher (Card / X / LinkedIn / Slack / Google) wraps the live canvas in `PreviewMock` chrome so users see the real unfurl. Canvas stays drawn across remounts (`platform` added to the redraw effect deps).
+  - **Embed**: "Copy meta tags" builds the `og:*` + `twitter:card` snippet (1200×630, escaped) to clipboard with hosting guidance.
+  - Verified: `tsc`, lint, full `next build` pass. Pixel/visual + font-rendering check still pending (browser only).
+
 - **Create: OG Image Maker** (2026-06-21)
   - New tool at `/create/og-image` (registry flipped `soon` → `live`, renamed "OG Image Generator" → "OG Image Maker", description/keywords expanded; **left unfeatured** so the landing's 4-card featured grid is untouched). Server `page.tsx` + client `OgImageEditor.tsx`. Zero new deps.
   - Renderer `src/lib/ogRender.ts`: pure `drawOg(ctx, settings, images)` onto a fixed **1200×630** canvas (Open Graph spec). **Reuses the shared canvas helpers** (`angleToGradientPoints`, `drawImageCover`, `roundRect`) per invariant 5 — no pixel math reinvented. Three templates: **Spotlight** (brand row + accent bar + eyebrow + auto-fit title + subtitle, optional right-side screenshot panel w/ shadow), **Centered** (logo + eyebrow pill + centered stack), **Showcase** (left text column + dominant screenshot panel). Title auto-fits font size to line budget; text wraps with explicit `\n` support; canvas `letterSpacing` used where supported (graceful no-op fallback).
