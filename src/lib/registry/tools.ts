@@ -49,9 +49,9 @@ export const tools: readonly Tool[] = [
   {
     slug: "og-image",
     category: "create",
-    name: "OG Image Generator",
+    name: "OG Image Maker",
     description:
-      "Combine a title, subtitle, and screenshot into social and blog cards.",
+      "Compose a title, subtitle, logo, and screenshot into polished 1200×630 social and blog cards.",
     keywords: [
       "og",
       "open graph",
@@ -59,9 +59,13 @@ export const tools: readonly Tool[] = [
       "twitter card",
       "blog",
       "banner",
+      "1200x630",
+      "meta image",
+      "share image",
     ],
     icon: "LayoutTemplate",
-    status: "soon",
+    status: "live",
+    featured: true,
   },
   {
     slug: "quote",

@@ -13,6 +13,12 @@ change.
 
 ## Completed
 
+- **Create: OG Image Maker** (2026-06-21)
+  - New tool at `/create/og-image` (registry flipped `soon` → `live`, renamed "OG Image Generator" → "OG Image Maker", description/keywords expanded; **left unfeatured** so the landing's 4-card featured grid is untouched). Server `page.tsx` + client `OgImageEditor.tsx`. Zero new deps.
+  - Renderer `src/lib/ogRender.ts`: pure `drawOg(ctx, settings, images)` onto a fixed **1200×630** canvas (Open Graph spec). **Reuses the shared canvas helpers** (`angleToGradientPoints`, `drawImageCover`, `roundRect`) per invariant 5 — no pixel math reinvented. Three templates: **Spotlight** (brand row + accent bar + eyebrow + auto-fit title + subtitle, optional right-side screenshot panel w/ shadow), **Centered** (logo + eyebrow pill + centered stack), **Showcase** (left text column + dominant screenshot panel). Title auto-fits font size to line budget; text wraps with explicit `\n` support; canvas `letterSpacing` used where supported (graceful no-op fallback).
+  - Editor: live canvas preview + right controls panel (template cards, content fields, logo/screenshot uploaders, background tabs gradient/solid/image with 8 gradient presets + custom colours + angle, image overlay slider, accent + light/dark/custom text colour). Export = **Download PNG** (1200×630) + **Copy to clipboard** (`ClipboardItem`) + Reset. Self-contained like the other editors; responsive (controls stack below preview under `lg`).
+  - Verified: `tsc`, lint, full `next build` all pass; `/create/og-image` prerenders. Pixel-level visual check pending (browser only — renderer can't run under Node without node-canvas, deliberately not added).
+
 - **Optimize: Compress & Convert tool** (2026-06-21)
   - New tool at `/optimize/compress` (registry flipped `soon` → `live`, renamed "Compress" → "Compress & Convert", keywords merged with the planned `convert` tool's). Server `page.tsx` + client `CompressEditor.tsx`. Zero new deps.
   - **Bulk**: multi-file drop / browse / paste; per-image grid with thumbnail (over a checkerboard so transparency shows), original→new size, % saved/gained, per-item download, and remove. "Add" appends more; "Clear" wipes.
