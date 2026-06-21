@@ -47,15 +47,6 @@ export const tools: readonly Tool[] = [
     featured: true,
   },
   {
-    slug: "code",
-    category: "create",
-    name: "Code Card",
-    description: "Render code snippets as styled, share-ready images.",
-    keywords: ["code", "snippet", "syntax", "highlight", "carbon", "share"],
-    icon: "Code",
-    status: "soon",
-  },
-  {
     slug: "og-image",
     category: "create",
     name: "OG Image Generator",
@@ -102,7 +93,7 @@ export const tools: readonly Tool[] = [
       "Draw regions to permanently pixelate or blur sensitive information.",
     keywords: ["redact", "blur", "pixelate", "censor", "hide", "privacy"],
     icon: "EyeOff",
-    status: "soon",
+    status: "live",
     featured: true,
   },
   {
@@ -125,8 +116,7 @@ export const tools: readonly Tool[] = [
     slug: "watermark",
     category: "edit",
     name: "Watermark",
-    description:
-      "Overlay text or a logo with position and opacity controls.",
+    description: "Overlay text or a logo with position and opacity controls.",
     keywords: ["watermark", "logo", "overlay", "copyright", "brand"],
     icon: "Stamp",
     status: "soon",
@@ -169,7 +159,10 @@ export function toolPath(tool: Pick<Tool, "category" | "slug">): string {
   return `/${tool.category}/${tool.slug}`;
 }
 
-export function getTool(category: ToolCategory, slug: string): Tool | undefined {
+export function getTool(
+  category: ToolCategory,
+  slug: string
+): Tool | undefined {
   return tools.find((t) => t.category === category && t.slug === slug);
 }
 

@@ -13,6 +13,13 @@ change.
 
 ## Completed
 
+- **Edit: Redact & Blur tool** (2026-06-21)
+  - New tool at `/edit/redact` (registry flipped `soon` → `live`). Server `page.tsx` (registry-derived metadata) + client `RedactEditor.tsx`.
+  - Self-contained canvas tool, zero new deps: pixelate (downscale→upscale, smoothing off), blur (`ctx.filter`), and solid black bar. Each drawn region snapshots the active mode+strength, so styles can be mixed; undo/clear/replace supported.
+  - Two stacked canvases at natural resolution: a **work canvas** (baked redactions, the only thing exported) and an **overlay canvas** (region outlines + live drag rect, never exported). Pointer coords mapped display→natural via `getBoundingClientRect`. Export = `workCanvas.toBlob` → PNG download. Reuses `ImageUpload` + paste handler.
+  - Deliberately did NOT extract a shared `lib/canvas/` pipeline — redact shares nothing with the screenshot pipeline; marked with a `ponytail:` comment to extract when a second consumer needs it.
+  - No localStorage persistence yet (only mode+strength would persist; deferred). Verified: typecheck passes; browser verification pending.
+
 - **Editor: reset style + editable browser URL** (2026-06-20)
   - `ScreenshotEditor` action bar (both image and code modes) gained a **Reset** button → restores `defaultSettings` and clears the active preset (image/code content preserved).
   - Browser device frame address bar is now editable. Added `browserUrl: string` to `StyleSettings` (default `"yoursite.com"`, replacing the hardcoded `snaply.app`); `drawDeviceFrame` takes an optional `browserUrl` param and renders `🔒  {url}` (lock-only when blank). Text input in `DeviceTab` shown only when the browser frame is active. Marketing rationale: hardcoding our domain into user exports hurts the user and isn't real brand exposure; attribution should be a separate optional watermark.
