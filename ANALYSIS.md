@@ -8,7 +8,7 @@
 
 **Snaply** is a client-side screenshot beautifier: paste or upload a screenshot (or paste code), style it with backgrounds, gradients, device frames, shadows and effects, then export or share it. All processing happens in the browser via the Canvas API — no backend, no login.
 
-It has two faces:
+It has two faces
 
 1. **Landing page** (`/`) — marketing site with hero, features, before/after demo, testimonials, CTA.
 2. **Editor** (`/editor`) — the actual tool, with two modes:
@@ -19,18 +19,18 @@ It has two faces:
 
 ## 2. Tech Stack
 
-| Layer | Choice | Notes |
-|---|---|---|
-| Framework | Next.js 16.2.4 (App Router) | Migrated from Vite (commit `b3e47e5`) |
-| UI library | React 19.2.5 | |
-| Language | TypeScript 5.8 | **`strict: false`** in [tsconfig.json](tsconfig.json) |
-| Styling | Tailwind CSS 3.4 + CSS variables | shadcn/ui-style tokens, class-based dark mode |
-| Components | Radix UI primitives + shadcn/ui | button, select, slider, switch, tooltip, toast, etc. |
-| Syntax highlighting | Shiki 4 | Lazy singleton highlighter |
-| Theming | next-themes | Default dark, system-aware |
-| Toasts | sonner + Radix toast | Both present (duplication) |
-| Icons | lucide-react | |
-| Fonts | Poppins (sans), EB Garamond (display serif), Fira Code (mono) | Google Fonts via [src/index.css](src/index.css#L1-L3) |
+| Layer               | Choice                                                        | Notes                                                 |
+| ------------------- | ------------------------------------------------------------- | ----------------------------------------------------- |
+| Framework           | Next.js 16.2.4 (App Router)                                   | Migrated from Vite (commit `b3e47e5`)                 |
+| UI library          | React 19.2.5                                                  |                                                       |
+| Language            | TypeScript 5.8                                                | **`strict: false`** in [tsconfig.json](tsconfig.json) |
+| Styling             | Tailwind CSS 3.4 + CSS variables                              | shadcn/ui-style tokens, class-based dark mode         |
+| Components          | Radix UI primitives + shadcn/ui                               | button, select, slider, switch, tooltip, toast, etc.  |
+| Syntax highlighting | Shiki 4                                                       | Lazy singleton highlighter                            |
+| Theming             | next-themes                                                   | Default dark, system-aware                            |
+| Toasts              | sonner + Radix toast                                          | Both present (duplication)                            |
+| Icons               | lucide-react                                                  |                                                       |
+| Fonts               | Poppins (sans), EB Garamond (display serif), Fira Code (mono) | Google Fonts via [src/index.css](src/index.css#L1-L3) |
 
 Rendering is **pure Canvas 2D** — no html2canvas/dom-to-image dependency, which keeps exports deterministic and fast.
 
@@ -112,30 +112,30 @@ Canvas size derives from device layout + aspect ratio + padding (`getAspectRatio
 
 ### `StyleSettings` ([src/types/settings.ts](src/types/settings.ts)) — 13 fields
 
-| Setting | Range / Type | Default |
-|---|---|---|
-| `padding` | 16–120 px | 40 |
-| `borderRadius` | 0–48 px | 12 |
-| `shadowIntensity` | 0–80 | 40 |
-| `backgroundColor` | hex | `#1a1a2e` |
-| `gradientStart` / `gradientEnd` | hex | `#667eea` / `#764ba2` |
-| `gradientAngle` | degrees | 135 |
-| `useGradient` | boolean | true |
-| `blurBackground` | boolean | false |
-| `aspectRatio` | `"free" \| "16:9" \| "4:3" \| "1:1" \| "9:16" \| "4:5"` | `"free"` |
-| `deviceMockup` | see below | `"none"` |
-| `grainIntensity` | 0–100 | 0 |
-| `backgroundImage` | string \| null | null |
+| Setting                         | Range / Type                                            | Default               |
+| ------------------------------- | ------------------------------------------------------- | --------------------- |
+| `padding`                       | 16–120 px                                               | 40                    |
+| `borderRadius`                  | 0–48 px                                                 | 12                    |
+| `shadowIntensity`               | 0–80                                                    | 40                    |
+| `backgroundColor`               | hex                                                     | `#1a1a2e`             |
+| `gradientStart` / `gradientEnd` | hex                                                     | `#667eea` / `#764ba2` |
+| `gradientAngle`                 | degrees                                                 | 135                   |
+| `useGradient`                   | boolean                                                 | true                  |
+| `blurBackground`                | boolean                                                 | false                 |
+| `aspectRatio`                   | `"free" \| "16:9" \| "4:3" \| "1:1" \| "9:16" \| "4:5"` | `"free"`              |
+| `deviceMockup`                  | see below                                               | `"none"`              |
+| `grainIntensity`                | 0–100                                                   | 0                     |
+| `backgroundImage`               | string \| null                                          | null                  |
 
 ### Presets ([src/types/presets.ts](src/types/presets.ts)) — 29 presets, 5 categories
 
-| Category | Count | Examples |
-|---|---|---|
-| Image backgrounds | 6 | Pastel Dream, Aurora, Neon Grid, Windows Ghibli |
-| Gradients | 8 | Purple Dream, Sunset, Ocean, Neon Cyber |
-| Minimal | 6 | White, Pearl, Graphite, Heavy Shadow |
-| Glass & Blur | 3 | Glassmorphism, Glass Indigo, Glass Midnight |
-| Grainy & Textured | 6 | Warm Film, Charcoal, Noir |
+| Category          | Count | Examples                                        |
+| ----------------- | ----- | ----------------------------------------------- |
+| Image backgrounds | 6     | Pastel Dream, Aurora, Neon Grid, Windows Ghibli |
+| Gradients         | 8     | Purple Dream, Sunset, Ocean, Neon Cyber         |
+| Minimal           | 6     | White, Pearl, Graphite, Heavy Shadow            |
+| Glass & Blur      | 3     | Glassmorphism, Glass Indigo, Glass Midnight     |
+| Grainy & Textured | 6     | Warm Film, Charcoal, Noir                       |
 
 Each preset is a partial `StyleSettings` override. Selecting one clears any custom background image.
 
@@ -173,13 +173,13 @@ Recent history shows a clear build-up: Vite→Next.js migration → device frame
 
 ### Bugs
 
-| # | Issue | Location |
-|---|---|---|
-| 1 | **Code mode ignores `backgroundImage`** — fills hardcoded `#1a1a2e` instead of drawing the selected image, so image-background presets silently break in code mode | [CodeCanvasRenderer.tsx:153-155](src/components/CodeCanvasRenderer.tsx#L153-L155) |
-| 2 | **Landscape device frames unimplemented** — `iphone-landscape` / `android-landscape` exist in the type and have SVG previews, but `getDeviceLayout()` has no case for them, so they fall through to default geometry (no bezels/notch) | [deviceMockups.ts:70-154](src/lib/deviceMockups.ts#L70-L154) |
-| 3 | **DeviceCard option toggles do nothing** — switches use `defaultChecked` with no `onCheckedChange`/state, so visible controls don't affect rendering | [DeviceCard.tsx:68-105](src/components/device/DeviceCard.tsx#L68-L105) |
-| 4 | **Aspect-ratio type/UI mismatch** — type says `"free"` + includes `"4:3"`; the UI renders `"auto"` and omits 4:3 | [settings.ts:3](src/types/settings.ts#L3), [StyleTab.tsx:116-120](src/components/StyleTab.tsx#L116-L120) |
-| 5 | Image load failures are silent (`onerror` just clears state, no toast) | [CanvasRenderer.tsx:100](src/components/CanvasRenderer.tsx#L100) |
+| #   | Issue                                                                                                                                                                                                                                  | Location                                                                                                 |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| 1   | **Code mode ignores `backgroundImage`** — fills hardcoded `#1a1a2e` instead of drawing the selected image, so image-background presets silently break in code mode                                                                     | [CodeCanvasRenderer.tsx:153-155](src/components/CodeCanvasRenderer.tsx#L153-L155)                        |
+| 2   | **Landscape device frames unimplemented** — `iphone-landscape` / `android-landscape` exist in the type and have SVG previews, but `getDeviceLayout()` has no case for them, so they fall through to default geometry (no bezels/notch) | [deviceMockups.ts:70-154](src/lib/deviceMockups.ts#L70-L154)                                             |
+| 3   | **DeviceCard option toggles do nothing** — switches use `defaultChecked` with no `onCheckedChange`/state, so visible controls don't affect rendering                                                                                   | [DeviceCard.tsx:68-105](src/components/device/DeviceCard.tsx#L68-L105)                                   |
+| 4   | **Aspect-ratio type/UI mismatch** — type says `"free"` + includes `"4:3"`; the UI renders `"auto"` and omits 4:3                                                                                                                       | [settings.ts:3](src/types/settings.ts#L3), [StyleTab.tsx:116-120](src/components/StyleTab.tsx#L116-L120) |
+| 5   | Image load failures are silent (`onerror` just clears state, no toast)                                                                                                                                                                 | [CanvasRenderer.tsx:100](src/components/CanvasRenderer.tsx#L100)                                         |
 
 ### Code smells / dead code
 
