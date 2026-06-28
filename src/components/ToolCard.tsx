@@ -15,9 +15,6 @@ function CardBody({ tool }: { tool: Tool }) {
         </h3>
         <p className="text-sm text-muted-foreground">{tool.description}</p>
       </div>
-      <p className="mt-auto font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
-        {CATEGORY_LABELS[tool.category]} · 0 uploads
-      </p>
     </>
   );
 }
