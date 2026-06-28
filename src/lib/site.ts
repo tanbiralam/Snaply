@@ -1,7 +1,6 @@
 /**
  * Single source of truth for site branding. The product name must never
  * be hardcoded in JSX or metadata — always read from this object.
- * (Naming is still TBD — Pixltly vs Snaply — and isolated here.)
  */
 const name = "Snaply";
 

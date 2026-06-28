@@ -6,7 +6,7 @@ import "../index.css";
 import { site } from "@/lib/site";
 import { Providers } from "./providers";
 
-const ogImage = "/snaply-og.png";
+const ogImage = `${site.url}/snaply-og.png`;
 const title = `${site.name} — ${site.tagline}`;
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title,
     description: site.description,
     type: "website",
-    url: "/",
+    url: site.url,
     siteName: site.name,
     images: [
       {
