@@ -57,7 +57,7 @@ src/
 │   ├── layout.tsx             # Root layout with metadata
 │   ├── page.tsx               # Main application page
 │   ├── not-found.tsx          # 404 fallback page
-│   └── providers.tsx          # React context providers (theme, tooltip, toaster)
+│   └── providers.tsx          # React context providers
 ├── components/
 │   ├── ui/                    # shadcn/ui components (button, slider, etc.)
 │   ├── CanvasRenderer.tsx     # Core canvas rendering with effects
