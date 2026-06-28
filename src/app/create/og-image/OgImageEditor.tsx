@@ -50,24 +50,75 @@ const TEMPLATES: { id: OgTemplate; label: string; icon: typeof AlignLeft }[] = [
 ];
 
 // One-click looks: each sets template + font + background + colours together.
+// Inspired by real-world SaaS OG images (saaspo.com).
 const RECIPES: { label: string; patch: Partial<OgSettings> }[] = [
   {
-    label: "Blog post",
-    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 3, eyebrow: "ARTICLE", accent: "#c4b5fd", textColor: "#ffffff", grain: 14 },
+    // Lemon Squeezy — purple gradient, product showcase right
+    label: "SaaS purple",
+    patch: { template: "showcase", font: "display", bgType: "gradient", gradientStart: "#4c1d95", gradientEnd: "#7c3aed", gradientAngle: 140, eyebrow: "", accent: "#fde68a", textColor: "#ffffff", grain: 6 },
   },
   {
+    // Fin — cinematic black, warm horizon spotlight glow, editorial feel
+    label: "Cinematic",
+    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 8, eyebrow: "", accent: "#fbbf24", textColor: "#ffffff", grain: 22 },
+  },
+  {
+    // Novu / developer tool — pure black, tight cyan glow, monospace eyebrow
+    label: "Dev dark",
+    patch: { template: "spotlight", font: "grotesk", bgType: "mesh", meshIndex: 9, eyebrow: "OPEN SOURCE", accent: "#22d3ee", textColor: "#ffffff", grain: 4 },
+  },
+  {
+    // Clarasight — soft lavender purple mesh, airy SaaS platform feel
+    label: "Lavender SaaS",
+    patch: { template: "centered", font: "display", bgType: "mesh", meshIndex: 10, eyebrow: "PLATFORM", accent: "#e9d5ff", textColor: "#ffffff", grain: 10 },
+  },
+  {
+    // Runner / editorial cream — off-white, editorial serif, no screenshot
+    label: "Editorial cream",
+    patch: { template: "centered", font: "editorial", bgType: "gradient", gradientStart: "#fefce8", gradientEnd: "#fef3c7", gradientAngle: 160, eyebrow: "", accent: "#78350f", textColor: "#1c1917", grain: 18 },
+  },
+  {
+    // Setary / Datum — clean white, dark text, bold sans, brand logo prominent
+    label: "Clean white",
+    patch: { template: "spotlight", font: "grotesk", bgType: "gradient", gradientStart: "#ffffff", gradientEnd: "#f1f5f9", gradientAngle: 160, eyebrow: "", accent: "#2563eb", textColor: "#0f172a", grain: 0 },
+  },
+  {
+    // Blynch — dark forest green, centered, accent-colored keyword feel
+    label: "Forest green",
+    patch: { template: "centered", font: "display", bgType: "solid", solidColor: "#052e16", eyebrow: "", accent: "#4ade80", textColor: "#ffffff", grain: 8 },
+  },
+  {
+    // HyperComply — dark olive, product on right, security/compliance vibe
+    label: "Olive security",
+    patch: { template: "showcase", font: "grotesk", bgType: "solid", solidColor: "#1a2008", eyebrow: "SECURITY", accent: "#a3e635", textColor: "#ffffff", grain: 10 },
+  },
+  {
+    // Auth0 — very dark charcoal, spotlight, single highlighted keyword
+    label: "Auth dark",
+    patch: { template: "spotlight", font: "sans", bgType: "solid", solidColor: "#0b0b0f", eyebrow: "", accent: "#818cf8", textColor: "#ffffff", grain: 0 },
+  },
+  {
+    // Optimal Workshop / Andercore — split with photo on right, corporate neutral
+    label: "Corporate neutral",
+    patch: { template: "showcase", font: "sans", bgType: "solid", solidColor: "#111827", eyebrow: "ENTERPRISE", accent: "#f59e0b", textColor: "#ffffff", grain: 0 },
+  },
+  {
+    // Blog post — editorial, grainy dusk mesh, article vibe
+    label: "Blog post",
+    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 3, eyebrow: "ARTICLE", accent: "#c4b5fd", textColor: "#ffffff", grain: 16 },
+  },
+  {
+    // Product launch — Aurora mesh, display font, launch announcement
     label: "Product launch",
     patch: { template: "spotlight", font: "display", bgType: "mesh", meshIndex: 0, eyebrow: "NOW LIVE", accent: "#818cf8", textColor: "#ffffff", grain: 10 },
   },
   {
+    // Changelog — solid near-black, green terminal accent, grotesk mono feel
     label: "Changelog",
-    patch: { template: "spotlight", font: "grotesk", bgType: "solid", solidColor: "#0b0f19", eyebrow: "CHANGELOG", accent: "#34d399", textColor: "#ffffff", grain: 8 },
+    patch: { template: "spotlight", font: "grotesk", bgType: "solid", solidColor: "#0b0f19", eyebrow: "CHANGELOG", accent: "#34d399", textColor: "#ffffff", grain: 6 },
   },
   {
-    label: "Quote",
-    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 1, eyebrow: "", accent: "#fda4af", textColor: "#ffffff", grain: 16 },
-  },
-  {
+    // Minimal — pure slate, clean, no eyebrow, sky accent
     label: "Minimal",
     patch: { template: "spotlight", font: "sans", bgType: "solid", solidColor: "#0f172a", eyebrow: "", accent: "#38bdf8", textColor: "#ffffff", grain: 0 },
   },

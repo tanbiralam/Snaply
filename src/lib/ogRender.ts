@@ -82,6 +82,69 @@ export const OG_MESH: {
       { x: 0.5, y: 0.5, r: 0.4, color: "#3b82f6" },
     ],
   },
+  {
+    name: "Copper",
+    base: "#110a00",
+    blobs: [
+      { x: 0.1, y: 0.1, r: 0.55, color: "#d97706" },
+      { x: 0.9, y: 0.85, r: 0.6, color: "#b45309" },
+      { x: 0.55, y: 0.45, r: 0.4, color: "#ef4444" },
+    ],
+  },
+  {
+    name: "Arctic",
+    base: "#060d14",
+    blobs: [
+      { x: 0.25, y: 0.75, r: 0.65, color: "#0ea5e9" },
+      { x: 0.78, y: 0.15, r: 0.5, color: "#38bdf8" },
+      { x: 0.5, y: 0.5, r: 0.35, color: "#a78bfa" },
+    ],
+  },
+  {
+    name: "Jungle",
+    base: "#020d08",
+    blobs: [
+      { x: 0.2, y: 0.6, r: 0.65, color: "#16a34a" },
+      { x: 0.8, y: 0.3, r: 0.55, color: "#15803d" },
+      { x: 0.5, y: 0.9, r: 0.4, color: "#facc15" },
+    ],
+  },
+  {
+    name: "Rose",
+    base: "#120009",
+    blobs: [
+      { x: 0.15, y: 0.3, r: 0.6, color: "#f43f5e" },
+      { x: 0.82, y: 0.7, r: 0.55, color: "#e11d48" },
+      { x: 0.5, y: 0.1, r: 0.4, color: "#fb923c" },
+    ],
+  },
+  {
+    name: "Cinematic",
+    base: "#000000",
+    blobs: [
+      { x: 0.5, y: 1.1, r: 0.7, color: "#f59e0b" },
+      { x: 0.3, y: 0.9, r: 0.45, color: "#ef4444" },
+      { x: 0.72, y: 0.95, r: 0.4, color: "#f97316" },
+    ],
+  },
+  {
+    name: "Developer",
+    base: "#000000",
+    blobs: [
+      { x: 0.5, y: 0.4, r: 0.45, color: "#06b6d4" },
+      { x: 0.18, y: 0.6, r: 0.3, color: "#8b5cf6" },
+      { x: 0.82, y: 0.3, r: 0.28, color: "#3b82f6" },
+    ],
+  },
+  {
+    name: "Lavender",
+    base: "#1e1040",
+    blobs: [
+      { x: 0.5, y: 0.35, r: 0.65, color: "#a78bfa" },
+      { x: 0.15, y: 0.75, r: 0.5, color: "#7c3aed" },
+      { x: 0.85, y: 0.65, r: 0.45, color: "#c4b5fd" },
+    ],
+  },
 ];
 
 export interface OgSettings {
@@ -131,6 +194,12 @@ export const OG_GRADIENTS: { name: string; start: string; end: string; angle: nu
   { name: "Berry", start: "#8e2de2", end: "#4a00e0", angle: 135 },
   { name: "Slate", start: "#1e293b", end: "#0f172a", angle: 160 },
   { name: "Dawn", start: "#ffecd2", end: "#fcb69f", angle: 120 },
+  { name: "Obsidian", start: "#000000", end: "#1a1a2e", angle: 145 },
+  { name: "Crimson", start: "#450a0a", end: "#dc2626", angle: 135 },
+  { name: "Sage", start: "#f0fdf4", end: "#bbf7d0", angle: 150 },
+  { name: "Paper", start: "#fafaf9", end: "#e7e5e4", angle: 160 },
+  { name: "Plum", start: "#2e1065", end: "#7e22ce", angle: 145 },
+  { name: "Coral", start: "#fff1f2", end: "#fda4af", angle: 135 },
 ];
 
 export const defaultOg: OgSettings = {
