@@ -6,7 +6,7 @@ import "../index.css";
 import { site } from "@/lib/site";
 import { Providers } from "./providers";
 
-const ogImage = "/public/snaply-og.png";
+const ogImage = "/snaply-og.png";
 const title = `${site.name} — ${site.tagline}`;
 
 export const metadata: Metadata = {

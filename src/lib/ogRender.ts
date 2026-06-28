@@ -141,7 +141,7 @@ export const defaultOg: OgSettings = {
   subtitle:
     "A privacy-first toolkit for crafting beautiful share images — right in your browser.",
   brand: "Snaply",
-  handle: "snaply.app",
+  handle: "snaply.tanbir.in",
   bgType: "gradient",
   gradientStart: OG_GRADIENTS[0].start,
   gradientEnd: OG_GRADIENTS[0].end,
