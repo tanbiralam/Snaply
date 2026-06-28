@@ -105,15 +105,7 @@ export const tools: readonly Tool[] = [
     status: "live",
     featured: true,
   },
-  {
-    slug: "watermark",
-    category: "edit",
-    name: "Watermark",
-    description: "Overlay text or a logo with position and opacity controls.",
-    keywords: ["watermark", "logo", "overlay", "copyright", "brand"],
-    icon: "Stamp",
-    status: "soon",
-  },
+
 
   // Optimize
   {

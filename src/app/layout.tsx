@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { Analytics } from "@vercel/analytics/next";
 import "../index.css";
 import { site } from "@/lib/site";
 import { Providers } from "./providers";
 
-const ogImage =
-  "/images/86f576610d0cd0d6a2e2b54a08a391238ac75434-1200x630.webp";
+const ogImage = "/snaply-og.png";
 const title = `${site.name} — ${site.tagline}`;
 
 export const metadata: Metadata = {
@@ -54,6 +54,7 @@ export default function RootLayout({
     >
       <body>
         <Providers>{children}</Providers>
+        <Analytics />
       </body>
     </html>
   );

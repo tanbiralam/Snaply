@@ -50,6 +50,22 @@ export function Footer() {
           </nav>
         ))}
       </div>
+
+      <div className="border-t">
+        <div className="mx-auto flex max-w-content items-center justify-center gap-1.5 px-4 py-4 md:px-6">
+          <span className="text-sm text-muted-foreground">
+            Got feedback? Reach out on{" "}
+            <a
+              href="https://x.com/iamtanbirr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-muted-foreground/40 underline-offset-2 transition-colors duration-120 ease-out hover:decoration-foreground"
+            >
+              𝕏
+            </a>
+          </span>
+        </div>
+      </div>
     </footer>
   );
 }
