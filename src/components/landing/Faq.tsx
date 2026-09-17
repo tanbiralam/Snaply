@@ -25,11 +25,6 @@ const faqs = [
     answer:
       "They're in active development and ship one at a time, free like everything else.",
   },
-  {
-    question: "Does it work offline?",
-    answer:
-      "After the page loads, processing is local; an installable offline version is on the roadmap.",
-  },
 ];
 
 /* FAQPage structured data generated from the same array the page renders. */
