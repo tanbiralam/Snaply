@@ -333,7 +333,7 @@ export default function CompressEditor() {
               type: "image/bmp",
             });
           } else if (mime === "image/x-icon") {
-            blob = await encodeIco(canvas);
+            blob = await encodeIco([canvas]);
           } else {
             blob = await new Promise<Blob | null>((res) =>
               canvas.toBlob(res, mime, LOSSY.has(mime) ? q : undefined)

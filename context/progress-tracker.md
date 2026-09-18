@@ -9,9 +9,21 @@ change.
 
 ## Current Goal
 
-- Three new tools planned (2026-09-18): Code Snippet (extraction), Metadata (EXIF) Viewer & Remover, Favicon & App Icon Generator. Units A and B shipped. Unit C (Favicon) and Unit 4 (/tools directory) still pending.
+- Three new tools planned (2026-09-18): Code Snippet (extraction), Metadata (EXIF) Viewer & Remover, Favicon & App Icon Generator. Units A, B, and C all shipped. Unit 4 (/tools directory) is the only thing left from this batch.
 
 ## Completed
+
+- **Unit C — Favicon & App Icon Generator** (2026-09-19)
+  - New tool at `/create/favicon` (registry entry, `category: "create"`, `featured: true` per user request — landing's featured grid is `grid-cols-tools` auto-fill, not fixed-4, so this is now all 8 live tools shown as cards with an empty pill strip; new icon `Squircle` added to `ToolIcon`'s map). Server `page.tsx` + client `FaviconEditor.tsx`, self-contained like the other new tools.
+  - **Plan deviation, decided during implementation**: the original plan called for lifting Compress's `targetSize`/`parseDim` (a "contain-fit within a box" resize) into a shared `src/lib/resize.ts`. Turned out to be the wrong tool for the job — a favicon generator needs to turn an arbitrary (often non-square) logo into a *square* icon, which is a center-crop-to-fill operation, not a contain-fit. `drawImageCover` (`canvasHelpers.ts`) already does exactly that (already used for background-image fill elsewhere) — reused directly, no extraction needed, no touch to Compress's resize code at all.
+  - **Generates**: 16/32/48/180/192/512px PNGs (48 is ICO-only, not shipped as a standalone file — matches real-world favicon kits) drawn straight from the same visible preview `<canvas>` elements the user sees (no duplicate offscreen-draw path), a multi-resolution `favicon.ico` (16+32+48 in one file), a `site.webmanifest` (name/short_name from a "Name" field, theme/background color from a color picker), and a ready-to-paste `<head>` embed snippet (same "copy embed code" UX pattern as OG Image Maker's "copy meta tags").
+  - **`encodeIco` generalized** (`src/lib/encode.ts`): was single-canvas/single-image-only; now takes `HTMLCanvasElement[]` and writes a proper multi-entry ICO directory (real favicon.ico files bundle 16/32/48 in one file — a single-res ICO was a real gap for a "proper" favicon tool). Compress's one call site updated (`encodeIco(canvas)` → `encodeIco([canvas])`), behavior unchanged there.
+  - Non-square sources get a visible "center-cropped to fit" notice rather than silently distorting or failing.
+  - **Verified in a real browser** (Playwright): uploaded a synthetic non-square PNG (blue rect with a centered yellow square) — crop centered correctly across all 6 preview sizes; downloaded package unzipped to exactly 7 files; every PNG's actual dimensions confirmed by `file`; `favicon.ico` independently confirmed by `file` as "MS Windows icon resource - 3 icons" (i.e. libmagic, a parser with zero relation to our code, agrees it's a valid multi-res ICO); manifest and embed snippet reactive to the Name/theme-color inputs. `next build` and `npm run lint` clean.
+  - **Follow-up (2026-09-19, user request): "Letters & emoji" mode.** A second source-image path alongside upload — type a letter, word, or emoji and it renders onto an offscreen square canvas (background shape: square/rounded/circle via `roundRect` from `canvasHelpers.ts` or a circular clip; auto-fit bold text sizing by shrinking font size until `measureText` fits ~70% of the box width). That canvas is turned into a dataURL and fed through the *exact same* `useLoadedImage` → `drawImageCover` → per-size-canvas pipeline the upload path already used — no branching needed anywhere downstream (preview grid, ICO/zip export, manifest) since it's all keyed off a plain `HTMLImageElement` regardless of how the source was produced. A mode toggle ("Upload image" / "Letters & emoji") switches which input UI shows; switching modes preserves each mode's own state (uploaded image isn't lost by visiting text mode and back).
+  - Emoji rendering needed no special font-stack trick — a plain `system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif` stack was enough for Chromium to color-render an emoji glyph via canvas `fillText`, confirmed visually in a real browser at every size down to 16px (verified with 🚀).
+  - Extracted a shared local `ColorField` component in `FaviconEditor.tsx` once the text-mode design panel brought the total color-picker instances in the file to three (theme color + background + text color) — three near-identical blocks was the threshold to de-duplicate, not before.
+  - Verified: letter + circle-shape + emoji + custom background color all render correctly across every preview size in a real browser; downloaded zip from text mode unzips to the same valid 7-file set (`file`-confirmed dimensions + valid multi-res ICO) as the image-upload path; switching modes back and forth doesn't drop the other mode's state; zero console errors throughout.
 
 - **Unit B — Metadata (EXIF) Viewer & Remover** (2026-09-18)
   - New tool at `/edit/metadata` (registry entry added, `category: "edit"`, `featured: true`, new icon `ScanSearch` added to `ToolIcon`'s import map). Server `page.tsx` + client `MetadataEditor.tsx`, shaped like `RemoveBackgroundEditor` (upload → process → result panel → download), reusing `ImageUpload` as-is.
@@ -123,7 +135,6 @@ change.
 
 ## Next Up
 
-- Unit C — Favicon & App Icon Generator (`/create/favicon`): reuses `encodeIco` and `zipSync`; needs `CompressEditor`'s inline `targetSize`/`parseDim` lifted into `src/lib/resize.ts` first.
 - Unit 4 — `/tools` searchable directory (then repoint the navbar "All tools" link from `/#tools` to `/tools`).
 
 ## Open Questions

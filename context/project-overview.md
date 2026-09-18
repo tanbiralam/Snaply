@@ -6,7 +6,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 ## Goals
 
-1. Ship a single launchable version containing 10 tools across three categories (Create / Edit / Optimize), each on its own route.
+1. Ship a single launchable version containing 12 tools across three categories (Create / Edit / Optimize), each on its own route.
 2. Keep 100% of image processing client-side so the "no uploads, no limits, no ads" promise is structurally true, not just marketing.
 3. Make the app read as one polished product — via categorized routing, a shared tool registry, and a searchable directory — rather than a pile of disconnected utilities.
 
@@ -26,6 +26,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 - **Screenshot Stylizer** — backgrounds, padding, shadows, device frames (`/create/screenshot`)
 - **Code Snippet** — render code snippets as styled, syntax-highlighted images (`/create/code-snippet`)
 - **OG Image Generator** — title/subtitle/screenshot to social & blog cards (`/create/og-image`)
+- **Favicon Generator** — logo, letter, or emoji to a full favicon/app-icon package (multi-res .ico, PNGs, manifest, embed code) (`/create/favicon`)
 - **Quote Card** — text + name + handle + avatar to tweet/quote graphics (`/create/quote`)
 
 ### Edit
@@ -52,7 +53,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 ### In Scope
 
-- The 10 tools listed above, each on its own categorized route
+- The 12 tools listed above, each on its own categorized route
 - The marketing landing page, the `/tools` directory, and the command palette
 - A shared canvas rendering pipeline, presets, and export system reused by all tools
 - localStorage persistence for settings across sessions
@@ -69,7 +70,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 ## Success Criteria
 
-1. A user can open any of the 10 tools from a categorized route and complete its task fully in-browser with no network image upload.
+1. A user can open any of the 12 tools from a categorized route and complete its task fully in-browser with no network image upload.
 2. Typing in the `/tools` search box live-filters cards by name and keyword (e.g. "shrink" surfaces Compress, "png to webp" surfaces Convert).
 3. The homepage shows exactly the featured tools plus a pill strip, and every nav surface (homepage grid, directory, sitemap, metadata) is generated from the single tool registry with no drift.
 4. Cmd+K opens a working command palette on every page that navigates to any tool.

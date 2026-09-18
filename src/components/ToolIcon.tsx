@@ -9,6 +9,7 @@ import {
   Minimize2,
   Quote,
   ScanSearch,
+  Squircle,
   Stamp,
   type LucideIcon,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const icons: Record<string, LucideIcon> = {
   Minimize2,
   Quote,
   ScanSearch,
+  Squircle,
   Stamp,
 };
 

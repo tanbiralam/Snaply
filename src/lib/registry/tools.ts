@@ -86,6 +86,25 @@ export const tools: readonly Tool[] = [
     status: "live",
     featured: true,
   },
+  {
+    slug: "favicon",
+    category: "create",
+    name: "Favicon Generator",
+    description:
+      "Turn a logo into a full favicon & app icon package — every size, a multi-res .ico, manifest, and embed code.",
+    keywords: [
+      "favicon",
+      "app icon",
+      "apple touch icon",
+      "manifest",
+      "ico",
+      "site icon",
+      "android chrome icon",
+    ],
+    icon: "Squircle",
+    status: "live",
+    featured: true,
+  },
   // {
   //   slug: "quote",
   //   category: "create",

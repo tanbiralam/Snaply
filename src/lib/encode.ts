@@ -46,41 +46,54 @@ export function encodeBmp(width: number, height: number, rgba: Uint8ClampedArray
 }
 
 /**
- * ICO containing a single PNG image. ICO entries cap at 256px per side, so the
- * canvas is downscaled to fit if larger.
+ * ICO containing one PNG image per canvas (multi-resolution icons — e.g. a
+ * favicon.ico bundling 16/32/48px — are just several directory entries in one
+ * file). Each entry caps at 256px per side; oversized canvases are downscaled.
  */
-export async function encodeIco(canvas: HTMLCanvasElement): Promise<Blob> {
+export async function encodeIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
   const MAX = 256;
-  let src = canvas;
-  if (canvas.width > MAX || canvas.height > MAX) {
-    const s = Math.min(MAX / canvas.width, MAX / canvas.height);
-    const c = document.createElement("canvas");
-    c.width = Math.max(1, Math.round(canvas.width * s));
-    c.height = Math.max(1, Math.round(canvas.height * s));
-    const ctx = c.getContext("2d");
-    if (!ctx) throw new Error("no 2d context");
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(canvas, 0, 0, c.width, c.height);
-    src = c;
-  }
+  const images = await Promise.all(
+    canvases.map(async (canvas) => {
+      let src = canvas;
+      if (canvas.width > MAX || canvas.height > MAX) {
+        const s = Math.min(MAX / canvas.width, MAX / canvas.height);
+        const c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(canvas.width * s));
+        c.height = Math.max(1, Math.round(canvas.height * s));
+        const ctx = c.getContext("2d");
+        if (!ctx) throw new Error("no 2d context");
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(canvas, 0, 0, c.width, c.height);
+        src = c;
+      }
+      const pngBlob = await new Promise<Blob | null>((res) => src.toBlob(res, "image/png"));
+      if (!pngBlob) throw new Error("PNG encode failed");
+      return { width: src.width, height: src.height, png: new Uint8Array(await pngBlob.arrayBuffer()) };
+    })
+  );
 
-  const pngBlob = await new Promise<Blob | null>((res) => src.toBlob(res, "image/png"));
-  if (!pngBlob) throw new Error("PNG encode failed");
-  const png = new Uint8Array(await pngBlob.arrayBuffer());
-
-  const head = new Uint8Array(6 + 16);
+  const dirSize = 6 + 16 * images.length;
+  const head = new Uint8Array(dirSize);
   const dv = new DataView(head.buffer);
   dv.setUint16(0, 0, true); // reserved
   dv.setUint16(2, 1, true); // type: 1 = icon
-  dv.setUint16(4, 1, true); // image count
-  head[6] = src.width >= 256 ? 0 : src.width; // 0 means 256
-  head[7] = src.height >= 256 ? 0 : src.height;
-  head[8] = 0; // palette count
-  head[9] = 0; // reserved
-  dv.setUint16(10, 1, true); // colour planes
-  dv.setUint16(12, 32, true); // bits per pixel
-  dv.setUint32(14, png.length, true); // image data size
-  dv.setUint32(18, head.length, true); // offset to image data
+  dv.setUint16(4, images.length, true);
 
-  return new Blob([head, png], { type: "image/x-icon" });
+  let offset = dirSize;
+  const parts: Uint8Array[] = [head];
+  images.forEach((img, i) => {
+    const e = 6 + i * 16;
+    head[e] = img.width >= 256 ? 0 : img.width; // 0 means 256
+    head[e + 1] = img.height >= 256 ? 0 : img.height;
+    head[e + 2] = 0; // palette count
+    head[e + 3] = 0; // reserved
+    dv.setUint16(e + 4, 1, true); // colour planes
+    dv.setUint16(e + 6, 32, true); // bits per pixel
+    dv.setUint32(e + 8, img.png.length, true); // image data size
+    dv.setUint32(e + 12, offset, true); // offset to image data
+    offset += img.png.length;
+    parts.push(img.png);
+  });
+
+  return new Blob(parts, { type: "image/x-icon" });
 }
