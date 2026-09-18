@@ -9,9 +9,20 @@ change.
 
 ## Current Goal
 
-- Units 1–3.5 complete. Next is Unit 4 (/tools directory).
+- Three new tools planned (2026-09-18): Code Snippet (extraction), Metadata (EXIF) Viewer & Remover, Favicon & App Icon Generator. Unit A (Code Snippet) shipped. Unit 4 (/tools directory) still pending after these.
 
 ## Completed
+
+- **Unit A — Code Snippet extraction** (2026-09-18)
+  - New tool at `/create/code-snippet` (registry entry added, `category: "create"`, `icon: "Code"` — already mapped in `ToolIcon`, no new import needed). Server `page.tsx` (registry-derived metadata) + client `CodeSnippetEditor.tsx`, self-contained like `OgImageEditor` (its own header/controls, doesn't reuse `SettingsPanel`).
+  - **Reused as-is**: `CodeCanvasRenderer`, `codeHighlighter.ts`, `CodeInput`, `CodeSettingsTab`, `ExportButton`, `ShareMenu`, `StylePresets` (the same preset categories — Image Backgrounds/Gradients/Minimal/Glass/Grainy — apply cleanly to code cards since none of their fields are screenshot-only).
+  - **New, small**: `CardSettingsTab` (local to `CodeSnippetEditor.tsx`, not exported/shared — matches the OG editor's own-file-local-helpers convention) exposes only the `StyleSettings` fields `CodeCanvasRenderer` actually reads (padding, border radius, shadow, background solid/gradient, grain) — no aspect ratio, device, or blur controls, which would've been dead UI in this tool.
+  - **Drive-by fix**: `CodeCanvasRenderer` never called `drawGrain` (already used by `CanvasRenderer`/`ogRender.ts`), so the reused "Grainy & Textured" preset category would have silently no-op'd. Wired it in (same call shape as `CanvasRenderer`, content-rect-excluded) — cheap and correct rather than shipping a preset category that does nothing in the new tool.
+  - **Removed from `ScreenshotEditor.tsx`**: the Image/Code mode toggle, `CodeCanvasRenderer`/`CodeInput` usage, `codeSettings` state, and the code-paste branch — it's image-only again, resolving the open question that had been sitting in this tracker since Unit 1. Header now shows a static "Screenshot Stylizer" label (matching `OgImageEditor`'s pattern) instead of the toggle pill.
+  - **`SettingsPanel`**: dropped the `editorMode`/`codeSettings`/`onCodeSettingsChange` props and the "Code" tab entirely — it only ever renders Style/Device now. `EditorMode` type deleted from `types/code.ts`/`types/index.ts` (had exactly 3 call sites, all removed).
+  - Verified in a real browser (Playwright, headless Chromium against `next dev`): typed/pasted code renders highlighted in the card, preset swap (Sunset gradient) applies correctly, the trimmed background section's gradient→solid toggle works, Export/Share are present and enabled once code exists, zero console/page errors. Re-checked `/create/screenshot`: no leftover Code toggle, upload flow intact. `next build` (`/create/code-snippet` prerenders) and `npm run lint` both clean.
+  - **Not done yet**: Unit B (Metadata/EXIF Viewer & Remover) and Unit C (Favicon & App Icon Generator) — planned, not started. Unit C will need a small extraction of Compress's inline `targetSize`/`parseDim` resize math into a shared `src/lib/resize.ts` first (currently private to `CompressEditor.tsx`).
+  - **Follow-up** (2026-09-18): flipped `featured: true` on the `code-snippet` registry entry per user request, so it renders as a full `ToolCard` in the landing page's featured grid instead of a `ToolPill` in the remaining-tools strip. The featured grid is `grid-cols-tools` (auto-fill), not a fixed 4-column layout, so a 5th featured card doesn't break anything — verified in browser.
 
 - **OG Image Maker — quality upgrade** (2026-06-22)
   - Product decision (user): free-form drag isn't the differentiator for OG cards; *opinionated quality* is. Built three upgrades; deliberately skipped device/browser frames (user said not needed).
@@ -103,12 +114,13 @@ change.
 
 ## Next Up
 
+- Unit B — Metadata (EXIF) Viewer & Remover (`/edit/metadata`): hand-rolled JPEG APP1/PNG chunk parser in a new `src/lib/exif.ts` (no dependency — no EXIF lib is installed, matches the zero-dep precedent in `decode.ts`), lossless strip (segment/chunk skip, not a canvas re-encode).
+- Unit C — Favicon & App Icon Generator (`/create/favicon`): reuses `encodeIco` and `zipSync`; needs `CompressEditor`'s inline `targetSize`/`parseDim` lifted into `src/lib/resize.ts` first.
 - Unit 4 — `/tools` searchable directory (then repoint the navbar "All tools" link from `/#tools` to `/tools`).
 
 ## Open Questions
 
 - **Branding mismatch**: `project-overview.md` names the product **Pixltly**, but the codebase (layout metadata, landing copy, editor header) still says **Snaply**. Unit 1 kept existing branding untouched; a later unit should resolve which name ships and update metadata/copy accordingly.
-- The current editor includes a built-in "Code" mode (mode toggle in its header). The registry lists Code Card as a separate `soon` tool at `/create/code`. When `/create/code` is built, decide whether the screenshot editor's code mode is removed or redirected.
 
 ## Architecture Decisions
 

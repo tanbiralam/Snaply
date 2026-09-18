@@ -67,6 +67,25 @@ export const tools: readonly Tool[] = [
     status: "live",
     featured: true,
   },
+  {
+    slug: "code-snippet",
+    category: "create",
+    name: "Code Snippet",
+    description:
+      "Turn a code snippet into a shareable, syntax-highlighted image with custom backgrounds and window chrome.",
+    keywords: [
+      "code",
+      "snippet",
+      "syntax highlighting",
+      "code screenshot",
+      "code card",
+      "dev",
+      "programming",
+    ],
+    icon: "Code",
+    status: "live",
+    featured: true,
+  },
   // {
   //   slug: "quote",
   //   category: "create",

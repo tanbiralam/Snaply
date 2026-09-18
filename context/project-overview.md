@@ -24,7 +24,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 ### Create
 
 - **Screenshot Stylizer** — backgrounds, padding, shadows, device frames (`/create/screenshot`)
-- **Code Card** — render code snippets as styled images (`/create/code`)
+- **Code Snippet** — render code snippets as styled, syntax-highlighted images (`/create/code-snippet`)
 - **OG Image Generator** — title/subtitle/screenshot to social & blog cards (`/create/og-image`)
 - **Quote Card** — text + name + handle + avatar to tweet/quote graphics (`/create/quote`)
 

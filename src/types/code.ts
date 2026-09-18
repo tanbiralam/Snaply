@@ -1,6 +1,4 @@
-// ─── Code Snippet Mode Types ──────────────────────────────────────────────────
-
-export type EditorMode = "image" | "code";
+// ─── Code Snippet Types ────────────────────────────────────────────────────────
 
 export interface CodeSettings {
   /** The raw code string entered by the user */

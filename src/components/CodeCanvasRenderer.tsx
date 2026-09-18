@@ -16,7 +16,7 @@ import {
   type TokenizedCode,
 } from "@/lib/codeHighlighter";
 import { ZoomBar, ZOOM_MIN, ZOOM_MAX, ZOOM_STEP } from "@/components/ZoomBar";
-import { angleToGradientPoints, drawImageCover } from "@/lib/canvasHelpers";
+import { angleToGradientPoints, drawImageCover, drawGrain } from "@/lib/canvasHelpers";
 import { toast } from "sonner";
 
 
@@ -201,6 +201,11 @@ export const CodeCanvasRenderer = forwardRef<CodeCanvasRendererRef, CodeCanvasRe
         const blockX = Math.round((canvasW - blockW) / 2);
         const blockY = Math.round((canvasH - blockH) / 2);
         const borderRadius = Math.min(settings.borderRadius, blockW / 2, blockH / 2);
+
+        if (settings.grainIntensity > 0) {
+          drawGrain(ctx, canvasW, canvasH, settings.grainIntensity, blockX, blockY, blockW, blockH, borderRadius);
+        }
+
         if (settings.shadowIntensity > 0) {
           ctx.save();
           ctx.shadowColor = `rgba(0, 0, 0, ${settings.shadowIntensity / 100})`;
