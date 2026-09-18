@@ -8,6 +8,7 @@ import {
   LayoutTemplate,
   Minimize2,
   Quote,
+  ScanSearch,
   Stamp,
   type LucideIcon,
 } from "lucide-react";
@@ -24,6 +25,7 @@ const icons: Record<string, LucideIcon> = {
   LayoutTemplate,
   Minimize2,
   Quote,
+  ScanSearch,
   Stamp,
 };
 

@@ -31,6 +31,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 ### Edit
 
 - **Resize & Crop** — preset + custom dimensions, freeform crop, aspect locks (`/edit/resize`)
+- **Metadata Viewer** — view embedded EXIF/GPS/device metadata and strip it losslessly (`/edit/metadata`)
 - **Redact & Blur** — draw regions to permanently pixelate/blur sensitive info (`/edit/redact`)
 - **Remove Background** — in-browser ML background removal, lazy-loaded (`/edit/remove-background`)
 - **Watermark** — text or logo overlay with position/opacity controls (`/edit/watermark`)

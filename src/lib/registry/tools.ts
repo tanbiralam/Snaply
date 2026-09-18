@@ -98,6 +98,26 @@ export const tools: readonly Tool[] = [
   // },
 
   {
+    slug: "metadata",
+    category: "edit",
+    name: "Metadata Viewer",
+    description:
+      "See exactly what's hidden in a photo — GPS location, camera, timestamps — then strip it losslessly.",
+    keywords: [
+      "exif",
+      "metadata",
+      "gps",
+      "location",
+      "privacy",
+      "strip metadata",
+      "remove exif",
+      "geotag",
+    ],
+    icon: "ScanSearch",
+    status: "live",
+    featured: true,
+  },
+  {
     slug: "redact",
     category: "edit",
     name: "Redact & Blur",
