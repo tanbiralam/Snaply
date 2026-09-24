@@ -10,9 +10,18 @@ change.
 ## Current Goal
 
 - Batch 2026-09-18 (Code Snippet, Metadata, Favicon) shipped. Unit 4 (/tools directory) still open.
-- Batch planned 2026-09-24 — the last three tools from `project-overview.md`, one phase each: **D** Resize & Crop → **E** Watermark → **F** Quote Card. See Next Up.
+- Batch 2026-09-24 (D Resize & Crop, E Watermark, F Quote Card) shipped — every tool in `project-overview.md` is live. Remaining shell work: Unit 4.
 
 ## Completed
+
+- **Unit F — Quote Card** (2026-09-24) — last tool from `project-overview.md`; all planned tools are now live (Convert lives inside Compress & Convert).
+  - New tool at `/create/quote` (registry entry un-commented, `status: "live"`, `featured: true`, icon `Quote` — already in `ToolIcon`'s map; description says "social-post" rather than "tweet" to stay clear of X branding). Server `page.tsx` + client `QuoteEditor.tsx`; no upload step — the card preview is live from the first render.
+  - **Reused from `ogRender.ts`** (now exported): `wrap`, `withAlpha`, `circleImage`, `BODY`, `HEADINGS`, gradient/mesh presets, and `drawBackground`. `drawBackground`/`drawMesh` were hard-wired to 1200×630; they now take `W, H` (defaulting to `OG_W`/`OG_H`, so OG's single call site is unchanged) and `drawBackground`'s settings param is narrowed to a `BgSettings` Pick.
+  - **New `src/lib/quoteRender.ts`**: `QUOTE_SIZES` (1080×1080 / 1200×675 / 1080×1350), `defaultQuote`, `fitBox` (largest font size whose wrapped lines fit a width *and* height budget; at the minimum size it truncates with …), and two layouts scaled by a unit `u = min(W,H)/1080` — **Social post** (white/dark card, avatar or initial-letter fallback, name, auto-`@` handle, Inter body) and **Big quote** (large quote mark + heading-font text + "— name" attribution, optional avatar). One `tone` field means card color for post and text color for quote.
+  - Controls: template, size, quote (≤600 chars), name, handle, avatar (validated image, removable), font (big quote only), light/dark tone, background gradient/mesh/solid. Export: Download PNG + Copy (`ClipboardItem`). No localStorage persistence (quote content is one-off; not in plan).
+  - Bug caught by the browser run: the first `toBlob` promise wrapper used `canvas.toBlob(...) ?? reject()` — `toBlob` returns `undefined`, so every export was rejected. Replaced with an explicit null check.
+  - Verified with Playwright on `next start`: default 1080×1080 PNG; landscape 1200×675 and portrait 1080×1350; worst-case 600-char quote on the landscape canvas stays inside a 4% margin band for *both* templates (pixel-counted, zero spill); font switch re-renders; avatar renders as a 96px circle (pixel area within 5% of π·48²) and is removable; non-image avatar rejected; solid colour reaches the canvas corner; mesh swatch works; Copy puts `image/png` on the clipboard; no horizontal overflow at 375px; dark + light + mobile screenshots checked. OG regression: OG editor canvas still 1200×630 painted edge to edge with its default gradient. Landing now links `/create/quote`. `next build`, lint, `tsc` clean.
+  - Not done: date/timestamp line, verified badges (deliberately — keeps it from reading as a fake-post generator), image backgrounds, grain slider (the renderer supports grain; no control exposed yet).
 
 - **Unit E — Watermark** (2026-09-24)
   - New tool at `/edit/watermark` (registry entry, `category: "edit"`, `featured: true`, icon `Stamp` — already in `ToolIcon`'s map). Server `page.tsx` + client `WatermarkEditor.tsx`, same shell as Redact/Resize.
@@ -156,11 +165,10 @@ change.
 ## Next Up
 
 - Unit 4 — `/tools` searchable directory (then repoint the navbar "All tools" link from `/#tools` to `/tools`).
-- **Unit F — Quote Card** (`/create/quote`): un-comment the registry entry; export `wrap`/`fitTitle`/`circleImage`/background drawing from `ogRender.ts` instead of copying them. Tweet + big-quote templates, 1080×1080 / 1200×675 / 1080×1350.
 
 ## Open Questions
 
-- Units D–F: `featured: true` like every other live tool? (Defaulted to yes for D and E.)
+- Units D–F: `featured: true` like every other live tool? (Defaulted to yes for all three — the landing now shows 11 featured cards and an empty pill strip; worth deciding whether the pill strip should go or a subset should be un-featured.)
 - Watermark shipped single-image; batch watermarking is the obvious first v1.1 batch candidate.
 - **Branding mismatch**: `project-overview.md` names the product **Pixltly**, but the codebase (layout metadata, landing copy, editor header) still says **Snaply**. Unit 1 kept existing branding untouched; a later unit should resolve which name ships and update metadata/copy accordingly.
 

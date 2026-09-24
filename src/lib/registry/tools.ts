@@ -105,16 +105,26 @@ export const tools: readonly Tool[] = [
     status: "live",
     featured: true,
   },
-  // {
-  //   slug: "quote",
-  //   category: "create",
-  //   name: "Quote Card",
-  //   description:
-  //     "Turn text, a name, a handle, and an avatar into tweet-style quote graphics.",
-  //   keywords: ["quote", "tweet", "testimonial", "avatar", "handle"],
-  //   icon: "Quote",
-  //   status: "soon",
-  // },
+  {
+    slug: "quote",
+    category: "create",
+    name: "Quote Card",
+    description:
+      "Turn text, a name, a handle, and an avatar into social-post and quote graphics.",
+    keywords: [
+      "quote",
+      "tweet",
+      "post",
+      "testimonial",
+      "avatar",
+      "handle",
+      "instagram",
+      "social",
+    ],
+    icon: "Quote",
+    status: "live",
+    featured: true,
+  },
 
   {
     slug: "resize",
