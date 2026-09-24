@@ -14,6 +14,17 @@ change.
 
 ## Completed
 
+- **Unit E — Watermark** (2026-09-24)
+  - New tool at `/edit/watermark` (registry entry, `category: "edit"`, `featured: true`, icon `Stamp` — already in `ToolIcon`'s map). Server `page.tsx` + client `WatermarkEditor.tsx`, same shell as Redact/Resize.
+  - **New `src/lib/watermark.ts`** (pure): `WmSettings` + `defaultWm`, `parseWm` (validates unknown/stored input field by field), `placeMark` (3×3 position using the *rotated* bounding box, so rotated marks keep their margin), `tileCenters` (staggered grid covering edge-to-edge), `drawWatermark` (text sized so it spans exactly `size`% of the image width; logo scaled to the same width keeping its ratio).
+  - **Fonts reused from OG**: exported `HEADINGS` from `ogRender.ts` (was private) so watermark text uses the same self-hosted Sora/Grotesk/Fraunces/Inter faces and `FONT_PRELOAD` routine — no new font assets.
+  - **First localStorage-persisted tool** (key `watermark`, documented in `architecture.md`). Settings are read in the `useState` initializer rather than an effect: with a load effect + save effect, StrictMode's double-run in dev let the default-valued save overwrite stored settings before the second load. Initializer read is hydration-safe here because nothing rendered depends on settings until an image is loaded. Logo image is never persisted (code-standards rule); a reload in logo mode prompts for the logo and disables Download until one is chosen.
+  - Preview canvas is the natural-resolution export canvas (same as Redact), so the download is exactly what's shown; output keeps the source format (PNG/JPEG/WebP).
+  - Sliders are native `<input type="range">` in a `<label>`, not the shadcn `Slider`: Radix puts `role="slider"` on the thumb, so an `aria-label` on the root never reaches it and the slider has no accessible name — `src/components/ui/` is protected, so native was the fix. (The same gap exists in Compress's quality slider — not touched.)
+  - Mobile fix applied to both Watermark and Resize: the sidebar is capped at `max-h-96` below `lg` and scrolls; without it a tall control panel squeezed the preview to ~40px on a phone.
+  - Verified: `tsx` asserts on `parseWm` (garbage/out-of-range/per-field fallback/round-trip), `placeMark` (corners, center, 90° rotation) and `tileCenters` (all four corners covered); Playwright on `next start` by sampling pixels in downloaded files — default text only in the bottom-right quadrant at the expected 60% blend (204 on #808080), top-left placement, opacity 100 → 255, tiling reaches all 4 quadrants, font switch re-renders, settings survive a reload, corrupt storage (`{not json`) → defaults, logo lands bottom-right at exactly 300×150 px (25% of 1200 wide), non-image logo rejected, JPEG in → JPEG out, no horizontal overflow at 390/375px, dark + light screenshots checked. Resize suite rerun after the sidebar change: all pass. `next build`, lint, `tsc` clean.
+  - Not done: batch watermarking (v1.1), text shadow/outline for busy backgrounds, drag-to-position.
+
 - **Unit D — Resize & Crop** (2026-09-24)
   - New tool at `/edit/resize` (registry entry, `category: "edit"`, `featured: true`, icon `Crop` — already in `ToolIcon`'s map). Server `page.tsx` + client `ResizeEditor.tsx`, same shell as Redact.
   - **New shared `src/lib/resize.ts`**: `targetSize`/`parseDim` moved out of `CompressEditor.tsx` (Compress now imports them, behavior unchanged); `normalizeRect` + `clientToImage` lifted out of `RedactEditor.tsx` (Redact now imports them); plus new pure crop geometry — `rectFromAnchor` (draw + corner-resize, aspect-locked, clamped to the image), `centeredAspectRect`, `moveRect`, `roundBox`.
@@ -145,13 +156,12 @@ change.
 ## Next Up
 
 - Unit 4 — `/tools` searchable directory (then repoint the navbar "All tools" link from `/#tools` to `/tools`).
-- **Unit E — Watermark** (`/edit/watermark`): text or logo, 3×3 position grid, size/opacity/rotation/tile. First tool to persist settings to localStorage (key `watermark`, text settings only — never the logo image).
 - **Unit F — Quote Card** (`/create/quote`): un-comment the registry entry; export `wrap`/`fitTitle`/`circleImage`/background drawing from `ogRender.ts` instead of copying them. Tweet + big-quote templates, 1080×1080 / 1200×675 / 1080×1350.
 
 ## Open Questions
 
-- Units D–F: `featured: true` like every other live tool? (Defaulted to yes for D.)
-- Unit E: watermarking is mostly a batch job, but batch is out of scope until v1.1. Ship single-image first?
+- Units D–F: `featured: true` like every other live tool? (Defaulted to yes for D and E.)
+- Watermark shipped single-image; batch watermarking is the obvious first v1.1 batch candidate.
 - **Branding mismatch**: `project-overview.md` names the product **Pixltly**, but the codebase (layout metadata, landing copy, editor header) still says **Snaply**. Unit 1 kept existing branding untouched; a later unit should resolve which name ships and update metadata/copy accordingly.
 
 ## Architecture Decisions

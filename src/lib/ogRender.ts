@@ -15,7 +15,7 @@ const FONT = BODY; // body text (subtitle, brand, eyebrow, handle)
 
 export type FontChoice = "display" | "grotesk" | "editorial" | "sans";
 
-const HEADINGS: Record<FontChoice, { family: string; weight: number }> = {
+export const HEADINGS: Record<FontChoice, { family: string; weight: number }> = {
   display: { family: `"Sora OG", ${BODY}`, weight: 800 },
   grotesk: { family: `"Space Grotesk OG", ${BODY}`, weight: 700 },
   editorial: { family: `"Fraunces OG", Georgia, "Times New Roman", serif`, weight: 600 },

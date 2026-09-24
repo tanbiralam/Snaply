@@ -185,6 +185,26 @@ export const tools: readonly Tool[] = [
     status: "live",
     featured: true,
   },
+  {
+    slug: "watermark",
+    category: "edit",
+    name: "Watermark",
+    description:
+      "Stamp text or a logo onto an image — pick a corner or tile it across, with size, opacity, and rotation controls.",
+    keywords: [
+      "watermark",
+      "logo",
+      "copyright",
+      "stamp",
+      "overlay",
+      "brand",
+      "protect",
+      "signature",
+    ],
+    icon: "Stamp",
+    status: "live",
+    featured: true,
+  },
 
 
   // Optimize

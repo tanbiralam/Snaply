@@ -23,6 +23,7 @@
 ## Storage Model
 
 - **localStorage**: Per-tool settings and preferences (last-used presets, quality values, dimensions). Keyed by tool slug. This is the only persistence layer — it is per-device and per-browser.
+  - `watermark` — JSON `WmSettings` (`src/lib/watermark.ts`): kind, text, font, color, size, opacity, rotation, position, margin, tile. Read through `parseWm`, which clamps/validates each field and falls back per field. The logo image is never stored.
 - **In-memory (Canvas / Blob)**: The working image and all generated output. Images exist only as in-memory canvas data and download Blobs; they are never serialized to a server, and only leave the browser via an explicit user-initiated download.
 
 ## Privacy Model

@@ -267,7 +267,7 @@ export default function ResizeEditor() {
         </main>
 
         {image && size && src && out && (
-          <aside className="shrink-0 border-t hairline lg:w-72 lg:border-l lg:border-t-0">
+          <aside className="max-h-96 shrink-0 overflow-y-auto border-t hairline lg:max-h-none lg:w-72 lg:border-l lg:border-t-0">
             <div className="flex h-full flex-col gap-5 overflow-y-auto p-4">
               <div>
                 <p className={kicker}>Aspect ratio</p>
