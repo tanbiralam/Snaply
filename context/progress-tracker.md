@@ -9,9 +9,18 @@ change.
 
 ## Current Goal
 
-- Three new tools planned (2026-09-18): Code Snippet (extraction), Metadata (EXIF) Viewer & Remover, Favicon & App Icon Generator. Units A, B, and C all shipped. Unit 4 (/tools directory) is the only thing left from this batch.
+- Batch 2026-09-18 (Code Snippet, Metadata, Favicon) shipped. Unit 4 (/tools directory) still open.
+- Batch planned 2026-09-24 — the last three tools from `project-overview.md`, one phase each: **D** Resize & Crop → **E** Watermark → **F** Quote Card. See Next Up.
 
 ## Completed
+
+- **Unit D — Resize & Crop** (2026-09-24)
+  - New tool at `/edit/resize` (registry entry, `category: "edit"`, `featured: true`, icon `Crop` — already in `ToolIcon`'s map). Server `page.tsx` + client `ResizeEditor.tsx`, same shell as Redact.
+  - **New shared `src/lib/resize.ts`**: `targetSize`/`parseDim` moved out of `CompressEditor.tsx` (Compress now imports them, behavior unchanged); `normalizeRect` + `clientToImage` lifted out of `RedactEditor.tsx` (Redact now imports them); plus new pure crop geometry — `rectFromAnchor` (draw + corner-resize, aspect-locked, clamped to the image), `centeredAspectRect`, `moveRect`, `roundBox`.
+  - Crop UI is plain DOM, not a canvas: an `<img>` with an absolutely positioned crop box (percent coords) whose outside is dimmed by a token-colored box-shadow; `data-handle` attributes on the box/corners route one pointer handler to draw / move / resize. A click or <4px drag restores the previous crop.
+  - Controls: aspect chips (Free/1:1/4:3/16:9/9:16), presets (OG 1200×630, IG 1080×1080, Story 1080×1920, X 1600×900), width/height + keep-aspect. A preset locks the crop to its ratio and turns keep-aspect off, so output is exactly the preset size (no ±1px from contain-fit rounding); picking an aspect chip afterwards clears it. Crop + resize is one `drawImage`; export keeps the source format (PNG/JPEG/WebP, read from the data-URL MIME, PNG fallback).
+  - Verified: `tsx` asserts on the geometry helpers (bounds, aspect exactness, clamping, rounding, `targetSize` unchanged); Playwright against `next start` — 1:1 crop dragged onto the blue half downloads a pure-blue 800×800, locked-square draw, corner resize keeps 1:1, stray click keeps the crop, width 400 → 400×400, OG preset → exact 1200×630 PNG, JPEG in → JPEG out (magic bytes), no horizontal overflow at 390px, dark + light screenshots checked; regressions: Redact still draws regions, Compress per-image resize still gives 400×200. Only console noise is the Vercel Analytics script 404 (only served on Vercel). `next build`, lint, `tsc` clean.
+  - Not done: numeric X/Y crop inputs (keyboard users can still use aspect chips/presets, which set centered crops), rotate/flip, batch (v1.1).
 
 - **Unit C — Favicon & App Icon Generator** (2026-09-19)
   - New tool at `/create/favicon` (registry entry, `category: "create"`, `featured: true` per user request — landing's featured grid is `grid-cols-tools` auto-fill, not fixed-4, so this is now all 8 live tools shown as cards with an empty pill strip; new icon `Squircle` added to `ToolIcon`'s map). Server `page.tsx` + client `FaviconEditor.tsx`, self-contained like the other new tools.
@@ -136,9 +145,13 @@ change.
 ## Next Up
 
 - Unit 4 — `/tools` searchable directory (then repoint the navbar "All tools" link from `/#tools` to `/tools`).
+- **Unit E — Watermark** (`/edit/watermark`): text or logo, 3×3 position grid, size/opacity/rotation/tile. First tool to persist settings to localStorage (key `watermark`, text settings only — never the logo image).
+- **Unit F — Quote Card** (`/create/quote`): un-comment the registry entry; export `wrap`/`fitTitle`/`circleImage`/background drawing from `ogRender.ts` instead of copying them. Tweet + big-quote templates, 1080×1080 / 1200×675 / 1080×1350.
 
 ## Open Questions
 
+- Units D–F: `featured: true` like every other live tool? (Defaulted to yes for D.)
+- Unit E: watermarking is mostly a batch job, but batch is out of scope until v1.1. Ship single-image first?
 - **Branding mismatch**: `project-overview.md` names the product **Pixltly**, but the codebase (layout metadata, landing copy, editor header) still says **Snaply**. Unit 1 kept existing branding untouched; a later unit should resolve which name ships and update metadata/copy accordingly.
 
 ## Architecture Decisions

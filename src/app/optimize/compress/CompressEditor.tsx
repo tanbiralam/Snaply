@@ -8,6 +8,7 @@ import { site } from "@/lib/site";
 import { zipSync } from "@/lib/zip";
 import { canDecode, decodeImage, isPreviewable, SUPPORTED_INPUT } from "@/lib/decode";
 import { encodeBmp, encodeIco } from "@/lib/encode";
+import { parseDim, targetSize } from "@/lib/resize";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import {
@@ -142,29 +143,6 @@ function formatBytes(n: number): string {
   return `${(n / 1024 / 1024).toFixed(2)} MB`;
 }
 
-/**
- * Target draw size from natural dims + resize options.
- * keepAspect fits the image *within* the given box (contain); off = exact.
- * Empty width/height means "use the natural value for that axis".
- */
-function targetSize(
-  w: number,
-  h: number,
-  rw: number | null,
-  rh: number | null,
-  keep: boolean
-): { w: number; h: number } {
-  if (!rw && !rh) return { w, h };
-  if (!keep) return { w: rw || w, h: rh || h };
-  const r = (n: number) => Math.max(1, Math.round(n));
-  if (rw && rh) {
-    const s = Math.min(rw / w, rh / h);
-    return { w: r(w * s), h: r(h * s) };
-  }
-  if (rw) return { w: rw, h: r(h * (rw / w)) };
-  return { w: r(w * (rh! / h)), h: rh! };
-}
-
 // ─── Item model ───────────────────────────────────────────────────────────────
 
 type ItemStatus = "pending" | "processing" | "done" | "error";
@@ -192,12 +170,6 @@ interface Item {
   keepAspect: boolean;
   /** Effective-settings snapshot this item's output was produced for. */
   processedKey: string;
-}
-
-/** Parse a resize input → positive integer, or null when empty/invalid. */
-function parseDim(v: string): number | null {
-  const n = parseInt(v, 10);
-  return Number.isFinite(n) && n > 0 ? n : null;
 }
 
 // File-picker filter: image/* plus the extensions browsers don't tag as images.

@@ -117,6 +117,28 @@ export const tools: readonly Tool[] = [
   // },
 
   {
+    slug: "resize",
+    category: "edit",
+    name: "Resize & Crop",
+    description:
+      "Crop to any aspect ratio and resize to exact dimensions or social-media presets.",
+    keywords: [
+      "resize",
+      "crop",
+      "dimensions",
+      "aspect ratio",
+      "scale",
+      "trim",
+      "instagram",
+      "thumbnail",
+      "1080x1080",
+      "1200x630",
+    ],
+    icon: "Crop",
+    status: "live",
+    featured: true,
+  },
+  {
     slug: "metadata",
     category: "edit",
     name: "Metadata Viewer",

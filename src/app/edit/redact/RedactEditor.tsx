@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { site } from "@/lib/site";
+import { clientToImage, normalizeRect } from "@/lib/resize";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Download, Eraser, ImageIcon, Undo2 } from "lucide-react";
@@ -70,15 +71,6 @@ function applyEffect(
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(off, 0, 0, tw, th, x, y, w, h);
   ctx.imageSmoothingEnabled = true;
-}
-
-function normalizeRect(a: { x: number; y: number }, b: { x: number; y: number }) {
-  return {
-    x: Math.min(a.x, b.x),
-    y: Math.min(a.y, b.y),
-    w: Math.abs(a.x - b.x),
-    h: Math.abs(a.y - b.y),
-  };
 }
 
 export default function RedactEditor() {
@@ -168,13 +160,7 @@ export default function RedactEditor() {
   const toImageCoords = useCallback((e: React.PointerEvent) => {
     const canvas = overlayRef.current;
     if (!canvas || !size) return null;
-    const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * size.w;
-    const y = ((e.clientY - rect.top) / rect.height) * size.h;
-    return {
-      x: Math.max(0, Math.min(size.w, x)),
-      y: Math.max(0, Math.min(size.h, y)),
-    };
+    return clientToImage(e, canvas, size.w, size.h);
   }, [size]);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
