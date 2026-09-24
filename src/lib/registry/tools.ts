@@ -270,3 +270,35 @@ export function getLiveTools(): Tool[] {
 export function getFeaturedTools(): Tool[] {
   return tools.filter((t) => t.featured);
 }
+
+// Filler words dropped from queries so "png to webp" matches on png + webp.
+const STOPWORDS = new Set(["a", "an", "and", "the", "to", "into", "of", "for", "from", "in", "my", "or", "with"]);
+
+/**
+ * Live filter for the directory and command palette. Every query word must appear in
+ * the tool's name, keywords, category, or description; results are ranked by where
+ * the words hit (name > keyword > category/description), registry order breaking ties.
+ */
+export function searchTools(query: string, pool: readonly Tool[] = tools): Tool[] {
+  const words = query
+    .toLowerCase()
+    .split(/[^a-z0-9.]+/)
+    .filter((w) => w && !STOPWORDS.has(w));
+  if (!words.length) return [...pool];
+
+  const scored: { tool: Tool; score: number; i: number }[] = [];
+  pool.forEach((tool, i) => {
+    const name = tool.name.toLowerCase();
+    const keywords = tool.keywords.join(" ").toLowerCase();
+    const rest = `${CATEGORY_LABELS[tool.category]} ${tool.description}`.toLowerCase();
+    let score = 0;
+    for (const w of words) {
+      if (name.includes(w)) score += 3;
+      else if (keywords.includes(w)) score += 2;
+      else if (rest.includes(w)) score += 1;
+      else return;
+    }
+    scored.push({ tool, score, i });
+  });
+  return scored.sort((a, b) => b.score - a.score || a.i - b.i).map((s) => s.tool);
+}

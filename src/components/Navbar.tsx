@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { site } from "@/lib/site";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CommandPaletteButton } from "@/components/CommandPalette";
 
 export function Navbar() {
   return (
@@ -22,9 +23,9 @@ export function Navbar() {
         </Link>
 
         <div className="flex items-center gap-3">
-          {/* TODO: point at /tools after unit 4 */}
+          <CommandPaletteButton />
           <Link
-            href="/#tools"
+            href="/tools"
             className="text-sm text-muted-foreground transition-colors duration-120 ease-out hover:text-foreground"
           >
             All tools

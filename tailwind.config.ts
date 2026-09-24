@@ -120,6 +120,7 @@ export default {
             'accordion-up': 'accordion-up 0.2s ease-out',
             'fade-in': 'fade-in 0.4s ease-out',
             'scale-in': 'scale-in 0.3s ease-out',
+            'palette-in': 'scale-in 160ms cubic-bezier(0.16,1,0.3,1)',
             'slide-up': 'slide-up 0.5s ease-out',
             'slide-down': 'slide-down 0.5s ease-out',
             'shimmer': 'shimmer 2s infinite',

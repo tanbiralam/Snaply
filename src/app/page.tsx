@@ -86,10 +86,16 @@ export default function LandingPage() {
           </div>
 
           {/* Pill strip — everything not featured */}
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-2">
             {remaining.map((tool) => (
               <ToolPill key={tool.slug} tool={tool} />
             ))}
+            <Link
+              href="/tools"
+              className="text-sm font-medium text-primary transition-colors duration-120 ease-out hover:text-primary-hover"
+            >
+              View all tools →
+            </Link>
           </div>
         </section>
 

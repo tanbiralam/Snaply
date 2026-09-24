@@ -10,9 +10,16 @@ change.
 ## Current Goal
 
 - Batch 2026-09-18 (Code Snippet, Metadata, Favicon) shipped. Unit 4 (/tools directory) still open.
-- Batch 2026-09-24 (D Resize & Crop, E Watermark, F Quote Card) shipped — every tool in `project-overview.md` is live. Remaining shell work: Unit 4.
+- Batch 2026-09-24 (D Resize & Crop, E Watermark, F Quote Card) shipped — every tool in `project-overview.md` is live. Unit 4 (directory + palette) shipped the same day.
 
 ## Completed
+
+- **Unit 4 — `/tools` directory + Cmd+K command palette** (2026-09-24)
+  - **Shared search** `searchTools(query, pool?)` in `src/lib/registry/tools.ts` — used by both surfaces, so they can never disagree. Lower-cased word tokens (stopwords like "to"/"the" dropped); every word must hit the tool's name, keywords, category label, or description (AND); ranked name (3) > keyword (2) > category/description (1), registry order breaking ties. `tsx` asserts cover the spec's examples ("shrink" → Compress & Convert, "png to webp" → Compress & Convert), name-over-keyword ranking, case-insensitivity, empty/stopword-only/junk queries, and one-miss-excludes.
+  - **`/tools`** (`src/app/tools/page.tsx` server shell with Navbar/Footer + registry-derived metadata; client `src/components/ToolDirectory.tsx`): sticky search input + category chips pinned 56px below the navbar, chip counts that track the current query, mono result count (`aria-live`), `grid-cols-tools` of the existing `ToolCard`, and an empty state with a "Show all N tools" reset. Navbar "All tools" now points at `/tools` (TODO removed); landing featured section gained a "View all tools →" link (hero "Browse tools" still scrolls to the on-page `#tools` section).
+  - **Command palette** (`src/components/CommandPalette.tsx`, mounted once in `providers.tsx` so it exists on every page, including tool pages with their own headers): native `<dialog>` + `showModal()` for focus trap, Esc, and `::backdrop` (no dialog library). Cmd/Ctrl+K toggles; ARIA combobox (`aria-activedescendant`) + listbox/options; ↑/↓ wrap, Enter opens, hover selects, click opens, backdrop click closes; query resets on reopen. `CommandPaletteButton` in the navbar opens it via a window event (shows ⌘K or Ctrl K per platform). Width 560px max / 90vw; opens with a new `palette-in` animation (reuses the `scale-in` keyframes at 160ms `cubic-bezier(0.16,1,0.3,1)` per `ui-context.md`), motion-safe only. Selected row uses `bg-primary/15` — `bg-accent` was nearly invisible on the dark popover surface.
+  - Verified with Playwright on `next start`: directory — navbar → `/tools`, 11 cards, both spec queries, Edit chip + query-aware counts, empty state + reset, sticky bar at y=72 after scrolling, card → tool, landing link, no overflow at 375px, both themes. Palette — Cmd/Ctrl+K opens with input focused and Esc closes on `/`, `/tools`, `/edit/watermark`, `/create/quote`; toggles closed; works from inside an editor textarea without typing into it; shared search results; arrow wrap + activedescendant; Enter lands on the highlighted tool's exact URL; no-results Enter is a no-op; query resets; navbar button, backdrop close, click-to-open; ≤90vw on mobile. `next build`, lint, `tsc` clean.
+  - Not done: sitemap (success criterion 3 lists it as registry-generated — no `sitemap.ts` exists yet), `?q=` deep links into the directory, non-tool palette entries (home, theme toggle).
 
 - **Unit F — Quote Card** (2026-09-24) — last tool from `project-overview.md`; all planned tools are now live (Convert lives inside Compress & Convert).
   - New tool at `/create/quote` (registry entry un-commented, `status: "live"`, `featured: true`, icon `Quote` — already in `ToolIcon`'s map; description says "social-post" rather than "tweet" to stay clear of X branding). Server `page.tsx` + client `QuoteEditor.tsx`; no upload step — the card preview is live from the first render.
@@ -164,7 +171,8 @@ change.
 
 ## Next Up
 
-- Unit 4 — `/tools` searchable directory (then repoint the navbar "All tools" link from `/#tools` to `/tools`).
+- Registry-generated `sitemap.ts` (+ `robots.ts` pointing at it) — last unmet item in the success criteria.
+- Category shell from the original plan: breadcrumbs + related-tools footer in the `create/`/`edit/`/`optimize/` layouts (still pass-through with a TODO).
 
 ## Open Questions
 
