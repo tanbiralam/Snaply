@@ -73,6 +73,13 @@ export function CommandPalette() {
       aria-label="Search tools"
       // Clicks on the ::backdrop land on the dialog element itself.
       onClick={(e) => e.target === dialogRef.current && dialogRef.current.close()}
+      // Close explicitly: another layer (e.g. an open Radix tooltip) may preventDefault the
+      // Escape keydown, which cancels the dialog's native close.
+      onKeyDown={(e) => {
+        if (e.key !== "Escape") return;
+        e.preventDefault();
+        dialogRef.current?.close();
+      }}
       className="mx-auto mt-[12vh] w-[90vw] max-w-[560px] overflow-hidden rounded-xl border bg-popover p-0 text-popover-foreground shadow-modal backdrop:bg-background/60 backdrop:backdrop-blur-sm motion-safe:open:animate-palette-in"
     >
       <div className="flex items-center gap-2 border-b px-4">

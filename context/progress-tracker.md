@@ -14,6 +14,13 @@ change.
 
 ## Completed
 
+- **Tool rail app shell** (2026-09-24, user request — tool pages "looked empty" with no way to hop between tools)
+  - **Spec change first**: the originally planned breadcrumb + related-tools footer is replaced by a 56px left tool rail — updated `ui-context.md` (tool-page layout, new "Tool rail" pattern, sizing row), `architecture.md`, `code-standards.md`, and `project-overview.md` (flow step 6 + shell feature list). Decision rationale: the tool header already names the tool, and a persistent rail gives one-click lateral moves; a full-width (~240px) sidebar was rejected because next to the 300px controls panel it squeezes the canvas on 13" laptops.
+  - **`src/components/ToolRail.tsx`** (client, `usePathname`): `ToolShell` wraps each category layout (`create/`, `edit/`, `optimize/` `layout.tsx` — server, one line each; TODOs removed), so no tool page changed. Rail = search slot (opens the palette via `openCommandPalette`, 56px tall to align with every tool header) → all live tools from the registry grouped Create/Edit/Optimize with dividers → "All tools" link to `/tools` pinned at the bottom. Icon buttons 40px, current tool `bg-primary/15 text-primary` + `aria-current="page"`, names in right-side Radix tooltips and as `aria-label`s, `<nav aria-label="Tools">` with per-category `<ul aria-label>`. Hidden below `md`. Rail links use `prefetch={false}` so tool pages don't prefetch 10 other tool bundles (Code Snippet's shiki etc.) on every visit.
+  - **Bug found + fixed in the palette**: rail links keep keyboard focus across client-side navigation (the category layout stays mounted), so their Radix tooltip stays open; opening the palette on top, the first Esc hit Radix's capture-phase handler, which `preventDefault`s → the native `<dialog>` cancel never fired. `CommandPalette` now closes itself on Escape in its own `onKeyDown` instead of relying on the native cancel.
+  - Verified with Playwright on `next start`: all 11 tool pages render a 56px rail with 11 tools in 3 groups (5/5/1), exactly one `aria-current` matching the URL, tool header starting at x=56, no horizontal overflow; hover tooltip; click navigation across categories with the highlight following; keyboard focus + Enter; search slot opens the palette and Esc closes it (the bug scenario); All tools → `/tools`; no rail on `/` or `/tools`; hidden at 390px; screenshot editor at 1024px keeps a 744px canvas area. Regression reruns: palette, directory, resize, watermark, quote suites all pass. `next build`, lint, `tsc` clean.
+  - Not done: richer pre-upload empty states (the center of upload-first tools is still mostly blank — next step), rail on mobile (phones use the logo + directory).
+
 - **Unit 4 — `/tools` directory + Cmd+K command palette** (2026-09-24)
   - **Shared search** `searchTools(query, pool?)` in `src/lib/registry/tools.ts` — used by both surfaces, so they can never disagree. Lower-cased word tokens (stopwords like "to"/"the" dropped); every word must hit the tool's name, keywords, category label, or description (AND); ranked name (3) > keyword (2) > category/description (1), registry order breaking ties. `tsx` asserts cover the spec's examples ("shrink" → Compress & Convert, "png to webp" → Compress & Convert), name-over-keyword ranking, case-insensitivity, empty/stopword-only/junk queries, and one-miss-excludes.
   - **`/tools`** (`src/app/tools/page.tsx` server shell with Navbar/Footer + registry-derived metadata; client `src/components/ToolDirectory.tsx`): sticky search input + category chips pinned 56px below the navbar, chip counts that track the current query, mono result count (`aria-live`), `grid-cols-tools` of the existing `ToolCard`, and an empty state with a "Show all N tools" reset. Navbar "All tools" now points at `/tools` (TODO removed); landing featured section gained a "View all tools →" link (hero "Browse tools" still scrolls to the on-page `#tools` section).
@@ -172,7 +179,7 @@ change.
 ## Next Up
 
 - Registry-generated `sitemap.ts` (+ `robots.ts` pointing at it) — last unmet item in the success criteria.
-- Category shell from the original plan: breadcrumbs + related-tools footer in the `create/`/`edit/`/`optimize/` layouts (still pass-through with a TODO).
+- Pre-upload empty states for the upload-first tools (tool description, accepted formats, optional "try a sample image") — the rail fills the left edge, but the center is still a lone dropzone.
 
 ## Open Questions
 

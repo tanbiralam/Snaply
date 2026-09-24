@@ -17,7 +17,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 3. A returning user goes directly to `/tools` (the searchable directory) or to a bookmarked tool page.
 4. On `/tools`, they filter the grid by typing (live filter-as-you-type) or tap a category chip (All / Create / Edit / Optimize) to narrow it down.
 5. They open a tool, do their task entirely in-browser, and export/download the result.
-6. From any tool page, breadcrumbs and a "related tools" footer let them move laterally to adjacent tools; Cmd+K opens a command palette to jump anywhere.
+6. From any tool page, a left tool rail (every tool, grouped by category, current one highlighted) lets them move laterally to another tool in one click; Cmd+K opens a command palette to jump anywhere.
 
 ## Features
 
@@ -47,7 +47,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 - Tool registry as a single source of truth (slug, category, name, description, keywords, icon)
 - Searchable, filterable `/tools` directory with category chips
 - Cmd+K command palette available on every page
-- Breadcrumbs and related-tools cross-linking on each tool page
+- A tool rail on each tool page for one-click switching between tools
 
 ## Scope
 

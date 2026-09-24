@@ -128,6 +128,7 @@ Fixed per component type so spacing is identical everywhere a type recurs.
 | Button height (sm/md/lg) | `32px` / `40px` / `48px`             |
 | Input height             | `40px`                               |
 | Sidebar width            | `300px` (fixed)                      |
+| Tool rail width          | `56px` (fixed, md+ only)             |
 | Tool card min width      | `260px` (grid auto-fills above this) |
 | Tool grid gap            | `16px`                               |
 | Command palette width    | `560px` max, `90vw` on mobile        |
@@ -160,7 +161,8 @@ shadcn/ui on top of Tailwind. Components live in `components/ui/`. Add new compo
 
 - **Landing (`/`)**: single-column scroll, `1200px` max content width, `80px` vertical rhythm between sections — hero, featured tool grid, pill strip, privacy/free-forever section.
 - **Directory (`/tools`)**: sticky search input + category chips (top, `56px` below navbar) above a responsive card grid (`260px` min cards, `16px` gap) that live-filters as the user types.
-- **Tool page**: full-viewport working area — fixed `300px` control sidebar, fluid center canvas preview, with a breadcrumb at top and a related-tools footer at bottom.
+- **Tool page**: full-viewport working area — `56px` tool rail on the far left (md+), fixed `300px` control sidebar, fluid center canvas preview.
+- **Tool rail**: `56px` wide, full height, `1px --border-default` right border, `--bg-surface` fill. Top slot (`56px`, aligned with the tool header) is a search button that opens the command palette; then every live tool from the registry as a `40px` icon button, grouped by category with a `1px` divider between groups; an "All tools" link to `/tools` pinned at the bottom. Icons `20px`, `--text-muted`; hover `--bg-hover`; the current tool is jade (`--accent-primary` icon on a `primary/15` tint) with `aria-current="page"`. Tool name appears in a tooltip to the right. Hidden below `md` (phones navigate via the logo and the directory). Replaces the originally planned breadcrumb + related-tools footer: the tool header already names the tool, and the rail shows where it sits among the others.
 - **Sidebars**: fixed `300px` width with a `1px --border-default` separator and `16px` inner padding.
 - **Command palette**: centered overlay, `560px` max width, backdrop blur, opened via Cmd+K.
 - **Navbar**: `56px` tall, top bar with a `1px` bottom border, theme toggle on the right; "All tools" links to `/tools`.

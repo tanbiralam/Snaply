@@ -22,7 +22,7 @@
 - Keep the heavy, interactive work in client component leaves; let layouts and static page shells stay on the server where possible.
 - One route segment = one tool. Each `page.tsx` imports only its own pipeline so it stays in that route's bundle.
 - Lazy-load heavy assets (`@imgly/background-removal`, ~40MB model) with dynamic import on first use within `/edit/remove-background` — never at module top level, never globally.
-- Use the category `layout.tsx` for shared shell (breadcrumb, related-tools footer), not for per-tool logic.
+- Use the category `layout.tsx` for shared shell (the tool rail), not for per-tool logic.
 - Keep `/editor` as a permanent redirect to `/create/screenshot`.
 
 ## Styling

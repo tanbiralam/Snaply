@@ -15,7 +15,7 @@
 
 ## System Boundaries
 
-- `src/app/` — Route segments. Three category folders (`create/`, `edit/`, `optimize/`), each with a `layout.tsx` (breadcrumb + related-tools shell) and per-tool `page.tsx`. Owns routing and per-tool page composition only.
+- `src/app/` — Route segments. Three category folders (`create/`, `edit/`, `optimize/`), each with a `layout.tsx` (tool-rail shell) and per-tool `page.tsx`. Owns routing and per-tool page composition only.
 - `src/lib/canvas/` — The shared rendering pipeline: canvas helpers, letterboxing/aspect math, device mockups, and the export system. Owns all pixel-level image work; tools call into it, never reimplement it.
 - `src/lib/registry/` — The single tool registry (`{ slug, category, name, description, keywords, icon }`). Owns the source of truth that the homepage grid, directory, command palette, sitemap, and metadata all read from.
 - `src/components/` — Shared shell UI: navbar, command palette (Cmd+K), tool cards, pill strip, category chips, search input. Owns cross-tool UI; tool-specific controls live within their own tool page.
