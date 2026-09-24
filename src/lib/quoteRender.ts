@@ -8,6 +8,7 @@ import {
   OG_GRADIENTS,
   circleImage,
   drawBackground,
+  ellipsize,
   withAlpha,
   wrap,
   type BgSettings,
@@ -80,7 +81,7 @@ export function fitBox(
   const lineH = min * lh;
   const all = wrap(ctx, text, maxW);
   const lines = all.slice(0, Math.max(1, Math.floor(maxH / lineH)));
-  if (lines.length < all.length) lines[lines.length - 1] += "…";
+  if (lines.length < all.length) lines[lines.length - 1] = ellipsize(ctx, lines[lines.length - 1], maxW);
   return { size: min, lines, lineH };
 }
 

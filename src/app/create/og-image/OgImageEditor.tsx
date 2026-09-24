@@ -286,7 +286,15 @@ export default function OgImageEditor() {
 
   const copyMeta = useCallback(async () => {
     const url = "https://your-site.com/og.png";
-    const esc = (t: string) => t.replace(/"/g, "&quot;").replace(/\s+/g, " ").trim();
+    // & first, so the entities added after it aren't double-escaped.
+    const esc = (t: string) =>
+      t
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\s+/g, " ")
+        .trim();
     const snippet = [
       `<meta property="og:title" content="${esc(s.title)}" />`,
       `<meta property="og:description" content="${esc(s.subtitle)}" />`,

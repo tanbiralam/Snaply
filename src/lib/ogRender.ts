@@ -279,11 +279,18 @@ function fitTitle(
     if (lines.length <= maxLines) return { size, lines, lineHeight: Math.round(size * 1.12) };
   }
   ctx.font = `${weight} ${min}px ${family}`;
-  return {
-    size: min,
-    lines: wrap(ctx, text, maxW).slice(0, maxLines),
-    lineHeight: Math.round(min * 1.12),
-  };
+  const all = wrap(ctx, text, maxW);
+  const lines = all.slice(0, maxLines);
+  if (all.length > maxLines) lines[maxLines - 1] = ellipsize(ctx, lines[maxLines - 1], maxW);
+  return { size: min, lines, lineHeight: Math.round(min * 1.12) };
+}
+
+/** Mark a line as truncated: drop whole words (then characters, for one long word) until "…" fits. */
+export function ellipsize(ctx: CanvasRenderingContext2D, line: string, maxW: number): string {
+  let t = line.trimEnd();
+  while (t.includes(" ") && ctx.measureText(`${t}…`).width > maxW) t = t.replace(/\s*\S+$/, "");
+  while (t.length > 1 && ctx.measureText(`${t}…`).width > maxW) t = t.slice(0, -1);
+  return `${t}…`;
 }
 
 /** object-fit: cover inside an arbitrary rect. */

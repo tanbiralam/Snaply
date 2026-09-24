@@ -33,13 +33,13 @@ const MODES: { id: RedactMode; label: string }[] = [
   { id: "solid", label: "Black bar" },
 ];
 
-function applyEffect(
-  ctx: CanvasRenderingContext2D,
-  base: CanvasImageSource,
-  r: Region
-) {
+// Effects sample the work canvas as it stands (earlier redactions included), never the
+// original image — otherwise a blur/pixelate drawn over an earlier black bar re-exposes
+// what the bar hid.
+function applyEffect(ctx: CanvasRenderingContext2D, r: Region) {
   const { x, y, w, h } = r;
   if (w < 1 || h < 1) return;
+  const src = ctx.canvas;
 
   if (r.mode === "solid") {
     ctx.fillStyle = "#000"; // exported content (censor bar), not UI chrome
@@ -48,12 +48,22 @@ function applyEffect(
   }
 
   if (r.mode === "blur") {
+    // Snapshot the region plus the kernel's reach (~3σ) so edges blur from real neighbours.
+    const pad = Math.ceil(r.strength * 3);
+    const sx = Math.max(0, Math.floor(x - pad));
+    const sy = Math.max(0, Math.floor(y - pad));
+    const sw = Math.min(src.width, Math.ceil(x + w + pad)) - sx;
+    const sh = Math.min(src.height, Math.ceil(y + h + pad)) - sy;
+    const snap = document.createElement("canvas");
+    snap.width = sw;
+    snap.height = sh;
+    snap.getContext("2d")?.drawImage(src, sx, sy, sw, sh, 0, 0, sw, sh);
     ctx.save();
     ctx.beginPath();
     ctx.rect(x, y, w, h);
     ctx.clip();
     ctx.filter = `blur(${r.strength}px)`;
-    ctx.drawImage(base, 0, 0);
+    ctx.drawImage(snap, sx, sy);
     ctx.restore(); // also resets ctx.filter
     return;
   }
@@ -67,7 +77,7 @@ function applyEffect(
   off.height = th;
   const octx = off.getContext("2d");
   if (!octx) return;
-  octx.drawImage(base, x, y, w, h, 0, 0, tw, th);
+  octx.drawImage(src, x, y, w, h, 0, 0, tw, th);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(off, 0, 0, tw, th, x, y, w, h);
   ctx.imageSmoothingEnabled = true;
@@ -134,7 +144,7 @@ export default function RedactEditor() {
     if (!ctx) return;
     ctx.clearRect(0, 0, size.w, size.h);
     ctx.drawImage(base, 0, 0, size.w, size.h);
-    for (const r of regions) applyEffect(ctx, base, r);
+    for (const r of regions) applyEffect(ctx, r);
   }, [regions, size, image]);
 
   // Draw region outlines + the in-progress drag rect (display only, never exported).

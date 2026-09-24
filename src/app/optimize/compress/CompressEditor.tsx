@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { site } from "@/lib/site";
 import { zipSync } from "@/lib/zip";
 import { canDecode, decodeImage, isPreviewable, SUPPORTED_INPUT } from "@/lib/decode";
-import { encodeBmp, encodeIco } from "@/lib/encode";
+import { encodeBmp, encodeIco, icoSize } from "@/lib/encode";
 import { parseDim, targetSize } from "@/lib/resize";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -313,6 +313,7 @@ export default function CompressEditor() {
           }
           if (!blob) throw new Error("encode failed");
           if (cancelled || myRun !== runRef.current) return;
+          const out = mime === "image/x-icon" ? icoSize(tw, th) : { w: tw, h: th };
           setItems((prev) =>
             prev.map((p) => {
               if (p.id !== it.id) return p;
@@ -324,8 +325,8 @@ export default function CompressEditor() {
                 outSize: blob.size,
                 outUrl: URL.createObjectURL(blob),
                 outName: renameExt(p.name, mime),
-                width: canvas.width,
-                height: canvas.height,
+                width: out.w,
+                height: out.h,
                 processedKey: key,
               };
             })
@@ -434,13 +435,14 @@ export default function CompressEditor() {
     if (!done.length) return;
     setZipping(true);
     try {
-      const used = new Map<string, number>();
+      // Track every name actually emitted (not just originals), so a generated "a-1.png"
+      // can't collide with a real input that was already called "a-1.png".
+      const taken = new Set<string>();
       const entries = await Promise.all(
         done.map(async (i) => {
           let name = i.outName!;
-          const seen = used.get(name) ?? 0;
-          used.set(name, seen + 1);
-          if (seen > 0) name = name.replace(/(\.[^.]+)$/, `-${seen}$1`);
+          for (let n = 1; taken.has(name); n++) name = i.outName!.replace(/(\.[^.]+)$/, `-${n}$1`);
+          taken.add(name);
           return { name, data: new Uint8Array(await i.outBlob!.arrayBuffer()) };
         })
       );

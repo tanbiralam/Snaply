@@ -50,16 +50,23 @@ export function encodeBmp(width: number, height: number, rgba: Uint8ClampedArray
  * favicon.ico bundling 16/32/48px — are just several directory entries in one
  * file). Each entry caps at 256px per side; oversized canvases are downscaled.
  */
-export async function encodeIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
+/** Dimensions an ICO entry ends up with: unchanged up to 256px, otherwise fit within 256×256. */
+export function icoSize(w: number, h: number): { w: number; h: number } {
   const MAX = 256;
+  if (w <= MAX && h <= MAX) return { w, h };
+  const s = Math.min(MAX / w, MAX / h);
+  return { w: Math.max(1, Math.round(w * s)), h: Math.max(1, Math.round(h * s)) };
+}
+
+export async function encodeIco(canvases: HTMLCanvasElement[]): Promise<Blob> {
   const images = await Promise.all(
     canvases.map(async (canvas) => {
       let src = canvas;
-      if (canvas.width > MAX || canvas.height > MAX) {
-        const s = Math.min(MAX / canvas.width, MAX / canvas.height);
+      const size = icoSize(canvas.width, canvas.height);
+      if (size.w !== canvas.width || size.h !== canvas.height) {
         const c = document.createElement("canvas");
-        c.width = Math.max(1, Math.round(canvas.width * s));
-        c.height = Math.max(1, Math.round(canvas.height * s));
+        c.width = size.w;
+        c.height = size.h;
         const ctx = c.getContext("2d");
         if (!ctx) throw new Error("no 2d context");
         ctx.imageSmoothingQuality = "high";
