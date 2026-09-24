@@ -159,7 +159,8 @@ shadcn/ui on top of Tailwind. Components live in `components/ui/`. Add new compo
 
 ## Layout Patterns
 
-- **Landing (`/`)**: single-column scroll, `1200px` max content width, `80px` vertical rhythm between sections — hero, featured tool grid, pill strip, privacy/free-forever section.
+- **Landing (`/`)**: single-column scroll, `1200px` max content width, `80px` vertical rhythm between sections — hero (with a real-output collage image, not a single-tool screenshot), a categorized tool grid (Create/Edit/Optimize, every live tool, no separate "featured" subset or pill strip), privacy/free-forever section, FAQ, final CTA.
+- **Tool grid card** (`FeaturedToolCard`, landing only — the directory's own `ToolCard` stays icon-only): a `3:2` thumbnail (a real, small, genuine export from the tool — a rendered OG card, a cropped/redacted photo, a favicon set, etc. — never a mockup) via `object-fit: cover`, then icon (jade) → title → one-line description below it. Thumbnails are pre-generated stills checked into `public/landing/thumbs/<slug>.webp`, not rendered live.
 - **Directory (`/tools`)**: sticky search input + category chips (top, `56px` below navbar) above a responsive card grid (`260px` min cards, `16px` gap) that live-filters as the user types.
 - **Tool page**: full-viewport working area — `56px` tool rail on the far left (md+), fixed `300px` control sidebar, fluid center canvas preview.
 - **Tool rail**: `56px` wide, full height, `1px --border-default` right border, `--bg-surface` fill. Top slot (`56px`, aligned with the tool header) is a search button that opens the command palette; then every live tool from the registry as a `40px` icon button, grouped by category with a `1px` divider between groups; an "All tools" link to `/tools` pinned at the bottom. Icons `20px`, `--text-muted`; hover `--bg-hover`; the current tool is jade (`--accent-primary` icon on a `primary/15` tint) with `aria-current="page"`. Tool name appears in a tooltip to the right. Hidden below `md` (phones navigate via the logo and the directory). Replaces the originally planned breadcrumb + related-tools footer: the tool header already names the tool, and the rail shows where it sits among the others.
@@ -177,7 +178,7 @@ Lucide React. Stroke-based icons only, `1.5px` stroke width. Sizes: `16px` inlin
 | Interaction        | Duration | Easing                       |
 | ------------------ | -------- | ---------------------------- |
 | Hover / color      | 120ms    | `ease-out`                   |
-| Theme switch       | 200ms    | `ease-in-out` (colors only)  |
+| Theme switch       | 200ms    | `ease-in-out`, whole-page crossfade via the View Transitions API (`document.startViewTransition`), not a per-element CSS `transition` — see [Architecture Decisions](progress-tracker.md) for why |
 | Modal / palette in | 160ms    | `cubic-bezier(0.16,1,0.3,1)` |
 | Card lift on hover | 120ms    | `ease-out` (translateY -2px) |
 

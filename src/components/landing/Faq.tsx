@@ -18,12 +18,12 @@ const faqs = [
   {
     question: "What formats are supported?",
     answer:
-      "Import common image formats; export PNG, JPEG, or WebP at up to 2x resolution.",
+      "Every tool reads PNG, JPEG, and WebP. Compress & Convert also reads GIF, BMP, ICO, AVIF, and a few less common formats, and exports to PNG, JPEG, WebP, AVIF, BMP, or ICO.",
   },
   {
-    question: "When are the other tools coming?",
+    question: "Can I request a tool?",
     answer:
-      "They're in active development and ship one at a time, free like everything else.",
+      "The whole roadmap is live, but if there's something else you need, reach out — it might be next.",
   },
 ];
 

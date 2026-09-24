@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { getFeaturedTools, getTool, toolPath, tools } from "@/lib/registry/tools";
+import { CATEGORY_LABELS, getToolsByCategory, tools, type ToolCategory } from "@/lib/registry/tools";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ToolCard } from "@/components/ToolCard";
-import { ToolPill } from "@/components/ToolPill";
+import { FeaturedToolCard } from "@/components/FeaturedToolCard";
 import { HeroVisual } from "@/components/landing/HeroVisual";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { StylizerSpotlight } from "@/components/landing/StylizerSpotlight";
 import { PrivacyComparison } from "@/components/landing/PrivacyComparison";
 import { Faq } from "@/components/landing/Faq";
 import { FinalCta } from "@/components/landing/FinalCta";
@@ -18,11 +15,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default function LandingPage() {
-  const featured = getFeaturedTools();
-  const remaining = tools.filter((tool) => !tool.featured);
-  const screenshotTool = getTool("create", "screenshot");
+const CATEGORIES = Object.keys(CATEGORY_LABELS) as ToolCategory[];
 
+export default function LandingPage() {
   return (
     <div
       className="min-h-screen bg-background text-foreground"
@@ -48,29 +43,22 @@ export default function LandingPage() {
           <p className="mt-5 max-w-hero text-base text-muted-foreground">
             {site.tagline}
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a
-              href="#tools"
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <Link
+              href="/tools"
               className="inline-flex h-12 items-center rounded-md bg-primary px-6 font-medium text-primary-foreground transition-colors duration-120 ease-out hover:bg-primary-hover"
             >
-              Browse tools
-            </a>
-            {screenshotTool && (
-              <Link
-                href={toolPath(screenshotTool)}
-                className="inline-flex h-12 items-center rounded-md px-6 font-medium text-foreground transition-colors duration-120 ease-out hover:bg-accent"
-              >
-                Try the {screenshotTool.name}
-              </Link>
-            )}
+              Browse all {tools.length} tools
+            </Link>
+            <span className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+              or press ⌘K to jump to any tool
+            </span>
           </div>
 
           <HeroVisual />
         </section>
 
-        <HowItWorks />
-
-        {/* Featured tools + pill strip */}
+        {/* Every tool, grouped by category */}
         <section
           id="tools"
           className="mx-auto max-w-content scroll-mt-14 px-4 py-20 md:px-6"
@@ -78,28 +66,30 @@ export default function LandingPage() {
           <p className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
             Tools
           </p>
-          <h2 className="mt-4 text-3xl font-bold">Featured tools</h2>
-          <div className="mt-8 grid grid-cols-tools gap-4">
-            {featured.map((tool) => (
-              <ToolCard key={tool.slug} tool={tool} />
+          <h2 className="mt-4 text-3xl font-bold">{tools.length} tools, one toolkit</h2>
+
+          <div className="mt-8 flex flex-col gap-12">
+            {CATEGORIES.map((category) => (
+              <div key={category}>
+                <h3 className="text-lg font-medium text-foreground">
+                  {CATEGORY_LABELS[category]}
+                </h3>
+                <div className="mt-4 grid grid-cols-tools gap-4">
+                  {getToolsByCategory(category).map((tool) => (
+                    <FeaturedToolCard key={tool.slug} tool={tool} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
 
-          {/* Pill strip — everything not featured */}
-          <div className="mt-6 flex flex-wrap items-center gap-2">
-            {remaining.map((tool) => (
-              <ToolPill key={tool.slug} tool={tool} />
-            ))}
-            <Link
-              href="/tools"
-              className="text-sm font-medium text-primary transition-colors duration-120 ease-out hover:text-primary-hover"
-            >
-              View all tools →
-            </Link>
-          </div>
+          <Link
+            href="/tools"
+            className="mt-8 inline-block text-sm font-medium text-primary transition-colors duration-120 ease-out hover:text-primary-hover"
+          >
+            Search the directory →
+          </Link>
         </section>
-
-        <StylizerSpotlight />
 
         <PrivacyComparison />
 

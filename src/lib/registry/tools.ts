@@ -14,8 +14,6 @@ export interface Tool {
   icon: string;
   /** "live" tools have a route; "soon" tools exist only in the registry. */
   status: ToolStatus;
-  /** Featured tools appear as cards on the landing page. */
-  featured?: boolean;
 }
 
 export const CATEGORY_LABELS: Record<ToolCategory, string> = {
@@ -44,7 +42,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Image",
     status: "live",
-    featured: true,
   },
   {
     slug: "og-image",
@@ -65,7 +62,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "LayoutTemplate",
     status: "live",
-    featured: true,
   },
   {
     slug: "code-snippet",
@@ -84,7 +80,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Code",
     status: "live",
-    featured: true,
   },
   {
     slug: "favicon",
@@ -103,7 +98,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Squircle",
     status: "live",
-    featured: true,
   },
   {
     slug: "quote",
@@ -123,7 +117,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Quote",
     status: "live",
-    featured: true,
   },
 
   {
@@ -146,7 +139,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Crop",
     status: "live",
-    featured: true,
   },
   {
     slug: "metadata",
@@ -166,7 +158,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "ScanSearch",
     status: "live",
-    featured: true,
   },
   {
     slug: "redact",
@@ -177,7 +168,6 @@ export const tools: readonly Tool[] = [
     keywords: ["redact", "blur", "pixelate", "censor", "hide", "privacy"],
     icon: "EyeOff",
     status: "live",
-    featured: true,
   },
   {
     slug: "remove-background",
@@ -193,7 +183,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Eraser",
     status: "live",
-    featured: true,
   },
   {
     slug: "watermark",
@@ -213,7 +202,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Stamp",
     status: "live",
-    featured: true,
   },
 
 
@@ -243,7 +231,6 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Minimize2",
     status: "live",
-    featured: true,
   },
 ];
 
@@ -265,10 +252,6 @@ export function getToolsByCategory(category: ToolCategory): Tool[] {
 
 export function getLiveTools(): Tool[] {
   return tools.filter((t) => t.status === "live");
-}
-
-export function getFeaturedTools(): Tool[] {
-  return tools.filter((t) => t.featured);
 }
 
 // Filler words dropped from queries so "png to webp" matches on png + webp.
