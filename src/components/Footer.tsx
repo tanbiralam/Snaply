@@ -69,6 +69,15 @@ export function Footer() {
               className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-muted-foreground/40 underline-offset-2 transition-colors duration-120 ease-out hover:decoration-foreground"
             >
               𝕏
+            </a>{" "}
+            · Open source on{" "}
+            <a
+              href={site.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-muted-foreground/40 underline-offset-2 transition-colors duration-120 ease-out hover:decoration-foreground"
+            >
+              GitHub
             </a>
           </span>
         </div>

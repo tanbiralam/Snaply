@@ -21,9 +21,14 @@ const faqs = [
       "Every tool reads PNG, JPEG, and WebP. Compress & Convert also reads GIF, BMP, ICO, AVIF, and a few less common formats, and exports to PNG, JPEG, WebP, AVIF, BMP, or ICO.",
   },
   {
+    question: "Is Snaply open source?",
+    answer:
+      "Yes — the entire codebase is public on GitHub under the MIT license. Read the code, self-host it, or send a pull request.",
+  },
+  {
     question: "Can I request a tool?",
     answer:
-      "The whole roadmap is live, but if there's something else you need, reach out — it might be next.",
+      "The whole roadmap is live, but if there's something else you need, open an issue on GitHub — it might be next.",
   },
 ];
 

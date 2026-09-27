@@ -14,6 +14,8 @@ export interface Tool {
   icon: string;
   /** "live" tools have a route; "soon" tools exist only in the registry. */
   status: ToolStatus;
+  /** Shown on the homepage's curated grid; every tool still appears on /tools regardless. */
+  featured?: boolean;
 }
 
 export const CATEGORY_LABELS: Record<ToolCategory, string> = {
@@ -42,6 +44,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Image",
     status: "live",
+    featured: true,
   },
   {
     slug: "og-image",
@@ -62,6 +65,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "LayoutTemplate",
     status: "live",
+    featured: true,
   },
   {
     slug: "code-snippet",
@@ -139,6 +143,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Crop",
     status: "live",
+    featured: true,
   },
   {
     slug: "metadata",
@@ -168,6 +173,7 @@ export const tools: readonly Tool[] = [
     keywords: ["redact", "blur", "pixelate", "censor", "hide", "privacy"],
     icon: "EyeOff",
     status: "live",
+    featured: true,
   },
   {
     slug: "remove-background",
@@ -183,6 +189,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Eraser",
     status: "live",
+    featured: true,
   },
   {
     slug: "watermark",
@@ -231,6 +238,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Minimize2",
     status: "live",
+    featured: true,
   },
 ];
 
@@ -252,6 +260,11 @@ export function getToolsByCategory(category: ToolCategory): Tool[] {
 
 export function getLiveTools(): Tool[] {
   return tools.filter((t) => t.status === "live");
+}
+
+/** Curated subset for the homepage grid; every tool still lists on /tools. */
+export function getFeaturedTools(): Tool[] {
+  return tools.filter((t) => t.status === "live" && t.featured);
 }
 
 // Filler words dropped from queries so "png to webp" matches on png + webp.

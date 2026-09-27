@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { Github } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CommandPaletteButton } from "@/components/CommandPalette";
 import { BrandMark } from "@/components/BrandMark";
+import { Button } from "@/components/ui/button";
+import { site } from "@/lib/site";
 
 export function Navbar() {
   return (
@@ -17,6 +20,21 @@ export function Navbar() {
           >
             All tools
           </Link>
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="rounded-lg border hairline hover:bg-secondary transition-colors"
+          >
+            <a
+              href={site.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View source on GitHub"
+            >
+              <Github className="h-4 w-4" />
+            </a>
+          </Button>
           <ThemeToggle />
         </div>
       </div>

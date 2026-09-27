@@ -6,6 +6,7 @@ export const site = {
     "Free forever, no limits, no ads — your images never leave your browser.",
   description: `${name} is a free, privacy-first image toolkit. Create, edit, and optimize images entirely in your browser — no uploads, no accounts, no limits.`,
   url: "https://snaply.tanbir.in",
+  github: "https://github.com/tanbiralam/Snaply",
 
   ogImage: {
     path: "/og-image.webp",
@@ -15,7 +16,7 @@ export const site = {
   logo: {
     light: "/logo-light.webp",
     dark: "/logo-dark.webp",
-    width: 120,
+    width: 84,
     height: 28,
   },
 } as const;

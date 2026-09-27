@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { LayoutGrid } from "lucide-react";
 import { site } from "@/lib/site";
-import { tools } from "@/lib/registry/tools";
+import { getFeaturedTools, getLiveTools } from "@/lib/registry/tools";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FeaturedToolCard } from "@/components/FeaturedToolCard";
@@ -14,6 +15,34 @@ export const metadata: Metadata = {
   description: site.description,
   alternates: { canonical: "/" },
 };
+
+// Local, single-use: same card shape as FeaturedToolCard so it sits flush in
+// the same grid, but with no thumbnail to fetch for a tile that isn't a tool.
+function MoreToolsCard({ count }: { count: number }) {
+  return (
+    <Link
+      href="/tools"
+      className="group flex flex-col overflow-hidden rounded-lg border bg-card transition-[border-color,transform,box-shadow] duration-120 ease-out hover:border-strong hover:shadow-card motion-safe:hover:-translate-y-0.5"
+    >
+      <div className="flex aspect-video w-full items-center justify-center bg-muted">
+        <span className="font-mono text-4xl font-semibold text-muted-foreground">
+          +{count}
+        </span>
+      </div>
+      <div className="flex flex-col gap-2 p-5">
+        <LayoutGrid className="h-5 w-5 text-primary" strokeWidth={1.5} />
+        <div className="flex flex-col gap-1">
+          <h3 className="text-lg font-medium text-card-foreground">
+            More tools
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Browse the full directory, or search with ⌘K.
+          </p>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 export default function LandingPage() {
   return (
@@ -32,7 +61,7 @@ export default function LandingPage() {
         {/* Hero + product visual */}
         <section className="mx-auto max-w-content px-4 py-20 md:px-6">
           <p className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
-            Free · Private · In-browser
+            Free · Private · In-browser · Open source
           </p>
           <h1 className="mt-4 max-w-hero text-3xl font-bold sm:text-5xl">
             Create, edit, and optimize images — without uploading a single
@@ -56,7 +85,7 @@ export default function LandingPage() {
           <HeroVisual />
         </section>
 
-        {/* Every tool, one flat grid */}
+        {/* Curated grid — the rest live on /tools, not duplicated here */}
         <section
           id="tools"
           className="mx-auto max-w-content scroll-mt-14 px-4 py-20 md:px-6"
@@ -64,20 +93,16 @@ export default function LandingPage() {
           <p className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
             Tools
           </p>
-          <h2 className="mt-4 text-3xl font-bold">Every tool, one toolkit</h2>
+          <h2 className="mt-4 text-3xl font-bold">Popular tools</h2>
 
           <div className="mt-8 grid grid-cols-tools gap-4">
-            {tools.map((tool) => (
+            {getFeaturedTools().map((tool) => (
               <FeaturedToolCard key={tool.slug} tool={tool} />
             ))}
+            <MoreToolsCard
+              count={getLiveTools().length - getFeaturedTools().length}
+            />
           </div>
-
-          <Link
-            href="/tools"
-            className="mt-8 inline-block text-sm font-medium text-primary transition-colors duration-120 ease-out hover:text-primary-hover"
-          >
-            Search the directory →
-          </Link>
         </section>
 
         <PrivacyComparison />
