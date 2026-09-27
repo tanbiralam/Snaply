@@ -12,8 +12,7 @@ import { clientToImage, normalizeRect } from "@/lib/resize";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Download, Eraser, ImageIcon, Undo2 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 
 type RedactMode = "pixelate" | "blur" | "solid";
 
@@ -92,7 +91,12 @@ export default function RedactEditor() {
   const [image, setImage] = useState<string | null>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [regions, setRegions] = useState<Region[]>([]);
-  const [draft, setDraft] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [draft, setDraft] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
   const [mode, setMode] = useState<RedactMode>("pixelate");
   const [strength, setStrength] = useState(14);
 
@@ -167,26 +171,35 @@ export default function RedactEditor() {
   }, [draft, regions, size]);
 
   // Map a pointer event to natural image coordinates.
-  const toImageCoords = useCallback((e: React.PointerEvent) => {
-    const canvas = overlayRef.current;
-    if (!canvas || !size) return null;
-    return clientToImage(e, canvas, size.w, size.h);
-  }, [size]);
+  const toImageCoords = useCallback(
+    (e: React.PointerEvent) => {
+      const canvas = overlayRef.current;
+      if (!canvas || !size) return null;
+      return clientToImage(e, canvas, size.w, size.h);
+    },
+    [size]
+  );
 
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    const p = toImageCoords(e);
-    if (!p) return;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    dragStart.current = p;
-    setDraft({ x: p.x, y: p.y, w: 0, h: 0 });
-  }, [toImageCoords]);
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      const p = toImageCoords(e);
+      if (!p) return;
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      dragStart.current = p;
+      setDraft({ x: p.x, y: p.y, w: 0, h: 0 });
+    },
+    [toImageCoords]
+  );
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragStart.current) return;
-    const p = toImageCoords(e);
-    if (!p) return;
-    setDraft(normalizeRect(dragStart.current, p));
-  }, [toImageCoords]);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragStart.current) return;
+      const p = toImageCoords(e);
+      if (!p) return;
+      setDraft(normalizeRect(dragStart.current, p));
+    },
+    [toImageCoords]
+  );
 
   const onPointerUp = useCallback(() => {
     const d = draft;
@@ -217,17 +230,7 @@ export default function RedactEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-lg"
-            priority
-          />
-          <span className="font-semibold tracking-tight text-[15px]">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">Redact &amp; Blur</span>
         <ThemeToggle />
       </header>
@@ -255,7 +258,11 @@ export default function RedactEditor() {
             </div>
           ) : (
             <div className="w-full max-w-lg">
-              <ImageUpload onImageUpload={handleImageUpload} hasImage={false} label="photo" />
+              <ImageUpload
+                onImageUpload={handleImageUpload}
+                hasImage={false}
+                label="photo"
+              />
             </div>
           )}
         </main>
@@ -292,7 +299,9 @@ export default function RedactEditor() {
                     <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                       {mode === "blur" ? "Blur radius" : "Pixel size"}
                     </span>
-                    <span className="text-xs tabular-nums text-muted-foreground">{strength}px</span>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      {strength}px
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -306,7 +315,8 @@ export default function RedactEditor() {
               )}
 
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Drag on the image to cover sensitive areas. New regions use the style above.
+                Drag on the image to cover sensitive areas. New regions use the
+                style above.
               </p>
 
               <div className="mt-auto flex flex-col gap-2">

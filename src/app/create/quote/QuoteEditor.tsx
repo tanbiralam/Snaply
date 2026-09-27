@@ -2,14 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { FONT_CHOICES, FONT_PRELOAD, OG_GRADIENTS, OG_MESH } from "@/lib/ogRender";
-import { QUOTE_SIZES, defaultQuote, drawQuote, type QuoteSettings, type QuoteSize } from "@/lib/quoteRender";
+import {
+  FONT_CHOICES,
+  FONT_PRELOAD,
+  OG_GRADIENTS,
+  OG_MESH,
+} from "@/lib/ogRender";
+import {
+  QUOTE_SIZES,
+  defaultQuote,
+  drawQuote,
+  type QuoteSettings,
+  type QuoteSize,
+} from "@/lib/quoteRender";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Copy, Download, RotateCcw, Upload, X } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 
 const chip = (active: boolean) =>
   cn(
@@ -25,8 +35,10 @@ const swatch = (active: boolean) =>
     active ? "ring-2 ring-primary" : "ring-1 ring-border hover:ring-strong"
   );
 
-const kicker = "mb-2 block font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground";
-const field = "w-full rounded-md border border-input bg-background px-3 text-sm";
+const kicker =
+  "mb-2 block font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground";
+const field =
+  "w-full rounded-md border border-input bg-background px-3 text-sm";
 
 export default function QuoteEditor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,7 +46,8 @@ export default function QuoteEditor() {
   const [avatar, setAvatar] = useState<HTMLImageElement | null>(null);
   const [fontsReady, setFontsReady] = useState(0);
 
-  const set = <K extends keyof QuoteSettings>(k: K, v: QuoteSettings[K]) => setS((p) => ({ ...p, [k]: v }));
+  const set = <K extends keyof QuoteSettings>(k: K, v: QuoteSettings[K]) =>
+    setS((p) => ({ ...p, [k]: v }));
   const { w: W, h: H } = QUOTE_SIZES[s.size];
 
   useEffect(() => {
@@ -55,13 +68,16 @@ export default function QuoteEditor() {
 
   const onAvatarFile = (file: File | undefined) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return toast.error("Avatar must be an image");
+    if (!file.type.startsWith("image/"))
+      return toast.error("Avatar must be an image");
     const reader = new FileReader();
     reader.onload = (ev) => {
       if (typeof ev.target?.result !== "string") return;
       const img = new window.Image();
       img.onload = () =>
-        img.naturalWidth && img.naturalHeight ? setAvatar(img) : toast.error("That image has no size — try a PNG or JPG");
+        img.naturalWidth && img.naturalHeight
+          ? setAvatar(img)
+          : toast.error("That image has no size — try a PNG or JPG");
       img.onerror = () => toast.error("Couldn't load that image");
       img.src = ev.target.result;
     };
@@ -72,7 +88,10 @@ export default function QuoteEditor() {
     new Promise<Blob>((resolve, reject) => {
       const canvas = canvasRef.current;
       if (!canvas) return reject(new Error("no canvas"));
-      canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("export failed"))), "image/png");
+      canvas.toBlob(
+        (b) => (b ? resolve(b) : reject(new Error("export failed"))),
+        "image/png"
+      );
     });
 
   const download = async () => {
@@ -90,7 +109,9 @@ export default function QuoteEditor() {
 
   const copy = async () => {
     try {
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": toBlob() })]);
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": toBlob() }),
+      ]);
       toast.success("Copied to clipboard");
     } catch {
       toast.error("Your browser blocked copying images — use Download instead");
@@ -100,17 +121,7 @@ export default function QuoteEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-lg"
-            priority
-          />
-          <span className="text-[15px] font-semibold tracking-tight">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">Quote Card</span>
         <ThemeToggle />
       </header>
@@ -132,7 +143,13 @@ export default function QuoteEditor() {
               <span className={kicker}>Template</span>
               <div className="grid grid-cols-2 gap-1.5">
                 {(["post", "quote"] as const).map((t) => (
-                  <button key={t} type="button" aria-pressed={s.template === t} onClick={() => set("template", t)} className={chip(s.template === t)}>
+                  <button
+                    key={t}
+                    type="button"
+                    aria-pressed={s.template === t}
+                    onClick={() => set("template", t)}
+                    className={chip(s.template === t)}
+                  >
                     {t === "post" ? "Social post" : "Big quote"}
                   </button>
                 ))}
@@ -148,7 +165,10 @@ export default function QuoteEditor() {
                     type="button"
                     aria-pressed={s.size === k}
                     onClick={() => set("size", k)}
-                    className={cn(chip(s.size === k), "flex flex-col items-center gap-0.5 px-1")}
+                    className={cn(
+                      chip(s.size === k),
+                      "flex flex-col items-center gap-0.5 px-1"
+                    )}
                   >
                     {QUOTE_SIZES[k].label}
                     <span className="font-mono text-2xs opacity-70">
@@ -173,11 +193,23 @@ export default function QuoteEditor() {
             <div className="grid grid-cols-2 gap-2">
               <label className="block">
                 <span className={kicker}>Name</span>
-                <input type="text" maxLength={60} value={s.name} onChange={(e) => set("name", e.target.value)} className={cn(field, "h-10")} />
+                <input
+                  type="text"
+                  maxLength={60}
+                  value={s.name}
+                  onChange={(e) => set("name", e.target.value)}
+                  className={cn(field, "h-10")}
+                />
               </label>
               <label className="block">
                 <span className={kicker}>Handle</span>
-                <input type="text" maxLength={40} value={s.handle} onChange={(e) => set("handle", e.target.value)} className={cn(field, "h-10")} />
+                <input
+                  type="text"
+                  maxLength={40}
+                  value={s.handle}
+                  onChange={(e) => set("handle", e.target.value)}
+                  className={cn(field, "h-10")}
+                />
               </label>
             </div>
 
@@ -220,7 +252,13 @@ export default function QuoteEditor() {
                 <span className={kicker}>Font</span>
                 <div className="grid grid-cols-4 gap-1.5">
                   {FONT_CHOICES.map((f) => (
-                    <button key={f.id} type="button" aria-pressed={s.font === f.id} onClick={() => set("font", f.id)} className={cn(chip(s.font === f.id), "px-1")}>
+                    <button
+                      key={f.id}
+                      type="button"
+                      aria-pressed={s.font === f.id}
+                      onClick={() => set("font", f.id)}
+                      className={cn(chip(s.font === f.id), "px-1")}
+                    >
                       {f.label}
                     </button>
                   ))}
@@ -229,10 +267,18 @@ export default function QuoteEditor() {
             )}
 
             <div>
-              <span className={kicker}>{s.template === "post" ? "Card" : "Text"}</span>
+              <span className={kicker}>
+                {s.template === "post" ? "Card" : "Text"}
+              </span>
               <div className="grid grid-cols-2 gap-1.5">
                 {(["light", "dark"] as const).map((t) => (
-                  <button key={t} type="button" aria-pressed={s.tone === t} onClick={() => set("tone", t)} className={chip(s.tone === t)}>
+                  <button
+                    key={t}
+                    type="button"
+                    aria-pressed={s.tone === t}
+                    onClick={() => set("tone", t)}
+                    className={chip(s.tone === t)}
+                  >
                     {t === "light" ? "Light" : "Dark"}
                   </button>
                 ))}
@@ -243,7 +289,13 @@ export default function QuoteEditor() {
               <span className={kicker}>Background</span>
               <div className="mb-2 grid grid-cols-3 gap-1.5">
                 {(["gradient", "mesh", "solid"] as const).map((b) => (
-                  <button key={b} type="button" aria-pressed={s.bgType === b} onClick={() => set("bgType", b)} className={chip(s.bgType === b)}>
+                  <button
+                    key={b}
+                    type="button"
+                    aria-pressed={s.bgType === b}
+                    onClick={() => set("bgType", b)}
+                    className={chip(s.bgType === b)}
+                  >
                     {b[0].toUpperCase() + b.slice(1)}
                   </button>
                 ))}
@@ -256,10 +308,23 @@ export default function QuoteEditor() {
                       type="button"
                       title={g.name}
                       aria-label={`${g.name} gradient`}
-                      aria-pressed={s.gradientStart === g.start && s.gradientEnd === g.end}
-                      onClick={() => setS((p) => ({ ...p, gradientStart: g.start, gradientEnd: g.end, gradientAngle: g.angle }))}
-                      className={swatch(s.gradientStart === g.start && s.gradientEnd === g.end)}
-                      style={{ background: `linear-gradient(135deg, ${g.start}, ${g.end})` }}
+                      aria-pressed={
+                        s.gradientStart === g.start && s.gradientEnd === g.end
+                      }
+                      onClick={() =>
+                        setS((p) => ({
+                          ...p,
+                          gradientStart: g.start,
+                          gradientEnd: g.end,
+                          gradientAngle: g.angle,
+                        }))
+                      }
+                      className={swatch(
+                        s.gradientStart === g.start && s.gradientEnd === g.end
+                      )}
+                      style={{
+                        background: `linear-gradient(135deg, ${g.start}, ${g.end})`,
+                      }}
                     />
                   ))}
                 </div>
@@ -284,7 +349,9 @@ export default function QuoteEditor() {
               )}
               {s.bgType === "solid" && (
                 <label className="flex items-center justify-between gap-2">
-                  <span className="font-mono text-2xs uppercase text-muted-foreground">{s.solidColor}</span>
+                  <span className="font-mono text-2xs uppercase text-muted-foreground">
+                    {s.solidColor}
+                  </span>
                   <input
                     type="color"
                     aria-label="Background color"

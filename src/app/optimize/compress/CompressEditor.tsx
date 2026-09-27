@@ -6,7 +6,12 @@ import { Switch } from "@/components/ui/switch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { site } from "@/lib/site";
 import { zipSync } from "@/lib/zip";
-import { canDecode, decodeImage, isPreviewable, SUPPORTED_INPUT } from "@/lib/decode";
+import {
+  canDecode,
+  decodeImage,
+  isPreviewable,
+  SUPPORTED_INPUT,
+} from "@/lib/decode";
 import { encodeBmp, encodeIco, icoSize } from "@/lib/encode";
 import { parseDim, targetSize } from "@/lib/resize";
 import { cn } from "@/lib/utils";
@@ -31,8 +36,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 
 // ─── Formats ────────────────────────────────────────────────────────────────
 
@@ -76,14 +80,63 @@ interface FormatCard {
 
 // Order = how they read left→right. AVIF last (it's the optional one).
 const FORMAT_CARDS: FormatCard[] = [
-  { fmt: "original", mime: null, label: "Original", ext: "keep", tag: "Same format", icon: Files },
-  { fmt: "image/webp", mime: "image/webp", label: "WebP", ext: ".webp", tag: "Best balance", icon: Sparkles },
-  { fmt: "image/jpeg", mime: "image/jpeg", label: "JPEG", ext: ".jpg", tag: "For photos", icon: ImageIcon },
-  { fmt: "image/png", mime: "image/png", label: "PNG", ext: ".png", tag: "Lossless · alpha", icon: Layers },
-  { fmt: "image/avif", mime: "image/avif", label: "AVIF", ext: ".avif", tag: "Smallest size", icon: Zap },
+  {
+    fmt: "original",
+    mime: null,
+    label: "Original",
+    ext: "keep",
+    tag: "Same format",
+    icon: Files,
+  },
+  {
+    fmt: "image/webp",
+    mime: "image/webp",
+    label: "WebP",
+    ext: ".webp",
+    tag: "Best balance",
+    icon: Sparkles,
+  },
+  {
+    fmt: "image/jpeg",
+    mime: "image/jpeg",
+    label: "JPEG",
+    ext: ".jpg",
+    tag: "For photos",
+    icon: ImageIcon,
+  },
+  {
+    fmt: "image/png",
+    mime: "image/png",
+    label: "PNG",
+    ext: ".png",
+    tag: "Lossless · alpha",
+    icon: Layers,
+  },
+  {
+    fmt: "image/avif",
+    mime: "image/avif",
+    label: "AVIF",
+    ext: ".avif",
+    tag: "Smallest size",
+    icon: Zap,
+  },
   // BMP/ICO use our own encoders (mime: null = always available, not toBlob-detected).
-  { fmt: "image/bmp", mime: null, label: "BMP", ext: ".bmp", tag: "Uncompressed", icon: Square },
-  { fmt: "image/x-icon", mime: null, label: "ICO", ext: ".ico", tag: "Favicon · ≤256px", icon: AppWindow },
+  {
+    fmt: "image/bmp",
+    mime: null,
+    label: "BMP",
+    ext: ".bmp",
+    tag: "Uncompressed",
+    icon: Square,
+  },
+  {
+    fmt: "image/x-icon",
+    mime: null,
+    label: "ICO",
+    ext: ".ico",
+    tag: "Favicon · ≤256px",
+    icon: AppWindow,
+  },
 ];
 
 function resolveMime(format: TargetFormat, inType: string): string {
@@ -107,7 +160,10 @@ function ConvertGlyph({ from, to }: { from: string; to: string }) {
   const File = ({ label, active }: { label: string; active?: boolean }) => (
     <div className="flex flex-col items-center gap-1">
       <FileIcon
-        className={cn("h-6 w-6", active ? "text-primary" : "text-muted-foreground")}
+        className={cn(
+          "h-6 w-6",
+          active ? "text-primary" : "text-muted-foreground"
+        )}
         strokeWidth={1.5}
       />
       <span
@@ -221,7 +277,9 @@ export default function CompressEditor() {
 
   const updateOpts = useCallback(
     (id: string, patch: Partial<Item>) => {
-      setItems((prev) => prev.map((p) => (p.id === id ? { ...p, ...patch } : p)));
+      setItems((prev) =>
+        prev.map((p) => (p.id === id ? { ...p, ...patch } : p))
+      );
       bumpDebounced();
     },
     [bumpDebounced]
@@ -249,7 +307,9 @@ export default function CompressEditor() {
             c.toBlob((b) => res([m, !!b && b.type === m]), m)
           )
       )
-    ).then((rs) => setSupported(new Set(rs.filter(([, ok]) => ok).map(([m]) => m))));
+    ).then((rs) =>
+      setSupported(new Set(rs.filter(([, ok]) => ok).map(([m]) => m)))
+    );
   }, []);
 
   // ── Reprocess when format / quality change (quality debounced) ─────────────
@@ -263,7 +323,8 @@ export default function CompressEditor() {
     const myRun = ++runRef.current;
     let cancelled = false;
     const canvas =
-      canvasRef.current ?? (canvasRef.current = document.createElement("canvas"));
+      canvasRef.current ??
+      (canvasRef.current = document.createElement("canvas"));
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -274,7 +335,9 @@ export default function CompressEditor() {
       const q = qualityRef.current / 100;
       // ponytail: sequential — bounds memory on big batches (one decoded bitmap
       // live at a time). Add a small concurrency pool if throughput ever matters.
-      const todo = itemsRef.current.filter((it) => it.processedKey !== keyOf(it));
+      const todo = itemsRef.current.filter(
+        (it) => it.processedKey !== keyOf(it)
+      );
       for (const it of todo) {
         if (cancelled || myRun !== runRef.current) return;
         const key = keyOf(it);
@@ -282,10 +345,17 @@ export default function CompressEditor() {
           prev.map((p) => (p.id === it.id ? { ...p, status: "processing" } : p))
         );
         try {
-          const mime = resolveMime(it.fmtOverride ?? formatRef.current, it.inType);
+          const mime = resolveMime(
+            it.fmtOverride ?? formatRef.current,
+            it.inType
+          );
           const src = await decodeImage(it.file);
           const { w: tw, h: th } = targetSize(
-            src.width, src.height, it.resizeW, it.resizeH, it.keepAspect
+            src.width,
+            src.height,
+            it.resizeW,
+            it.resizeH,
+            it.keepAspect
           );
           canvas.width = tw;
           canvas.height = th;
@@ -301,9 +371,12 @@ export default function CompressEditor() {
           if (src instanceof ImageBitmap) src.close();
           let blob: Blob | null;
           if (mime === "image/bmp") {
-            blob = new Blob([encodeBmp(tw, th, ctx.getImageData(0, 0, tw, th).data)], {
-              type: "image/bmp",
-            });
+            blob = new Blob(
+              [encodeBmp(tw, th, ctx.getImageData(0, 0, tw, th).data)],
+              {
+                type: "image/bmp",
+              }
+            );
           } else if (mime === "image/x-icon") {
             blob = await encodeIco([canvas]);
           } else {
@@ -313,7 +386,8 @@ export default function CompressEditor() {
           }
           if (!blob) throw new Error("encode failed");
           if (cancelled || myRun !== runRef.current) return;
-          const out = mime === "image/x-icon" ? icoSize(tw, th) : { w: tw, h: th };
+          const out =
+            mime === "image/x-icon" ? icoSize(tw, th) : { w: tw, h: th };
           setItems((prev) =>
             prev.map((p) => {
               if (p.id !== it.id) return p;
@@ -362,7 +436,8 @@ export default function CompressEditor() {
       const imgs = Array.from(files).filter(canDecode);
       if (!imgs.length) {
         toast.error("No supported images found", {
-          description: "Drop PNG, JPG, WebP, AVIF, GIF, BMP, ICO, PPM, TGA or ICNS",
+          description:
+            "Drop PNG, JPG, WebP, AVIF, GIF, BMP, ICO, PPM, TGA or ICNS",
         });
         return;
       }
@@ -422,7 +497,9 @@ export default function CompressEditor() {
         .filter((f): f is File => !!f);
       if (files.length) {
         addFiles(files);
-        toast.success(`Added ${files.length} image${files.length > 1 ? "s" : ""}`);
+        toast.success(
+          `Added ${files.length} image${files.length > 1 ? "s" : ""}`
+        );
       }
     };
     document.addEventListener("paste", onPaste);
@@ -431,7 +508,9 @@ export default function CompressEditor() {
 
   // ── Downloads ──────────────────────────────────────────────────────────────
   const downloadAll = useCallback(async () => {
-    const done = items.filter((i) => i.status === "done" && i.outBlob && i.outName);
+    const done = items.filter(
+      (i) => i.status === "done" && i.outBlob && i.outName
+    );
     if (!done.length) return;
     setZipping(true);
     try {
@@ -441,7 +520,8 @@ export default function CompressEditor() {
       const entries = await Promise.all(
         done.map(async (i) => {
           let name = i.outName!;
-          for (let n = 1; taken.has(name); n++) name = i.outName!.replace(/(\.[^.]+)$/, `-${n}$1`);
+          for (let n = 1; taken.has(name); n++)
+            name = i.outName!.replace(/(\.[^.]+)$/, `-${n}$1`);
           taken.add(name);
           return { name, data: new Uint8Array(await i.outBlob!.arrayBuffer()) };
         })
@@ -459,16 +539,24 @@ export default function CompressEditor() {
     const done = items.filter((i) => i.status === "done" && i.outSize != null);
     const totalIn = done.reduce((n, i) => n + i.inSize, 0);
     const totalOut = done.reduce((n, i) => n + (i.outSize ?? 0), 0);
-    const savedPct = totalIn > 0 ? Math.round((1 - totalOut / totalIn) * 100) : 0;
+    const savedPct =
+      totalIn > 0 ? Math.round((1 - totalOut / totalIn) * 100) : 0;
     return { count: done.length, totalIn, totalOut, savedPct };
   }, [items]);
 
-  const cards = FORMAT_CARDS.filter((c) => c.mime === null || supported.has(c.mime));
-  const globalLabel = FORMAT_CARDS.find((c) => c.fmt === format)?.label ?? "WebP";
+  const cards = FORMAT_CARDS.filter(
+    (c) => c.mime === null || supported.has(c.mime)
+  );
+  const globalLabel =
+    FORMAT_CARDS.find((c) => c.fmt === format)?.label ?? "WebP";
   // Quality only applies to lossy encoders; "original" is a mix, so keep it shown.
-  const showQuality = !["image/png", "image/bmp", "image/x-icon"].includes(format);
+  const showQuality = !["image/png", "image/bmp", "image/x-icon"].includes(
+    format
+  );
   const doneCount = items.filter((i) => i.status === "done").length;
-  const busyCount = items.filter((i) => i.status === "processing" || i.status === "pending").length;
+  const busyCount = items.filter(
+    (i) => i.status === "processing" || i.status === "pending"
+  ).length;
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (
@@ -481,11 +569,10 @@ export default function CompressEditor() {
       </div>
 
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Image src="/logo.png" alt={`${site.name} logo`} width={28} height={28} className="h-7 w-7 rounded-lg" priority />
-          <span className="text-[15px] font-semibold tracking-tight">{site.name}</span>
-        </Link>
-        <span className="text-sm text-muted-foreground">Compress &amp; Convert</span>
+        <BrandMark />
+        <span className="text-sm text-muted-foreground">
+          Compress &amp; Convert
+        </span>
         <ThemeToggle />
       </header>
 
@@ -535,10 +622,16 @@ export default function CompressEditor() {
             </div>
             <div>
               <p className="text-lg font-semibold tracking-tight">
-                {isDragging ? "Drop to add them" : "Drop images here — as many as you like"}
+                {isDragging
+                  ? "Drop to add them"
+                  : "Drop images here — as many as you like"}
               </p>
               <p className="mt-1.5 text-sm text-muted-foreground">
-                or click to browse · or press <kbd className="rounded bg-secondary px-1.5 py-0.5 font-mono text-2xs">Ctrl+V</kbd> to paste
+                or click to browse · or press{" "}
+                <kbd className="rounded bg-secondary px-1.5 py-0.5 font-mono text-2xs">
+                  Ctrl+V
+                </kbd>{" "}
+                to paste
               </p>
             </div>
             {/* Supported conversions, shown as quiet chips. */}
@@ -556,8 +649,8 @@ export default function CompressEditor() {
                 ))}
             </div>
             <p className="max-w-sm text-center text-2xs leading-relaxed text-muted-foreground/70">
-              Accepts {SUPPORTED_INPUT.map((e) => e.toUpperCase()).join(", ")}. Everything runs in
-              your browser — nothing is uploaded.
+              Accepts {SUPPORTED_INPUT.map((e) => e.toUpperCase()).join(", ")}.
+              Everything runs in your browser — nothing is uploaded.
             </p>
           </label>
         </main>
@@ -600,10 +693,15 @@ export default function CompressEditor() {
                           <span className="flex items-center gap-1.5 text-sm font-semibold leading-none">
                             {c.label}
                             {active && (
-                              <Check className="h-3 w-3 animate-scale-in text-primary" strokeWidth={3} />
+                              <Check
+                                className="h-3 w-3 animate-scale-in text-primary"
+                                strokeWidth={3}
+                              />
                             )}
                           </span>
-                          <span className="text-2xs leading-none text-muted-foreground">{c.tag}</span>
+                          <span className="text-2xs leading-none text-muted-foreground">
+                            {c.tag}
+                          </span>
                         </span>
                       </button>
                     );
@@ -626,7 +724,9 @@ export default function CompressEditor() {
                       onValueChange={([v]) => setQuality(v)}
                       className="w-40"
                     />
-                    <span className="w-10 text-sm font-semibold tabular-nums">{quality}%</span>
+                    <span className="w-10 text-sm font-semibold tabular-nums">
+                      {quality}%
+                    </span>
                   </div>
                 </div>
               )}
@@ -636,7 +736,8 @@ export default function CompressEditor() {
                 {stats.count > 0 && (
                   <div className="mr-2 hidden text-right sm:block">
                     <div className="text-sm font-medium">
-                      {formatBytes(stats.totalIn)} → {formatBytes(stats.totalOut)}
+                      {formatBytes(stats.totalIn)} →{" "}
+                      {formatBytes(stats.totalOut)}
                     </div>
                     <div
                       className={cn(
@@ -646,14 +747,21 @@ export default function CompressEditor() {
                           : "text-amber-600 dark:text-amber-400"
                       )}
                     >
-                      {stats.savedPct >= 0 ? "saved" : "grew"} {Math.abs(stats.savedPct)}% across {stats.count}
+                      {stats.savedPct >= 0 ? "saved" : "grew"}{" "}
+                      {Math.abs(stats.savedPct)}% across {stats.count}
                     </div>
                   </div>
                 )}
                 <label className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border hairline px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
                   <Plus className="h-3.5 w-3.5" />
                   Add
-                  <input type="file" accept={ACCEPT} multiple className="hidden" onChange={(e) => e.target.files && addFiles(e.target.files)} />
+                  <input
+                    type="file"
+                    accept={ACCEPT}
+                    multiple
+                    className="hidden"
+                    onChange={(e) => e.target.files && addFiles(e.target.files)}
+                  />
                 </label>
                 <button
                   type="button"
@@ -669,7 +777,11 @@ export default function CompressEditor() {
                   disabled={doneCount === 0 || zipping}
                   className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-4 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
                 >
-                  {zipping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  {zipping ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
                   Download all{doneCount > 0 ? ` (${doneCount})` : ""}
                 </button>
               </div>
@@ -684,10 +796,17 @@ export default function CompressEditor() {
                   it.outSize != null && it.inSize > 0
                     ? Math.round((1 - it.outSize / it.inSize) * 100)
                     : null;
-                const busy = it.status === "processing" || it.status === "pending";
+                const busy =
+                  it.status === "processing" || it.status === "pending";
                 const open = openOpts.has(it.id);
-                const overridden = it.fmtOverride != null || it.resizeW != null || it.resizeH != null;
-                const destMime = resolveMime(it.fmtOverride ?? format, it.inType);
+                const overridden =
+                  it.fmtOverride != null ||
+                  it.resizeW != null ||
+                  it.resizeH != null;
+                const destMime = resolveMime(
+                  it.fmtOverride ?? format,
+                  it.inType
+                );
                 return (
                   <div
                     key={it.id}
@@ -709,17 +828,25 @@ export default function CompressEditor() {
                           alt={it.name}
                           className={cn(
                             "max-h-full max-w-full object-contain transition-all duration-300",
-                            busy ? "scale-[0.97] blur-[1px]" : "scale-100 blur-0"
+                            busy
+                              ? "scale-[0.97] blur-[1px]"
+                              : "scale-100 blur-0"
                           )}
                         />
                       ) : (
                         // Non-native format with no encoded preview yet.
-                        <FileIcon className="h-10 w-10 text-muted-foreground/40" strokeWidth={1.25} />
+                        <FileIcon
+                          className="h-10 w-10 text-muted-foreground/40"
+                          strokeWidth={1.25}
+                        />
                       )}
                       {/* "File converting to another file" while encoding. */}
                       {busy && (
                         <div className="absolute inset-0 flex items-center justify-center bg-background/45 backdrop-blur-[2px]">
-                          <ConvertGlyph from={shortLabel(it.inType)} to={shortLabel(destMime)} />
+                          <ConvertGlyph
+                            from={shortLabel(it.inType)}
+                            to={shortLabel(destMime)}
+                          />
                         </div>
                       )}
                       {/* Done badge pops in. */}
@@ -731,13 +858,24 @@ export default function CompressEditor() {
                     </div>
 
                     <div className="flex flex-1 flex-col gap-1 p-3">
-                      <p className="truncate text-sm font-medium" title={it.outName ?? it.name}>
+                      <p
+                        className="truncate text-sm font-medium"
+                        title={it.outName ?? it.name}
+                      >
                         {it.outName ?? it.name}
                       </p>
                       <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
                         <span>
                           {formatBytes(it.inSize)}
-                          {it.outSize != null && <> → <span className="text-foreground">{formatBytes(it.outSize)}</span></>}
+                          {it.outSize != null && (
+                            <>
+                              {" "}
+                              →{" "}
+                              <span className="text-foreground">
+                                {formatBytes(it.outSize)}
+                              </span>
+                            </>
+                          )}
                         </span>
                         {delta != null && (
                           <span
@@ -752,7 +890,11 @@ export default function CompressEditor() {
                             {Math.abs(delta)}%
                           </span>
                         )}
-                        {it.status === "error" && <span className="font-medium text-destructive">failed</span>}
+                        {it.status === "error" && (
+                          <span className="font-medium text-destructive">
+                            failed
+                          </span>
+                        )}
                       </div>
                       {it.status === "done" && it.width > 0 && (
                         <span className="text-2xs tabular-nums text-muted-foreground/70">
@@ -764,7 +906,9 @@ export default function CompressEditor() {
                       {open && (
                         <div className="mt-2 flex animate-scale-in flex-col gap-2.5 rounded-lg border hairline bg-secondary/30 p-2.5 text-xs">
                           <label className="flex items-center justify-between gap-2">
-                            <span className="text-muted-foreground">Format</span>
+                            <span className="text-muted-foreground">
+                              Format
+                            </span>
                             <select
                               value={it.fmtOverride ?? "default"}
                               onChange={(e) =>
@@ -777,7 +921,9 @@ export default function CompressEditor() {
                               }
                               className="h-7 rounded-md border border-input bg-background px-1.5 text-xs"
                             >
-                              <option value="default">Default ({globalLabel})</option>
+                              <option value="default">
+                                Default ({globalLabel})
+                              </option>
                               {cards.map((c) => (
                                 <option key={c.fmt} value={c.fmt}>
                                   {c.label}
@@ -787,14 +933,20 @@ export default function CompressEditor() {
                           </label>
 
                           <div className="flex items-center justify-between gap-2">
-                            <span className="text-muted-foreground">Resize</span>
+                            <span className="text-muted-foreground">
+                              Resize
+                            </span>
                             <div className="flex items-center gap-1">
                               <input
                                 type="number"
                                 min={1}
                                 placeholder="W"
                                 value={it.resizeW ?? ""}
-                                onChange={(e) => updateOpts(it.id, { resizeW: parseDim(e.target.value) })}
+                                onChange={(e) =>
+                                  updateOpts(it.id, {
+                                    resizeW: parseDim(e.target.value),
+                                  })
+                                }
                                 className="h-7 w-12 rounded-md border border-input bg-background px-1 text-center text-xs"
                               />
                               <span className="text-muted-foreground">×</span>
@@ -803,7 +955,11 @@ export default function CompressEditor() {
                                 min={1}
                                 placeholder="H"
                                 value={it.resizeH ?? ""}
-                                onChange={(e) => updateOpts(it.id, { resizeH: parseDim(e.target.value) })}
+                                onChange={(e) =>
+                                  updateOpts(it.id, {
+                                    resizeH: parseDim(e.target.value),
+                                  })
+                                }
                                 className="h-7 w-12 rounded-md border border-input bg-background px-1 text-center text-xs"
                               />
                               <span className="text-muted-foreground">px</span>
@@ -811,10 +967,14 @@ export default function CompressEditor() {
                           </div>
 
                           <label className="flex items-center justify-between gap-2">
-                            <span className="text-muted-foreground">Keep aspect ratio</span>
+                            <span className="text-muted-foreground">
+                              Keep aspect ratio
+                            </span>
                             <Switch
                               checked={it.keepAspect}
-                              onCheckedChange={(v) => updateOpts(it.id, { keepAspect: v })}
+                              onCheckedChange={(v) =>
+                                updateOpts(it.id, { keepAspect: v })
+                              }
                               className="scale-90"
                             />
                           </label>
@@ -843,7 +1003,9 @@ export default function CompressEditor() {
                         {it.status === "done" && it.outUrl && it.outName && (
                           <button
                             type="button"
-                            onClick={() => triggerDownload(it.outUrl!, it.outName!)}
+                            onClick={() =>
+                              triggerDownload(it.outUrl!, it.outName!)
+                            }
                             className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-lg border hairline text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                           >
                             <Download className="h-3 w-3" />

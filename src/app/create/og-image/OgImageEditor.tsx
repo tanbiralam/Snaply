@@ -21,8 +21,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { BrandMark } from "@/components/BrandMark";
 import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -55,72 +54,204 @@ const RECIPES: { label: string; patch: Partial<OgSettings> }[] = [
   {
     // Lemon Squeezy — purple gradient, product showcase right
     label: "SaaS purple",
-    patch: { template: "showcase", font: "display", bgType: "gradient", gradientStart: "#4c1d95", gradientEnd: "#7c3aed", gradientAngle: 140, eyebrow: "", accent: "#fde68a", textColor: "#ffffff", grain: 6 },
+    patch: {
+      template: "showcase",
+      font: "display",
+      bgType: "gradient",
+      gradientStart: "#4c1d95",
+      gradientEnd: "#7c3aed",
+      gradientAngle: 140,
+      eyebrow: "",
+      accent: "#fde68a",
+      textColor: "#ffffff",
+      grain: 6,
+    },
   },
   {
     // Fin — cinematic black, warm horizon spotlight glow, editorial feel
     label: "Cinematic",
-    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 8, eyebrow: "", accent: "#fbbf24", textColor: "#ffffff", grain: 22 },
+    patch: {
+      template: "centered",
+      font: "editorial",
+      bgType: "mesh",
+      meshIndex: 8,
+      eyebrow: "",
+      accent: "#fbbf24",
+      textColor: "#ffffff",
+      grain: 22,
+    },
   },
   {
     // Novu / developer tool — pure black, tight cyan glow, monospace eyebrow
     label: "Dev dark",
-    patch: { template: "spotlight", font: "grotesk", bgType: "mesh", meshIndex: 9, eyebrow: "OPEN SOURCE", accent: "#22d3ee", textColor: "#ffffff", grain: 4 },
+    patch: {
+      template: "spotlight",
+      font: "grotesk",
+      bgType: "mesh",
+      meshIndex: 9,
+      eyebrow: "OPEN SOURCE",
+      accent: "#22d3ee",
+      textColor: "#ffffff",
+      grain: 4,
+    },
   },
   {
     // Clarasight — soft lavender purple mesh, airy SaaS platform feel
     label: "Lavender SaaS",
-    patch: { template: "centered", font: "display", bgType: "mesh", meshIndex: 10, eyebrow: "PLATFORM", accent: "#e9d5ff", textColor: "#ffffff", grain: 10 },
+    patch: {
+      template: "centered",
+      font: "display",
+      bgType: "mesh",
+      meshIndex: 10,
+      eyebrow: "PLATFORM",
+      accent: "#e9d5ff",
+      textColor: "#ffffff",
+      grain: 10,
+    },
   },
   {
     // Runner / editorial cream — off-white, editorial serif, no screenshot
     label: "Editorial cream",
-    patch: { template: "centered", font: "editorial", bgType: "gradient", gradientStart: "#fefce8", gradientEnd: "#fef3c7", gradientAngle: 160, eyebrow: "", accent: "#78350f", textColor: "#1c1917", grain: 18 },
+    patch: {
+      template: "centered",
+      font: "editorial",
+      bgType: "gradient",
+      gradientStart: "#fefce8",
+      gradientEnd: "#fef3c7",
+      gradientAngle: 160,
+      eyebrow: "",
+      accent: "#78350f",
+      textColor: "#1c1917",
+      grain: 18,
+    },
   },
   {
     // Setary / Datum — clean white, dark text, bold sans, brand logo prominent
     label: "Clean white",
-    patch: { template: "spotlight", font: "grotesk", bgType: "gradient", gradientStart: "#ffffff", gradientEnd: "#f1f5f9", gradientAngle: 160, eyebrow: "", accent: "#2563eb", textColor: "#0f172a", grain: 0 },
+    patch: {
+      template: "spotlight",
+      font: "grotesk",
+      bgType: "gradient",
+      gradientStart: "#ffffff",
+      gradientEnd: "#f1f5f9",
+      gradientAngle: 160,
+      eyebrow: "",
+      accent: "#2563eb",
+      textColor: "#0f172a",
+      grain: 0,
+    },
   },
   {
     // Blynch — dark forest green, centered, accent-colored keyword feel
     label: "Forest green",
-    patch: { template: "centered", font: "display", bgType: "solid", solidColor: "#052e16", eyebrow: "", accent: "#4ade80", textColor: "#ffffff", grain: 8 },
+    patch: {
+      template: "centered",
+      font: "display",
+      bgType: "solid",
+      solidColor: "#052e16",
+      eyebrow: "",
+      accent: "#4ade80",
+      textColor: "#ffffff",
+      grain: 8,
+    },
   },
   {
     // HyperComply — dark olive, product on right, security/compliance vibe
     label: "Olive security",
-    patch: { template: "showcase", font: "grotesk", bgType: "solid", solidColor: "#1a2008", eyebrow: "SECURITY", accent: "#a3e635", textColor: "#ffffff", grain: 10 },
+    patch: {
+      template: "showcase",
+      font: "grotesk",
+      bgType: "solid",
+      solidColor: "#1a2008",
+      eyebrow: "SECURITY",
+      accent: "#a3e635",
+      textColor: "#ffffff",
+      grain: 10,
+    },
   },
   {
     // Auth0 — very dark charcoal, spotlight, single highlighted keyword
     label: "Auth dark",
-    patch: { template: "spotlight", font: "sans", bgType: "solid", solidColor: "#0b0b0f", eyebrow: "", accent: "#818cf8", textColor: "#ffffff", grain: 0 },
+    patch: {
+      template: "spotlight",
+      font: "sans",
+      bgType: "solid",
+      solidColor: "#0b0b0f",
+      eyebrow: "",
+      accent: "#818cf8",
+      textColor: "#ffffff",
+      grain: 0,
+    },
   },
   {
     // Optimal Workshop / Andercore — split with photo on right, corporate neutral
     label: "Corporate neutral",
-    patch: { template: "showcase", font: "sans", bgType: "solid", solidColor: "#111827", eyebrow: "ENTERPRISE", accent: "#f59e0b", textColor: "#ffffff", grain: 0 },
+    patch: {
+      template: "showcase",
+      font: "sans",
+      bgType: "solid",
+      solidColor: "#111827",
+      eyebrow: "ENTERPRISE",
+      accent: "#f59e0b",
+      textColor: "#ffffff",
+      grain: 0,
+    },
   },
   {
     // Blog post — editorial, grainy dusk mesh, article vibe
     label: "Blog post",
-    patch: { template: "centered", font: "editorial", bgType: "mesh", meshIndex: 3, eyebrow: "ARTICLE", accent: "#c4b5fd", textColor: "#ffffff", grain: 16 },
+    patch: {
+      template: "centered",
+      font: "editorial",
+      bgType: "mesh",
+      meshIndex: 3,
+      eyebrow: "ARTICLE",
+      accent: "#c4b5fd",
+      textColor: "#ffffff",
+      grain: 16,
+    },
   },
   {
     // Product launch — Aurora mesh, display font, launch announcement
     label: "Product launch",
-    patch: { template: "spotlight", font: "display", bgType: "mesh", meshIndex: 0, eyebrow: "NOW LIVE", accent: "#818cf8", textColor: "#ffffff", grain: 10 },
+    patch: {
+      template: "spotlight",
+      font: "display",
+      bgType: "mesh",
+      meshIndex: 0,
+      eyebrow: "NOW LIVE",
+      accent: "#818cf8",
+      textColor: "#ffffff",
+      grain: 10,
+    },
   },
   {
     // Changelog — solid near-black, green terminal accent, grotesk mono feel
     label: "Changelog",
-    patch: { template: "spotlight", font: "grotesk", bgType: "solid", solidColor: "#0b0f19", eyebrow: "CHANGELOG", accent: "#34d399", textColor: "#ffffff", grain: 6 },
+    patch: {
+      template: "spotlight",
+      font: "grotesk",
+      bgType: "solid",
+      solidColor: "#0b0f19",
+      eyebrow: "CHANGELOG",
+      accent: "#34d399",
+      textColor: "#ffffff",
+      grain: 6,
+    },
   },
   {
     // Minimal — pure slate, clean, no eyebrow, sky accent
     label: "Minimal",
-    patch: { template: "spotlight", font: "sans", bgType: "solid", solidColor: "#0f172a", eyebrow: "", accent: "#38bdf8", textColor: "#ffffff", grain: 0 },
+    patch: {
+      template: "spotlight",
+      font: "sans",
+      bgType: "solid",
+      solidColor: "#0f172a",
+      eyebrow: "",
+      accent: "#38bdf8",
+      textColor: "#ffffff",
+      grain: 0,
+    },
   },
 ];
 
@@ -173,15 +304,23 @@ export default function OgImageEditor() {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shotRectRef = useRef<Rect | null>(null);
-  const dragRef = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
+  const dragRef = useRef<{
+    px: number;
+    py: number;
+    ox: number;
+    oy: number;
+  } | null>(null);
   const [dragging, setDragging] = useState(false);
   const bg = useLoadedImage(bgSrc);
   const logo = useLoadedImage(logoSrc);
   const shot = useLoadedImage(shotSrc);
 
-  const set = useCallback(<K extends keyof OgSettings>(key: K, val: OgSettings[K]) => {
-    setS((prev) => ({ ...prev, [key]: val }));
-  }, []);
+  const set = useCallback(
+    <K extends keyof OgSettings>(key: K, val: OgSettings[K]) => {
+      setS((prev) => ({ ...prev, [key]: val }));
+    },
+    []
+  );
 
   // Preload the self-hosted fonts, then bump a counter to redraw with them.
   useEffect(() => {
@@ -218,7 +357,12 @@ export default function OgImageEditor() {
       const rect = shotRectRef.current;
       if (!rect) return;
       const p = toOg(e.clientX, e.clientY);
-      if (p.x >= rect.x && p.x <= rect.x + rect.w && p.y >= rect.y && p.y <= rect.y + rect.h) {
+      if (
+        p.x >= rect.x &&
+        p.x <= rect.x + rect.w &&
+        p.y >= rect.y &&
+        p.y <= rect.y + rect.h
+      ) {
         dragRef.current = { px: p.x, py: p.y, ox: s.shotX, oy: s.shotY };
         setDragging(true);
         canvasRef.current?.setPointerCapture(e.pointerId);
@@ -232,7 +376,11 @@ export default function OgImageEditor() {
       const d = dragRef.current;
       if (!d) return;
       const p = toOg(e.clientX, e.clientY);
-      setS((prev) => ({ ...prev, shotX: d.ox + (p.x - d.px), shotY: d.oy + (p.y - d.py) }));
+      setS((prev) => ({
+        ...prev,
+        shotX: d.ox + (p.x - d.px),
+        shotY: d.oy + (p.y - d.py),
+      }));
     },
     [toOg]
   );
@@ -275,12 +423,16 @@ export default function OgImageEditor() {
     try {
       const blob = await exportBlob();
       if (!blob) return;
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      await navigator.clipboard.write([
+        new ClipboardItem({ "image/png": blob }),
+      ]);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       toast.success("Copied to clipboard");
     } catch {
-      toast.error("Copy not supported", { description: "Use Download instead" });
+      toast.error("Copy not supported", {
+        description: "Use Download instead",
+      });
     }
   }, [exportBlob]);
 
@@ -308,7 +460,9 @@ export default function OgImageEditor() {
       await navigator.clipboard.writeText(snippet);
       setMetaCopied(true);
       setTimeout(() => setMetaCopied(false), 2000);
-      toast.success("Meta tags copied", { description: "Swap in your hosted image URL" });
+      toast.success("Meta tags copied", {
+        description: "Swap in your hosted image URL",
+      });
     } catch {
       toast.error("Copy failed");
     }
@@ -352,7 +506,9 @@ export default function OgImageEditor() {
   const meta = {
     title: s.title || "Untitled",
     description: s.subtitle,
-    domain: (s.handle || s.brand || "yoursite.com").replace(/^https?:\/\//, "").replace(/\/$/, ""),
+    domain: (s.handle || s.brand || "yoursite.com")
+      .replace(/^https?:\/\//, "")
+      .replace(/\/$/, ""),
     brand: s.brand || site.name,
     accent: s.accent,
   };
@@ -360,10 +516,7 @@ export default function OgImageEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Image src="/logo.png" alt={`${site.name} logo`} width={28} height={28} className="h-7 w-7 rounded-lg" priority />
-          <span className="text-[15px] font-semibold tracking-tight">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">OG Image Maker</span>
         <ThemeToggle />
       </header>
@@ -419,7 +572,11 @@ export default function OgImageEditor() {
               onClick={copy}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg border hairline px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
             >
-              {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-emerald-500" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
               Copy
             </button>
             <button
@@ -428,7 +585,11 @@ export default function OgImageEditor() {
               disabled={exporting}
               className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
             >
-              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {exporting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
               Download PNG
             </button>
           </div>
@@ -573,10 +734,19 @@ export default function OgImageEditor() {
               {shotSrc && s.template !== "centered" && (
                 <div className="flex flex-col gap-3 rounded-lg border hairline bg-secondary/30 p-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium">Adjust screenshot</span>
+                    <span className="text-xs font-medium">
+                      Adjust screenshot
+                    </span>
                     <button
                       type="button"
-                      onClick={() => setS((p) => ({ ...p, shotX: 0, shotY: 0, shotScale: 1 }))}
+                      onClick={() =>
+                        setS((p) => ({
+                          ...p,
+                          shotX: 0,
+                          shotY: 0,
+                          shotScale: 1,
+                        }))
+                      }
                       className="text-2xs text-muted-foreground transition-colors hover:text-foreground"
                     >
                       Reset position
@@ -647,7 +817,9 @@ export default function OgImageEditor() {
                         onClick={() => set("meshIndex", i)}
                         className={cn(
                           "h-10 rounded-lg ring-offset-2 ring-offset-background transition-all",
-                          active ? "ring-2 ring-primary" : "ring-1 ring-border hover:ring-strong"
+                          active
+                            ? "ring-2 ring-primary"
+                            : "ring-1 ring-border hover:ring-strong"
                         )}
                         style={{
                           background: `radial-gradient(circle at 20% 25%, ${m.blobs[0].color}, transparent 60%), radial-gradient(circle at 85% 20%, ${m.blobs[1].color}, transparent 55%), radial-gradient(circle at 60% 90%, ${m.blobs[2].color}, transparent 60%), ${m.base}`,
@@ -662,7 +834,8 @@ export default function OgImageEditor() {
                 <>
                   <div className="grid grid-cols-4 gap-2">
                     {OG_GRADIENTS.map((g) => {
-                      const active = s.gradientStart === g.start && s.gradientEnd === g.end;
+                      const active =
+                        s.gradientStart === g.start && s.gradientEnd === g.end;
                       return (
                         <button
                           key={g.name}
@@ -671,16 +844,28 @@ export default function OgImageEditor() {
                           onClick={() => pickGradient(g)}
                           className={cn(
                             "h-10 rounded-lg ring-offset-2 ring-offset-background transition-all",
-                            active ? "ring-2 ring-primary" : "ring-1 ring-border hover:ring-strong"
+                            active
+                              ? "ring-2 ring-primary"
+                              : "ring-1 ring-border hover:ring-strong"
                           )}
-                          style={{ background: `linear-gradient(135deg, ${g.start}, ${g.end})` }}
+                          style={{
+                            background: `linear-gradient(135deg, ${g.start}, ${g.end})`,
+                          }}
                         />
                       );
                     })}
                   </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <ColorField label="From" value={s.gradientStart} onChange={(v) => set("gradientStart", v)} />
-                    <ColorField label="To" value={s.gradientEnd} onChange={(v) => set("gradientEnd", v)} />
+                    <ColorField
+                      label="From"
+                      value={s.gradientStart}
+                      onChange={(v) => set("gradientStart", v)}
+                    />
+                    <ColorField
+                      label="To"
+                      value={s.gradientEnd}
+                      onChange={(v) => set("gradientEnd", v)}
+                    />
                   </div>
                   <Field label={`Angle · ${s.gradientAngle}°`}>
                     <Slider
@@ -695,7 +880,11 @@ export default function OgImageEditor() {
               )}
 
               {s.bgType === "solid" && (
-                <ColorField label="Colour" value={s.solidColor} onChange={(v) => set("solidColor", v)} />
+                <ColorField
+                  label="Colour"
+                  value={s.solidColor}
+                  onChange={(v) => set("solidColor", v)}
+                />
               )}
 
               {s.bgType === "image" && (
@@ -707,7 +896,9 @@ export default function OgImageEditor() {
                     onPick={(f) => readFile(f, setBgSrc)}
                     onClear={() => setBgSrc(null)}
                   />
-                  <Field label={`Dark overlay · ${Math.round(s.overlay * 100)}%`}>
+                  <Field
+                    label={`Dark overlay · ${Math.round(s.overlay * 100)}%`}
+                  >
                     <Slider
                       value={[Math.round(s.overlay * 100)]}
                       min={0}
@@ -732,7 +923,11 @@ export default function OgImageEditor() {
 
             {/* Colours */}
             <Section title="Colours">
-              <ColorField label="Accent" value={s.accent} onChange={(v) => set("accent", v)} />
+              <ColorField
+                label="Accent"
+                value={s.accent}
+                onChange={(v) => set("accent", v)}
+              />
               <Field label="Text">
                 <div className="flex items-center gap-2">
                   <button
@@ -772,8 +967,12 @@ export default function OgImageEditor() {
             {/* Embed */}
             <Section title="Embed">
               <p className="text-2xs leading-relaxed text-muted-foreground">
-                Download the PNG, host it, then paste these tags in your page&apos;s{" "}
-                <code className="rounded bg-secondary px-1 font-mono">&lt;head&gt;</code>.
+                Download the PNG, host it, then paste these tags in your
+                page&apos;s{" "}
+                <code className="rounded bg-secondary px-1 font-mono">
+                  &lt;head&gt;
+                </code>
+                .
               </p>
               <button
                 type="button"
@@ -831,7 +1030,9 @@ function PreviewMock({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1 text-sm">
               <span className="font-bold">{meta.brand}</span>
-              <span className="text-[#71767b]">@{meta.domain.split(".")[0]} · 1h</span>
+              <span className="text-[#71767b]">
+                @{meta.domain.split(".")[0]} · 1h
+              </span>
             </div>
             <p className="mt-0.5 text-sm">Check this out 👇</p>
             <div className="mt-2 overflow-hidden rounded-2xl border border-[#2f3336]">
@@ -840,7 +1041,9 @@ function PreviewMock({
                 <p className="text-xs text-[#71767b]">{meta.domain}</p>
                 <p className="truncate text-sm text-white">{meta.title}</p>
                 {meta.description && (
-                  <p className="line-clamp-1 text-xs text-[#71767b]">{meta.description}</p>
+                  <p className="line-clamp-1 text-xs text-[#71767b]">
+                    {meta.description}
+                  </p>
                 )}
               </div>
             </div>
@@ -876,11 +1079,19 @@ function PreviewMock({
           {avatar}
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold">
-              {meta.brand} <span className="ml-1 align-middle text-xs font-normal text-[#616061]">1:00 PM</span>
+              {meta.brand}{" "}
+              <span className="ml-1 align-middle text-xs font-normal text-[#616061]">
+                1:00 PM
+              </span>
             </p>
-            <div className="mt-1 border-l-4 pl-3" style={{ borderColor: meta.accent }}>
+            <div
+              className="mt-1 border-l-4 pl-3"
+              style={{ borderColor: meta.accent }}
+            >
               <p className="text-sm font-bold text-[#1264a3]">{meta.title}</p>
-              {meta.description && <p className="text-sm text-[#1d1c1d]">{meta.description}</p>}
+              {meta.description && (
+                <p className="text-sm text-[#1d1c1d]">{meta.description}</p>
+              )}
               <div className="mt-2 max-w-xs overflow-hidden rounded-md border border-black/10">
                 {children}
               </div>
@@ -903,9 +1114,13 @@ function PreviewMock({
               <p className="text-xs text-[#5f6368]">{meta.domain}</p>
             </div>
           </div>
-          <p className="mt-1 text-xl leading-snug text-[#1a0dab]">{meta.title}</p>
+          <p className="mt-1 text-xl leading-snug text-[#1a0dab]">
+            {meta.title}
+          </p>
           {meta.description && (
-            <p className="mt-0.5 line-clamp-2 text-sm text-[#4d5156]">{meta.description}</p>
+            <p className="mt-0.5 line-clamp-2 text-sm text-[#4d5156]">
+              {meta.description}
+            </p>
           )}
         </div>
         <div className="w-32 shrink-0 overflow-hidden rounded-lg border border-black/10">
@@ -921,16 +1136,30 @@ function PreviewMock({
 const inputCls =
   "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-ring";
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h2>
+      <h2 className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </h2>
       {children}
     </section>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -957,7 +1186,9 @@ function ColorField({
           onChange={(e) => onChange(e.target.value)}
           className="h-7 w-9 cursor-pointer rounded bg-transparent"
         />
-        <span className="font-mono text-xs uppercase text-muted-foreground">{value}</span>
+        <span className="font-mono text-xs uppercase text-muted-foreground">
+          {value}
+        </span>
       </div>
     </Field>
   );
@@ -981,10 +1212,16 @@ function ImageSlot({
       <label
         className={cn(
           "flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed py-3 text-xs transition-colors",
-          has ? "border-primary/40 bg-primary/5 text-primary" : "hairline text-muted-foreground hover:border-strong hover:text-foreground"
+          has
+            ? "border-primary/40 bg-primary/5 text-primary"
+            : "hairline text-muted-foreground hover:border-strong hover:text-foreground"
         )}
       >
-        {has ? <ImageLucide className="h-3.5 w-3.5" /> : <Upload className="h-3.5 w-3.5" />}
+        {has ? (
+          <ImageLucide className="h-3.5 w-3.5" />
+        ) : (
+          <Upload className="h-3.5 w-3.5" />
+        )}
         {has ? `${label} ✓` : label}
         <input
           type="file"

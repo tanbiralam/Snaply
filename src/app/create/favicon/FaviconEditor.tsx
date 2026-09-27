@@ -9,9 +9,15 @@ import { encodeIco } from "@/lib/encode";
 import { zipSync, type ZipEntry } from "@/lib/zip";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Check, Copy, Download, ImageIcon, RotateCcw, Type } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import {
+  Check,
+  Copy,
+  Download,
+  ImageIcon,
+  RotateCcw,
+  Type,
+} from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 
 // 48 only ever ships embedded in favicon.ico; everything else also gets a
 // standalone named PNG, matching the file names browsers/OSes look for.
@@ -40,12 +46,19 @@ const SHAPES = [
 ] as const;
 type Shape = (typeof SHAPES)[number]["id"];
 
-const TEXT_FONT_STACK = "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+const TEXT_FONT_STACK =
+  "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
 const DEFAULT_BG = "#4f46e5";
 const DEFAULT_FG = "#ffffff";
 
 /** Renders a letter/word/emoji onto a square backdrop — the "text mode" source image. */
-function drawTextIcon(size: number, text: string, bg: string, fg: string, shape: Shape): HTMLCanvasElement {
+function drawTextIcon(
+  size: number,
+  text: string,
+  bg: string,
+  fg: string,
+  shape: Shape
+): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
   canvas.width = size;
   canvas.height = size;
@@ -84,12 +97,17 @@ function drawTextIcon(size: number, text: string, bg: string, fg: string, shape:
 function useLoadedImage(src: string | null): HTMLImageElement | null {
   const [img, setImg] = useState<HTMLImageElement | null>(null);
   useEffect(() => {
-    if (!src) { setImg(null); return; }
+    if (!src) {
+      setImg(null);
+      return;
+    }
     const im = new window.Image();
     im.onload = () => setImg(im);
     im.onerror = () => setImg(null);
     im.src = src;
-    return () => { im.onload = null; };
+    return () => {
+      im.onload = null;
+    };
   }, [src]);
   return img;
 }
@@ -98,10 +116,20 @@ const inputCls =
   "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none transition-colors focus:ring-2 focus:ring-ring";
 
 function SectionLabel({ children }: { children: string }) {
-  return <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{children}</p>;
+  return (
+    <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+      {children}
+    </p>
+  );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="flex flex-col gap-1.5">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -110,7 +138,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <Field label={label}>
       <div className="flex items-center gap-2 rounded-lg border border-input bg-background px-2 py-1.5">
@@ -120,7 +156,9 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
           onChange={(e) => onChange(e.target.value)}
           className="h-7 w-9 cursor-pointer rounded bg-transparent"
         />
-        <span className="font-mono text-xs uppercase text-muted-foreground">{value}</span>
+        <span className="font-mono text-xs uppercase text-muted-foreground">
+          {value}
+        </span>
       </div>
     </Field>
   );
@@ -143,7 +181,9 @@ export default function FaviconEditor() {
   // uploaded file uses, so nothing downstream needs to know which mode it came from.
   useEffect(() => {
     if (mode !== "text") return;
-    setTextSrcUrl(drawTextIcon(512, text, bgColor, fgColor, shape).toDataURL("image/png"));
+    setTextSrcUrl(
+      drawTextIcon(512, text, bgColor, fgColor, shape).toDataURL("image/png")
+    );
   }, [mode, text, bgColor, fgColor, shape]);
 
   const effectiveSrc = mode === "text" ? textSrcUrl : srcUrl;
@@ -202,25 +242,45 @@ export default function FaviconEditor() {
     for (const [sizeStr, fileName] of Object.entries(PNG_EXPORTS)) {
       const canvas = canvasRefs.current.get(Number(sizeStr));
       const blob = canvas && (await toBlob(canvas));
-      if (blob) entries.push({ name: fileName, data: new Uint8Array(await blob.arrayBuffer()) });
+      if (blob)
+        entries.push({
+          name: fileName,
+          data: new Uint8Array(await blob.arrayBuffer()),
+        });
     }
 
-    const icoCanvases = ICO_SIZES.map((s) => canvasRefs.current.get(s)).filter((c): c is HTMLCanvasElement => !!c);
+    const icoCanvases = ICO_SIZES.map((s) => canvasRefs.current.get(s)).filter(
+      (c): c is HTMLCanvasElement => !!c
+    );
     const icoBlob = await encodeIco(icoCanvases);
-    entries.push({ name: "favicon.ico", data: new Uint8Array(await icoBlob.arrayBuffer()) });
+    entries.push({
+      name: "favicon.ico",
+      data: new Uint8Array(await icoBlob.arrayBuffer()),
+    });
 
     const manifest = {
       name,
       short_name: name.slice(0, 12),
       icons: [
-        { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
-        { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+        {
+          src: "/android-chrome-192x192.png",
+          sizes: "192x192",
+          type: "image/png",
+        },
+        {
+          src: "/android-chrome-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+        },
       ],
       theme_color: themeColor,
       background_color: themeColor,
       display: "standalone",
     };
-    entries.push({ name: "site.webmanifest", data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)) });
+    entries.push({
+      name: "site.webmanifest",
+      data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
+    });
 
     const zipBlob = zipSync(entries);
     const url = URL.createObjectURL(zipBlob);
@@ -229,16 +289,15 @@ export default function FaviconEditor() {
     a.download = `${site.name.toLowerCase()}-favicon-package.zip`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Favicon package downloaded", { description: `${entries.length} files` });
+    toast.success("Favicon package downloaded", {
+      description: `${entries.length} files`,
+    });
   }, [img, name, themeColor]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/logo.png" alt={`${site.name} logo`} width={28} height={28} className="h-7 w-7 rounded-lg" priority />
-          <span className="font-semibold tracking-tight text-[15px]">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">Favicon Generator</span>
         <ThemeToggle />
       </header>
@@ -250,7 +309,9 @@ export default function FaviconEditor() {
             onClick={() => setMode("image")}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-150",
-              mode === "image" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              mode === "image"
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             <ImageIcon className="h-3.5 w-3.5" />
@@ -261,7 +322,9 @@ export default function FaviconEditor() {
             onClick={() => setMode("text")}
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-150",
-              mode === "text" ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              mode === "text"
+                ? "bg-foreground text-background"
+                : "text-muted-foreground hover:text-foreground"
             )}
           >
             <Type className="h-3.5 w-3.5" />
@@ -271,9 +334,14 @@ export default function FaviconEditor() {
 
         {mode === "image" && !srcUrl ? (
           <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center gap-4">
-            <ImageUpload onImageUpload={setSrcUrl} hasImage={false} label="logo" />
+            <ImageUpload
+              onImageUpload={setSrcUrl}
+              hasImage={false}
+              label="logo"
+            />
             <p className="text-center text-xs text-muted-foreground">
-              A square logo or app icon works best — non-square images are center-cropped. Processed entirely in your browser.
+              A square logo or app icon works best — non-square images are
+              center-cropped. Processed entirely in your browser.
             </p>
           </div>
         ) : (
@@ -281,7 +349,8 @@ export default function FaviconEditor() {
             <div className="flex flex-col items-center gap-4 md:w-1/2">
               {mode === "image" && !isSquare && (
                 <p className="rounded-lg border hairline bg-card px-3 py-2 text-center text-xs text-muted-foreground">
-                  Your image isn&apos;t square — it&apos;s center-cropped to fit each icon.
+                  Your image isn&apos;t square — it&apos;s center-cropped to fit
+                  each icon.
                 </p>
               )}
 
@@ -289,7 +358,10 @@ export default function FaviconEditor() {
                 {SIZES.map((size) => {
                   const display = Math.min(size, 96);
                   return (
-                    <div key={size} className="flex flex-col items-center gap-1.5">
+                    <div
+                      key={size}
+                      className="flex flex-col items-center gap-1.5"
+                    >
                       <div
                         className="overflow-hidden rounded-md ring-1 ring-border"
                         style={{ width: display, height: display, ...CHECKER }}
@@ -304,7 +376,9 @@ export default function FaviconEditor() {
                           style={{ width: display, height: display }}
                         />
                       </div>
-                      <span className="text-2xs font-mono text-muted-foreground">{size}px</span>
+                      <span className="text-2xs font-mono text-muted-foreground">
+                        {size}px
+                      </span>
                     </div>
                   );
                 })}
@@ -316,7 +390,11 @@ export default function FaviconEditor() {
                   onClick={reset}
                   className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg border hairline text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
                 >
-                  {mode === "image" ? <ImageIcon className="h-3.5 w-3.5" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  {mode === "image" ? (
+                    <ImageIcon className="h-3.5 w-3.5" />
+                  ) : (
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  )}
                   {mode === "image" ? "Replace" : "Reset"}
                 </button>
                 <button
@@ -345,8 +423,16 @@ export default function FaviconEditor() {
                     />
                   </Field>
                   <div className="grid grid-cols-2 gap-3">
-                    <ColorField label="Background" value={bgColor} onChange={setBgColor} />
-                    <ColorField label="Text color" value={fgColor} onChange={setFgColor} />
+                    <ColorField
+                      label="Background"
+                      value={bgColor}
+                      onChange={setBgColor}
+                    />
+                    <ColorField
+                      label="Text color"
+                      value={fgColor}
+                      onChange={setFgColor}
+                    />
                   </div>
                   <Field label="Shape">
                     <div className="flex gap-1 rounded-lg border hairline p-0.5">
@@ -381,9 +467,21 @@ export default function FaviconEditor() {
                     className={inputCls}
                   />
                 </Field>
-                <ColorField label="Theme color" value={themeColor} onChange={setThemeColor} />
+                <ColorField
+                  label="Theme color"
+                  value={themeColor}
+                  onChange={setThemeColor}
+                />
                 <p className="text-2xs text-muted-foreground">
-                  Used in <code className="rounded bg-secondary px-1 font-mono">site.webmanifest</code> and the <code className="rounded bg-secondary px-1 font-mono">theme-color</code> meta tag.
+                  Used in{" "}
+                  <code className="rounded bg-secondary px-1 font-mono">
+                    site.webmanifest
+                  </code>{" "}
+                  and the{" "}
+                  <code className="rounded bg-secondary px-1 font-mono">
+                    theme-color
+                  </code>{" "}
+                  meta tag.
                 </p>
               </div>
 
@@ -397,7 +495,11 @@ export default function FaviconEditor() {
                   onClick={copyEmbed}
                   className="inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border hairline text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
-                  {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copied ? (
+                    <Check className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <Copy className="h-3.5 w-3.5" />
+                  )}
                   Copy embed code
                 </button>
               </div>

@@ -7,20 +7,35 @@ import { Switch } from "@/components/ui/switch";
 import { FONT_CHOICES, FONT_PRELOAD } from "@/lib/ogRender";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
-import { WM_LIMITS, defaultWm, drawWatermark, parseWm, type WmSettings } from "@/lib/watermark";
+import {
+  WM_LIMITS,
+  defaultWm,
+  drawWatermark,
+  parseWm,
+  type WmSettings,
+} from "@/lib/watermark";
 import { toast } from "sonner";
 import { Download, ImageIcon, RotateCcw, Upload } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 
 const STORAGE_KEY = "watermark";
 
-const EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+const EXT: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
 
 const POSITIONS = [
-  "Top left", "Top center", "Top right",
-  "Middle left", "Center", "Middle right",
-  "Bottom left", "Bottom center", "Bottom right",
+  "Top left",
+  "Top center",
+  "Top right",
+  "Middle left",
+  "Center",
+  "Middle right",
+  "Bottom left",
+  "Bottom center",
+  "Bottom right",
 ];
 
 const chip = (active: boolean) =>
@@ -31,7 +46,8 @@ const chip = (active: boolean) =>
       : "hairline text-muted-foreground hover:bg-secondary hover:text-foreground"
   );
 
-const kicker = "mb-2 font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground";
+const kicker =
+  "mb-2 font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground";
 
 function loadSettings(): WmSettings {
   if (typeof window === "undefined") return defaultWm;
@@ -45,7 +61,8 @@ function loadSettings(): WmSettings {
 
 function readDataUrl(file: File, cb: (url: string) => void) {
   const reader = new FileReader();
-  reader.onload = (ev) => typeof ev.target?.result === "string" && cb(ev.target.result);
+  reader.onload = (ev) =>
+    typeof ev.target?.result === "string" && cb(ev.target.result);
   reader.readAsDataURL(file);
 }
 
@@ -65,7 +82,9 @@ function SliderRow({
   return (
     <label className="block">
       <span className="mb-2 flex items-center justify-between">
-        <span className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
+        <span className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+          {label}
+        </span>
         <span className="font-mono text-2xs tabular-nums text-muted-foreground">
           {value}
           {unit}
@@ -96,7 +115,8 @@ export default function WatermarkEditor() {
   const [s, setS] = useState<WmSettings>(loadSettings);
   const [fontsReady, setFontsReady] = useState(0);
 
-  const set = <K extends keyof WmSettings>(k: K, v: WmSettings[K]) => setS((p) => ({ ...p, [k]: v }));
+  const set = <K extends keyof WmSettings>(k: K, v: WmSettings[K]) =>
+    setS((p) => ({ ...p, [k]: v }));
 
   useEffect(() => {
     try {
@@ -143,12 +163,14 @@ export default function WatermarkEditor() {
 
   const onLogoFile = (file: File | undefined) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return toast.error("Logo must be an image");
+    if (!file.type.startsWith("image/"))
+      return toast.error("Logo must be an image");
     readDataUrl(file, (url) => {
       const img = new window.Image();
       img.onload = () => {
         // SVGs without width/height report 0×0 and can't be scaled proportionally.
-        if (!img.naturalWidth || !img.naturalHeight) return toast.error("That logo has no size — try a PNG");
+        if (!img.naturalWidth || !img.naturalHeight)
+          return toast.error("That logo has no size — try a PNG");
         setLogo(img);
         set("kind", "logo");
       };
@@ -192,17 +214,7 @@ export default function WatermarkEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-lg"
-            priority
-          />
-          <span className="text-[15px] font-semibold tracking-tight">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">Watermark</span>
         <ThemeToggle />
       </header>
@@ -218,7 +230,11 @@ export default function WatermarkEditor() {
             />
           ) : (
             <div className="w-full max-w-lg">
-              <ImageUpload onImageUpload={handleImageUpload} hasImage={false} label="image" />
+              <ImageUpload
+                onImageUpload={handleImageUpload}
+                hasImage={false}
+                label="image"
+              />
             </div>
           )}
         </main>
@@ -276,7 +292,9 @@ export default function WatermarkEditor() {
                       Color
                     </span>
                     <span className="flex items-center gap-2">
-                      <span className="font-mono text-2xs uppercase text-muted-foreground">{s.color}</span>
+                      <span className="font-mono text-2xs uppercase text-muted-foreground">
+                        {s.color}
+                      </span>
                       <input
                         type="color"
                         value={s.color}
@@ -306,13 +324,33 @@ export default function WatermarkEditor() {
                   ) : (
                     <Upload className="h-4 w-4 shrink-0" />
                   )}
-                  {logo ? "Change logo" : "Upload a logo (PNG with transparency works best)"}
+                  {logo
+                    ? "Change logo"
+                    : "Upload a logo (PNG with transparency works best)"}
                 </label>
               )}
 
-              <SliderRow label="Size" unit="%" value={s.size} limits={WM_LIMITS.size} onChange={(v) => set("size", v)} />
-              <SliderRow label="Opacity" unit="%" value={s.opacity} limits={WM_LIMITS.opacity} onChange={(v) => set("opacity", v)} />
-              <SliderRow label="Rotation" unit="°" value={s.rotation} limits={WM_LIMITS.rotation} onChange={(v) => set("rotation", v)} />
+              <SliderRow
+                label="Size"
+                unit="%"
+                value={s.size}
+                limits={WM_LIMITS.size}
+                onChange={(v) => set("size", v)}
+              />
+              <SliderRow
+                label="Opacity"
+                unit="%"
+                value={s.opacity}
+                limits={WM_LIMITS.opacity}
+                onChange={(v) => set("opacity", v)}
+              />
+              <SliderRow
+                label="Rotation"
+                unit="°"
+                value={s.rotation}
+                limits={WM_LIMITS.rotation}
+                onChange={(v) => set("rotation", v)}
+              />
               <SliderRow
                 label={s.tile ? "Spacing" : "Margin"}
                 unit="%"
@@ -323,7 +361,10 @@ export default function WatermarkEditor() {
 
               <label className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
                 Tile across image
-                <Switch checked={s.tile} onCheckedChange={(v) => set("tile", v)} />
+                <Switch
+                  checked={s.tile}
+                  onCheckedChange={(v) => set("tile", v)}
+                />
               </label>
 
               {!s.tile && (
@@ -339,7 +380,9 @@ export default function WatermarkEditor() {
                         onClick={() => set("position", i)}
                         className={cn(
                           "h-7 rounded-sm border transition-colors duration-120",
-                          s.position === i ? "border-primary bg-primary" : "hairline hover:bg-secondary"
+                          s.position === i
+                            ? "border-primary bg-primary"
+                            : "hairline hover:bg-secondary"
                         )}
                       />
                     ))}

@@ -10,6 +10,7 @@
 | UI          | Tailwind + shadcn/ui              | Styling and component primitives                          |
 | Rendering   | HTML Canvas 2D API                | Shared image pipeline (draw, frame, export) for all tools |
 | ML          | @imgly/background-removal         | In-browser background removal model (lazy-loaded)         |
+| SVG         | SVGO _(planned, not yet added)_    | Bundled for client-side SVG minification, lazy-loaded on first use within `/optimize/svg-optimizer` — same lazy-load rule as the ML model (invariant 4) |
 | Persistence | Browser localStorage              | Per-tool settings persisted across sessions               |
 | Hosting     | Static hosting / CDN              | App ships as static assets (no server runtime required)   |
 
@@ -36,5 +37,5 @@
 1. No image data is ever sent to a server. All processing happens client-side; any feature that would require an upload is out of scope.
 2. The tool registry is the single source of truth. The homepage, directory, command palette, sitemap, and metadata are all generated from it — tools are never hardcoded in more than one place.
 3. Routes are always two-level and categorized (`/category/tool-name`) in kebab-case, noun-first, no abbreviations; the UI heading matches the slug.
-4. Heavy assets (e.g. the ~40MB background-removal model) are lazy-loaded only on first use within their own route, never bundled globally.
-5. Every tool reuses the shared canvas pipeline; no tool reimplements export, aspect math, or frame drawing.
+4. Heavy assets/dependencies (e.g. the ~40MB background-removal model, the planned SVGO bundle) are lazy-loaded only on first use within their own route, never bundled globally.
+5. Every raster tool reuses the shared canvas pipeline; no tool reimplements export, aspect math, or frame drawing. Text/markup tools that never touch pixels (the planned SVG Optimizer) are exempt from the canvas pipeline specifically, but still follow every other invariant (client-side only, registry-driven, own categorized route).

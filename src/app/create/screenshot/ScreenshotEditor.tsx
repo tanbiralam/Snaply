@@ -12,9 +12,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { ImageIcon, RotateCcw, SlidersHorizontal, X } from "lucide-react";
 import { site } from "@/lib/site";
-import Link from "next/link";
-import Image from "next/image";
-
+import { BrandMark } from "@/components/BrandMark";
 
 export default function ScreenshotEditor() {
   const imageCanvasRef = useRef<CanvasRendererRef>(null);
@@ -24,7 +22,6 @@ export default function ScreenshotEditor() {
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-
 
   const handlePresetSelect = useCallback((preset: Preset) => {
     setActivePreset(preset.id);
@@ -91,19 +88,11 @@ export default function ScreenshotEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-lg"
-            priority
-          />
-          <span className="font-semibold tracking-tight text-[15px]">{site.name}</span>
-        </Link>
+        <BrandMark />
 
-        <span className="text-sm text-muted-foreground">Screenshot Stylizer</span>
+        <span className="text-sm text-muted-foreground">
+          Screenshot Stylizer
+        </span>
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -159,7 +148,10 @@ export default function ScreenshotEditor() {
             </div>
           ) : (
             <div className="w-full max-w-lg">
-              <ImageUpload onImageUpload={handleImageUpload} hasImage={!!image} />
+              <ImageUpload
+                onImageUpload={handleImageUpload}
+                hasImage={!!image}
+              />
             </div>
           )}
         </main>

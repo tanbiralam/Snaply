@@ -19,8 +19,7 @@ import {
 } from "@/lib/resize";
 import { toast } from "sonner";
 import { Download, ImageIcon, RotateCcw } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 
 const ASPECTS: { label: string; value: number | null }[] = [
   { label: "Free", value: null },
@@ -37,7 +36,11 @@ const PRESETS = [
   { label: "X post", w: 1600, h: 900 },
 ];
 
-const EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
+const EXT: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+};
 
 const HANDLES = ["nw", "ne", "sw", "se"] as const;
 
@@ -53,7 +56,8 @@ const chip = (active: boolean) =>
       : "hairline text-muted-foreground hover:bg-secondary hover:text-foreground"
   );
 
-const kicker = "mb-2 font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground";
+const kicker =
+  "mb-2 font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground";
 
 export default function ResizeEditor() {
   const imgRef = useRef<HTMLImageElement | null>(null);
@@ -99,7 +103,8 @@ export default function ResizeEditor() {
       e.preventDefault();
       const reader = new FileReader();
       reader.onload = (ev) => {
-        if (typeof ev.target?.result === "string") handleImageUpload(ev.target.result);
+        if (typeof ev.target?.result === "string")
+          handleImageUpload(ev.target.result);
       };
       reader.readAsDataURL(file);
     };
@@ -204,17 +209,7 @@ export default function ResizeEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-lg"
-            priority
-          />
-          <span className="text-[15px] font-semibold tracking-tight">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">Resize &amp; Crop</span>
         <ThemeToggle />
       </header>
@@ -253,7 +248,9 @@ export default function ResizeEditor() {
                       "absolute h-3 w-3 rounded-sm border border-primary bg-background",
                       h[0] === "n" ? "-top-1.5" : "-bottom-1.5",
                       h[1] === "w" ? "-left-1.5" : "-right-1.5",
-                      h === "nw" || h === "se" ? "cursor-nwse-resize" : "cursor-nesw-resize"
+                      h === "nw" || h === "se"
+                        ? "cursor-nwse-resize"
+                        : "cursor-nesw-resize"
                     )}
                   />
                 ))}
@@ -261,7 +258,11 @@ export default function ResizeEditor() {
             </div>
           ) : (
             <div className="w-full max-w-lg">
-              <ImageUpload onImageUpload={handleImageUpload} hasImage={false} label="image" />
+              <ImageUpload
+                onImageUpload={handleImageUpload}
+                hasImage={false}
+                label="image"
+              />
             </div>
           )}
         </main>
@@ -297,7 +298,10 @@ export default function ResizeEditor() {
                         type="button"
                         aria-pressed={active}
                         onClick={() => pickPreset(p)}
-                        className={cn(chip(active), "flex flex-col items-start gap-0.5 text-left")}
+                        className={cn(
+                          chip(active),
+                          "flex flex-col items-start gap-0.5 text-left"
+                        )}
                       >
                         {p.label}
                         <span className="font-mono text-2xs opacity-70">
@@ -336,7 +340,9 @@ export default function ResizeEditor() {
                   Keep aspect ratio
                   <Switch checked={keep} onCheckedChange={setKeep} />
                 </label>
-                <p className="mt-2 text-xs text-muted-foreground">Leave blank to keep the crop size.</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Leave blank to keep the crop size.
+                </p>
               </div>
 
               <p className="font-mono text-2xs uppercase tracking-wider text-muted-foreground">
@@ -344,7 +350,8 @@ export default function ResizeEditor() {
               </p>
 
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Drag on the image to draw a crop, drag inside it to move, or pull a corner to resize.
+                Drag on the image to draw a crop, drag inside it to move, or
+                pull a corner to resize.
               </p>
 
               <div className="mt-auto flex flex-col gap-2">

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { CATEGORY_LABELS, getToolsByCategory, type ToolCategory } from "@/lib/registry/tools";
+import { tools } from "@/lib/registry/tools";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FeaturedToolCard } from "@/components/FeaturedToolCard";
@@ -14,8 +14,6 @@ export const metadata: Metadata = {
   description: site.description,
   alternates: { canonical: "/" },
 };
-
-const CATEGORIES = Object.keys(CATEGORY_LABELS) as ToolCategory[];
 
 export default function LandingPage() {
   return (
@@ -58,7 +56,7 @@ export default function LandingPage() {
           <HeroVisual />
         </section>
 
-        {/* Every tool, grouped by category */}
+        {/* Every tool, one flat grid */}
         <section
           id="tools"
           className="mx-auto max-w-content scroll-mt-14 px-4 py-20 md:px-6"
@@ -68,18 +66,9 @@ export default function LandingPage() {
           </p>
           <h2 className="mt-4 text-3xl font-bold">Every tool, one toolkit</h2>
 
-          <div className="mt-8 flex flex-col gap-12">
-            {CATEGORIES.map((category) => (
-              <div key={category}>
-                <h3 className="text-lg font-medium text-foreground">
-                  {CATEGORY_LABELS[category]}
-                </h3>
-                <div className="mt-4 grid grid-cols-tools gap-4">
-                  {getToolsByCategory(category).map((tool) => (
-                    <FeaturedToolCard key={tool.slug} tool={tool} />
-                  ))}
-                </div>
-              </div>
+          <div className="mt-8 grid grid-cols-tools gap-4">
+            {tools.map((tool) => (
+              <FeaturedToolCard key={tool.slug} tool={tool} />
             ))}
           </div>
 
