@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { tools } from "@/lib/registry/tools";
 
 export function FinalCta() {
   return (
     <section className="mx-auto max-w-content px-4 py-20 text-center md:px-6">
       <h2 className="text-3xl font-bold">
-        {tools.length} tools. Nothing ever leaves your browser.
+        Every tool. Nothing ever leaves your browser.
       </h2>
       <div className="mt-8">
         <Link

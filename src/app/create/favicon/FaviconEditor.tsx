@@ -271,7 +271,7 @@ export default function FaviconEditor() {
 
         {mode === "image" && !srcUrl ? (
           <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center gap-4">
-            <ImageUpload onImageUpload={setSrcUrl} hasImage={false} />
+            <ImageUpload onImageUpload={setSrcUrl} hasImage={false} label="logo" />
             <p className="text-center text-xs text-muted-foreground">
               A square logo or app icon works best — non-square images are center-cropped. Processed entirely in your browser.
             </p>

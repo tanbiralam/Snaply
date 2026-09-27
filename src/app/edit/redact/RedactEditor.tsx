@@ -255,7 +255,7 @@ export default function RedactEditor() {
             </div>
           ) : (
             <div className="w-full max-w-lg">
-              <ImageUpload onImageUpload={handleImageUpload} hasImage={false} />
+              <ImageUpload onImageUpload={handleImageUpload} hasImage={false} label="photo" />
             </div>
           )}
         </main>

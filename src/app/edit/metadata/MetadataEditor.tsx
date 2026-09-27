@@ -95,7 +95,7 @@ export default function MetadataEditor() {
       <main className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/60 p-4 md:p-6 lg:p-8">
         {!dataUrl ? (
           <div className="mx-auto flex w-full max-w-lg flex-1 flex-col items-center justify-center gap-4">
-            <ImageUpload onImageUpload={handleUpload} hasImage={false} />
+            <ImageUpload onImageUpload={handleUpload} hasImage={false} label="photo" />
             <p className="text-center text-xs text-muted-foreground">
               JPEG and PNG are supported. Processed entirely in your browser — nothing is uploaded.
             </p>

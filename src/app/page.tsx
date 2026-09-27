@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
-import { CATEGORY_LABELS, getToolsByCategory, tools, type ToolCategory } from "@/lib/registry/tools";
+import { CATEGORY_LABELS, getToolsByCategory, type ToolCategory } from "@/lib/registry/tools";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FeaturedToolCard } from "@/components/FeaturedToolCard";
@@ -48,7 +48,7 @@ export default function LandingPage() {
               href="/tools"
               className="inline-flex h-12 items-center rounded-md bg-primary px-6 font-medium text-primary-foreground transition-colors duration-120 ease-out hover:bg-primary-hover"
             >
-              Browse all {tools.length} tools
+              Browse all tools
             </Link>
             <span className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
               or press ⌘K to jump to any tool
@@ -66,7 +66,7 @@ export default function LandingPage() {
           <p className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
             Tools
           </p>
-          <h2 className="mt-4 text-3xl font-bold">{tools.length} tools, one toolkit</h2>
+          <h2 className="mt-4 text-3xl font-bold">Every tool, one toolkit</h2>
 
           <div className="mt-8 flex flex-col gap-12">
             {CATEGORIES.map((category) => (
