@@ -5,9 +5,11 @@ import { cn } from '@/lib/utils';
 interface ImageUploadProps {
   onImageUpload: (imageData: string) => void;
   hasImage: boolean;
+  /** What this tool's input actually is, for the dropzone copy. */
+  label?: string;
 }
 
-export const ImageUpload = ({ onImageUpload, hasImage }: ImageUploadProps) => {
+export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot' }: ImageUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDrop = useCallback(
@@ -56,7 +58,7 @@ export const ImageUpload = ({ onImageUpload, hasImage }: ImageUploadProps) => {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       className={cn(
-        'relative flex flex-col items-center justify-center gap-4 p-8 rounded-xl border border-dashed transition-colors duration-200 cursor-pointer group',
+        'relative flex flex-col items-center justify-center gap-4 p-8 rounded-lg border border-dashed transition-colors duration-200 cursor-pointer group',
         isDragging
           ? 'border-foreground bg-secondary'
           : hasImage
@@ -90,7 +92,7 @@ export const ImageUpload = ({ onImageUpload, hasImage }: ImageUploadProps) => {
       </div>
       <div className="text-center">
         <p className="font-medium text-sm text-foreground">
-          {hasImage ? 'Replace screenshot' : isDragging ? 'Drop to upload' : 'Drop screenshot here'}
+          {hasImage ? `Replace ${label}` : isDragging ? 'Drop to upload' : `Drop ${label} here`}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {hasImage

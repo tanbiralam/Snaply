@@ -10,12 +10,12 @@ export const OG_H = 630;
 // Self-hosted fonts (declared in index.css, preloaded by the editor before draw).
 // Falls back to the system stack if a face hasn't loaded yet.
 const SYSTEM = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-const BODY = `"Inter OG", ${SYSTEM}`;
+export const BODY = `"Inter OG", ${SYSTEM}`;
 const FONT = BODY; // body text (subtitle, brand, eyebrow, handle)
 
 export type FontChoice = "display" | "grotesk" | "editorial" | "sans";
 
-const HEADINGS: Record<FontChoice, { family: string; weight: number }> = {
+export const HEADINGS: Record<FontChoice, { family: string; weight: number }> = {
   display: { family: `"Sora OG", ${BODY}`, weight: 800 },
   grotesk: { family: `"Space Grotesk OG", ${BODY}`, weight: 700 },
   editorial: { family: `"Fraunces OG", Georgia, "Times New Roman", serif`, weight: 600 },
@@ -229,14 +229,14 @@ export const defaultOg: OgSettings = {
 
 // ─── small helpers ──────────────────────────────────────────────────────────
 
-function withAlpha(hex: string, a: number): string {
+export function withAlpha(hex: string, a: number): string {
   let h = hex.replace("#", "");
   if (h.length === 3) h = h.split("").map((c) => c + c).join("");
   const n = parseInt(h, 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
 }
 
-function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
+export function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
   const out: string[] = [];
   for (const para of text.split("\n")) {
     const words = para.split(/\s+/).filter(Boolean);
@@ -279,11 +279,18 @@ function fitTitle(
     if (lines.length <= maxLines) return { size, lines, lineHeight: Math.round(size * 1.12) };
   }
   ctx.font = `${weight} ${min}px ${family}`;
-  return {
-    size: min,
-    lines: wrap(ctx, text, maxW).slice(0, maxLines),
-    lineHeight: Math.round(min * 1.12),
-  };
+  const all = wrap(ctx, text, maxW);
+  const lines = all.slice(0, maxLines);
+  if (all.length > maxLines) lines[maxLines - 1] = ellipsize(ctx, lines[maxLines - 1], maxW);
+  return { size: min, lines, lineHeight: Math.round(min * 1.12) };
+}
+
+/** Mark a line as truncated: drop whole words (then characters, for one long word) until "…" fits. */
+export function ellipsize(ctx: CanvasRenderingContext2D, line: string, maxW: number): string {
+  let t = line.trimEnd();
+  while (t.includes(" ") && ctx.measureText(`${t}…`).width > maxW) t = t.replace(/\s*\S+$/, "");
+  while (t.length > 1 && ctx.measureText(`${t}…`).width > maxW) t = t.slice(0, -1);
+  return `${t}…`;
 }
 
 /** object-fit: cover inside an arbitrary rect. */
@@ -303,7 +310,7 @@ function coverRect(
   ctx.drawImage(img, x + (w - sw) / 2, y + (h - sh) / 2, sw, sh);
 }
 
-function circleImage(
+export function circleImage(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   x: number,
@@ -368,46 +375,57 @@ function drawShot(
 
 // ─── background ───────────────────────────────────────────────────────────────
 
-function drawMesh(ctx: CanvasRenderingContext2D, index: number) {
+function drawMesh(ctx: CanvasRenderingContext2D, index: number, W: number, H: number) {
   const mesh = OG_MESH[index] ?? OG_MESH[0];
   ctx.fillStyle = mesh.base;
-  ctx.fillRect(0, 0, OG_W, OG_H);
-  const maxR = Math.max(OG_W, OG_H);
+  ctx.fillRect(0, 0, W, H);
+  const maxR = Math.max(W, H);
   for (const b of mesh.blobs) {
-    const cx = b.x * OG_W;
-    const cy = b.y * OG_H;
+    const cx = b.x * W;
+    const cy = b.y * H;
     const r = b.r * maxR;
     const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
     g.addColorStop(0, withAlpha(b.color, 0.85));
     g.addColorStop(1, withAlpha(b.color, 0));
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, OG_W, OG_H);
+    ctx.fillRect(0, 0, W, H);
   }
 }
 
-function drawBackground(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages) {
-  ctx.clearRect(0, 0, OG_W, OG_H);
+export type BgSettings = Pick<
+  OgSettings,
+  "bgType" | "gradientStart" | "gradientEnd" | "gradientAngle" | "solidColor" | "meshIndex" | "grain" | "overlay"
+>;
+
+export function drawBackground(
+  ctx: CanvasRenderingContext2D,
+  s: BgSettings,
+  imgs: Pick<OgImages, "bg">,
+  W: number = OG_W,
+  H: number = OG_H
+) {
+  ctx.clearRect(0, 0, W, H);
   if (s.bgType === "image" && imgs.bg) {
-    drawImageCover(ctx, imgs.bg, OG_W, OG_H);
+    drawImageCover(ctx, imgs.bg, W, H);
     if (s.overlay > 0) {
       ctx.fillStyle = `rgba(0,0,0,${s.overlay})`;
-      ctx.fillRect(0, 0, OG_W, OG_H);
+      ctx.fillRect(0, 0, W, H);
     }
   } else if (s.bgType === "mesh") {
-    drawMesh(ctx, s.meshIndex);
+    drawMesh(ctx, s.meshIndex, W, H);
   } else if (s.bgType === "solid") {
     ctx.fillStyle = s.solidColor;
-    ctx.fillRect(0, 0, OG_W, OG_H);
+    ctx.fillRect(0, 0, W, H);
   } else {
-    const [x0, y0, x1, y1] = angleToGradientPoints(s.gradientAngle, OG_W, OG_H);
+    const [x0, y0, x1, y1] = angleToGradientPoints(s.gradientAngle, W, H);
     const g = ctx.createLinearGradient(x0, y0, x1, y1);
     g.addColorStop(0, s.gradientStart);
     g.addColorStop(1, s.gradientEnd);
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, OG_W, OG_H);
+    ctx.fillRect(0, 0, W, H);
   }
   // Film grain over the whole background (content rect collapsed to nothing).
-  if (s.grain > 0) drawGrain(ctx, OG_W, OG_H, s.grain, -10, -10, 0, 0, 0);
+  if (s.grain > 0) drawGrain(ctx, W, H, s.grain, -10, -10, 0, 0, 0);
 }
 
 // ─── templates ──────────────────────────────────────────────────────────────

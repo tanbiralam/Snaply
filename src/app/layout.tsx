@@ -6,7 +6,7 @@ import "../index.css";
 import { site } from "@/lib/site";
 import { Providers } from "./providers";
 
-const ogImage = `${site.url}/snaply-og.png`;
+const ogImageUrl = `${site.url}${site.ogImage.path}`;
 const title = `${site.name} — ${site.tagline}`;
 
 export const metadata: Metadata = {
@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     siteName: site.name,
     images: [
       {
-        url: ogImage,
-        width: 1200,
-        height: 630,
+        url: ogImageUrl,
+        width: site.ogImage.width,
+        height: site.ogImage.height,
         alt: title,
       },
     ],
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description: site.description,
-    images: [ogImage],
+    images: [ogImageUrl],
   },
 };
 
@@ -50,6 +50,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body>

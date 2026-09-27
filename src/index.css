@@ -231,26 +231,12 @@
     @apply border-border;
   }
 
-  /* Theme switch: colors transition at 200ms ease-in-out (motion table).
-     Zero-specificity default — any explicit transition utility wins. */
-  *,
-  ::before,
-  ::after {
-    transition-property: color, background-color, border-color, fill, stroke;
-    transition-duration: 200ms;
-    transition-timing-function: ease-in-out;
-  }
-
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
 
   * {
     scroll-behavior: smooth;
-  }
-
-  button, a, input, select {
-    @apply transition-colors duration-200;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -262,5 +248,27 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+/* Theme switch: a single whole-page crossfade (motion table: 200ms ease-in-out),
+   via the View Transitions API — see ThemeToggle. A per-element `transition` on
+   every color property caused visible jitter: each element's color depends on a
+   CSS custom property that itself doesn't animate, so nested elements resolved
+   at different frames and drifted out of sync (observed settling 150ms-455ms
+   apart for a "200ms" transition). Snapshotting the whole page once and cross-
+   fading it as two flat images has no such per-element drift. Unsupported
+   browsers (no document.startViewTransition) just swap instantly — still no
+   jitter, just no fade. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }

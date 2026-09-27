@@ -8,7 +8,6 @@ export type { DeviceMockup, DeviceMockupOption } from "./devices";
 export { deviceMockupOptions } from "./devices";
 
 export type {
-  EditorMode,
   CodeSettings,
   CodeLanguage,
   CodeTheme,

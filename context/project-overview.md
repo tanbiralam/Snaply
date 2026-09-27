@@ -6,9 +6,10 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 ## Goals
 
-1. Ship a single launchable version containing 10 tools across three categories (Create / Edit / Optimize), each on its own route.
+1. Ship a single launchable version containing 12 tools across three categories (Create / Edit / Optimize), each on its own route. **Shipped** (as 11 routes — Convert lives inside Compress & Convert).
 2. Keep 100% of image processing client-side so the "no uploads, no limits, no ads" promise is structurally true, not just marketing.
 3. Make the app read as one polished product — via categorized routing, a shared tool registry, and a searchable directory — rather than a pile of disconnected utilities.
+4. **Post-launch expansion (planned, not yet built)**: add QR Code Generator, SVG Optimizer, and BlurHash Generator (3 new routes, bringing the total to 14), plus batch support for Watermark — see Features and `progress-tracker.md`'s Next Up.
 
 ## Core User Flow
 
@@ -17,43 +18,49 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 3. A returning user goes directly to `/tools` (the searchable directory) or to a bookmarked tool page.
 4. On `/tools`, they filter the grid by typing (live filter-as-you-type) or tap a category chip (All / Create / Edit / Optimize) to narrow it down.
 5. They open a tool, do their task entirely in-browser, and export/download the result.
-6. From any tool page, breadcrumbs and a "related tools" footer let them move laterally to adjacent tools; Cmd+K opens a command palette to jump anywhere.
+6. From any tool page, a left tool rail (every tool, grouped by category, current one highlighted) lets them move laterally to another tool in one click; Cmd+K opens a command palette to jump anywhere.
 
 ## Features
 
 ### Create
 
 - **Screenshot Stylizer** — backgrounds, padding, shadows, device frames (`/create/screenshot`)
-- **Code Card** — render code snippets as styled images (`/create/code`)
+- **Code Snippet** — render code snippets as styled, syntax-highlighted images (`/create/code-snippet`)
 - **OG Image Generator** — title/subtitle/screenshot to social & blog cards (`/create/og-image`)
+- **Favicon Generator** — logo, letter, or emoji to a full favicon/app-icon package (multi-res .ico, PNGs, manifest, embed code) (`/create/favicon`)
 - **Quote Card** — text + name + handle + avatar to tweet/quote graphics (`/create/quote`)
+- **QR Code Generator** _(planned)_ — text/URL to a downloadable QR code image, with size and color/foreground-background controls (`/create/qr-code`)
 
 ### Edit
 
 - **Resize & Crop** — preset + custom dimensions, freeform crop, aspect locks (`/edit/resize`)
+- **Metadata Viewer** — view embedded EXIF/GPS/device metadata and strip it losslessly (`/edit/metadata`)
 - **Redact & Blur** — draw regions to permanently pixelate/blur sensitive info (`/edit/redact`)
 - **Remove Background** — in-browser ML background removal, lazy-loaded (`/edit/remove-background`)
-- **Watermark** — text or logo overlay with position/opacity controls (`/edit/watermark`)
+- **Watermark** — text or logo overlay with position/opacity controls (`/edit/watermark`). **Batch support planned**: apply the same watermark settings across multiple uploaded images in one pass, download as a zip (reusing `src/lib/zip.ts`) — currently single-image only.
 
 ### Optimize
 
 - **Compress** — quality slider with live file-size preview (`/optimize/compress`)
 - **Convert** — PNG / JPEG / WebP / AVIF format conversion (`/optimize/convert`)
+- **SVG Optimizer** _(planned)_ — minify/clean an uploaded SVG (strip editor metadata, collapse whitespace, simplify paths) via a bundled SVGO build; before/after size comparison (`/optimize/svg-optimizer`)
+- **BlurHash Generator** _(planned)_ — upload an image, get its compact BlurHash placeholder string (for `<img>`/CSS blur-up placeholders) plus a copy-to-clipboard action (`/optimize/blurhash`)
 
 ### Shell & Navigation
 
 - Tool registry as a single source of truth (slug, category, name, description, keywords, icon)
 - Searchable, filterable `/tools` directory with category chips
 - Cmd+K command palette available on every page
-- Breadcrumbs and related-tools cross-linking on each tool page
+- A tool rail on each tool page for one-click switching between tools
 
 ## Scope
 
 ### In Scope
 
-- The 10 tools listed above, each on its own categorized route
+- The 14 tools listed above (11 shipped, 3 planned), each on its own categorized route
 - The marketing landing page, the `/tools` directory, and the command palette
-- A shared canvas rendering pipeline, presets, and export system reused by all tools
+- A shared canvas rendering pipeline, presets, and export system reused by all raster tools (SVG Optimizer works on markup, not pixels, and is exempt — see `architecture.md`)
+- Batch processing for Watermark specifically (multiple images, one settings pass, zip download)
 - localStorage persistence for settings across sessions
 - Redirect from legacy `/editor` to `/create/screenshot`
 
@@ -61,14 +68,14 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 - Any backend, server, login, or user accounts
 - Shareable/hosted links and cloud storage (breaks the no-server promise)
-- Batch processing (deferred to v1.1)
+- Batch processing for any tool other than Watermark (deferred to a later v1.x)
 - Animated GIF / MP4 exports (deferred — large standalone feature)
 - App Store screenshot templates and README header templates
 - Ads, paywalls, or usage limits of any kind
 
 ## Success Criteria
 
-1. A user can open any of the 10 tools from a categorized route and complete its task fully in-browser with no network image upload.
+1. A user can open any of the 14 tools from a categorized route and complete its task fully in-browser with no network image upload.
 2. Typing in the `/tools` search box live-filters cards by name and keyword (e.g. "shrink" surfaces Compress, "png to webp" surfaces Convert).
 3. The homepage shows exactly the featured tools plus a pill strip, and every nav surface (homepage grid, directory, sitemap, metadata) is generated from the single tool registry with no drift.
 4. Cmd+K opens a working command palette on every page that navigates to any tool.

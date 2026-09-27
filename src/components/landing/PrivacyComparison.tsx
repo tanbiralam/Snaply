@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   Download,
+  Github,
   Image as ImageIcon,
   Infinity as InfinityIcon,
   Server,
@@ -25,6 +26,11 @@ const valueProps = [
     icon: UserX,
     title: "No account needed",
     body: "Open a tool and start working. No signup, no login, no email.",
+  },
+  {
+    icon: Github,
+    title: "Open source",
+    body: "Don't just take our word for it — the code is public on GitHub, so the privacy claims are verifiable.",
   },
 ];
 
@@ -87,7 +93,7 @@ export function PrivacyComparison() {
       </div>
 
       {/* Compact value props */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {valueProps.map(({ icon: Icon, title, body }) => (
           <div key={title} className="flex items-start gap-3">
             <Icon

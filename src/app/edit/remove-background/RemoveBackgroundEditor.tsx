@@ -10,8 +10,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { site } from "@/lib/site";
 import { toast } from "sonner";
 import { Download, ImageIcon, Loader2 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 
 type Status = "idle" | "processing" | "done" | "error";
 
@@ -119,17 +118,7 @@ export default function RemoveBackgroundEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-lg"
-            priority
-          />
-          <span className="font-semibold tracking-tight text-[15px]">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">Remove Background</span>
         <ThemeToggle />
       </header>
@@ -137,7 +126,11 @@ export default function RemoveBackgroundEditor() {
       <main className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 overflow-auto bg-muted/60 p-4 md:p-6 lg:p-8">
         {!image ? (
           <div className="w-full max-w-lg">
-            <ImageUpload onImageUpload={handleImageUpload} hasImage={false} />
+            <ImageUpload
+              onImageUpload={handleImageUpload}
+              hasImage={false}
+              label="image"
+            />
           </div>
         ) : (
           <>
@@ -155,7 +148,9 @@ export default function RemoveBackgroundEditor() {
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-background/50 backdrop-blur-sm">
                   <Loader2 className="h-6 w-6 animate-spin text-foreground" />
                   <div className="text-center">
-                    <p className="text-sm font-medium text-foreground">Removing background…</p>
+                    <p className="text-sm font-medium text-foreground">
+                      Removing background…
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {progress > 0
                         ? `${progress}%`

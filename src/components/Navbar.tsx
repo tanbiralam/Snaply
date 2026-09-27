@@ -1,34 +1,40 @@
 import Link from "next/link";
-import Image from "next/image";
-import { site } from "@/lib/site";
+import { Github } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { CommandPaletteButton } from "@/components/CommandPalette";
+import { BrandMark } from "@/components/BrandMark";
+import { Button } from "@/components/ui/button";
+import { site } from "@/lib/site";
 
 export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="mx-auto flex h-14 max-w-content items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-md"
-            priority
-          />
-          <span className="text-base font-semibold tracking-tight">
-            {site.name}
-          </span>
-        </Link>
+        <BrandMark />
 
         <div className="flex items-center gap-3">
-          {/* TODO: point at /tools after unit 4 */}
+          <CommandPaletteButton />
           <Link
-            href="/#tools"
+            href="/tools"
             className="text-sm text-muted-foreground transition-colors duration-120 ease-out hover:text-foreground"
           >
             All tools
           </Link>
+          <Button
+            asChild
+            variant="ghost"
+            size="icon"
+            className="rounded-lg border hairline hover:bg-secondary transition-colors"
+          >
+            <a
+              href={site.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View source on GitHub"
+            >
+              <Github className="h-4 w-4" />
+            </a>
+          </Button>
           <ThemeToggle />
         </div>
       </div>

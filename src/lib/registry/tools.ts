@@ -14,7 +14,7 @@ export interface Tool {
   icon: string;
   /** "live" tools have a route; "soon" tools exist only in the registry. */
   status: ToolStatus;
-  /** Featured tools appear as cards on the landing page. */
+  /** Shown on the homepage's curated grid; every tool still appears on /tools regardless. */
   featured?: boolean;
 }
 
@@ -67,17 +67,103 @@ export const tools: readonly Tool[] = [
     status: "live",
     featured: true,
   },
-  // {
-  //   slug: "quote",
-  //   category: "create",
-  //   name: "Quote Card",
-  //   description:
-  //     "Turn text, a name, a handle, and an avatar into tweet-style quote graphics.",
-  //   keywords: ["quote", "tweet", "testimonial", "avatar", "handle"],
-  //   icon: "Quote",
-  //   status: "soon",
-  // },
+  {
+    slug: "code-snippet",
+    category: "create",
+    name: "Code Snippet",
+    description:
+      "Turn a code snippet into a shareable, syntax-highlighted image with custom backgrounds and window chrome.",
+    keywords: [
+      "code",
+      "snippet",
+      "syntax highlighting",
+      "code screenshot",
+      "code card",
+      "dev",
+      "programming",
+    ],
+    icon: "Code",
+    status: "live",
+  },
+  {
+    slug: "favicon",
+    category: "create",
+    name: "Favicon Generator",
+    description:
+      "Turn a logo into a full favicon & app icon package — every size, a multi-res .ico, manifest, and embed code.",
+    keywords: [
+      "favicon",
+      "app icon",
+      "apple touch icon",
+      "manifest",
+      "ico",
+      "site icon",
+      "android chrome icon",
+    ],
+    icon: "Squircle",
+    status: "live",
+  },
+  {
+    slug: "quote",
+    category: "create",
+    name: "Quote Card",
+    description:
+      "Turn text, a name, a handle, and an avatar into social-post and quote graphics.",
+    keywords: [
+      "quote",
+      "tweet",
+      "post",
+      "testimonial",
+      "avatar",
+      "handle",
+      "instagram",
+      "social",
+    ],
+    icon: "Quote",
+    status: "live",
+  },
 
+  {
+    slug: "resize",
+    category: "edit",
+    name: "Resize & Crop",
+    description:
+      "Crop to any aspect ratio and resize to exact dimensions or social-media presets.",
+    keywords: [
+      "resize",
+      "crop",
+      "dimensions",
+      "aspect ratio",
+      "scale",
+      "trim",
+      "instagram",
+      "thumbnail",
+      "1080x1080",
+      "1200x630",
+    ],
+    icon: "Crop",
+    status: "live",
+    featured: true,
+  },
+  {
+    slug: "metadata",
+    category: "edit",
+    name: "Metadata Viewer",
+    description:
+      "See exactly what's hidden in a photo — GPS location, camera, timestamps — then strip it losslessly.",
+    keywords: [
+      "exif",
+      "metadata",
+      "gps",
+      "location",
+      "privacy",
+      "strip metadata",
+      "remove exif",
+      "geotag",
+    ],
+    icon: "ScanSearch",
+    status: "live",
+  },
   {
     slug: "redact",
     category: "edit",
@@ -104,6 +190,25 @@ export const tools: readonly Tool[] = [
     icon: "Eraser",
     status: "live",
     featured: true,
+  },
+  {
+    slug: "watermark",
+    category: "edit",
+    name: "Watermark",
+    description:
+      "Stamp text or a logo onto an image — pick a corner or tile it across, with size, opacity, and rotation controls.",
+    keywords: [
+      "watermark",
+      "logo",
+      "copyright",
+      "stamp",
+      "overlay",
+      "brand",
+      "protect",
+      "signature",
+    ],
+    icon: "Stamp",
+    status: "live",
   },
 
 
@@ -157,6 +262,39 @@ export function getLiveTools(): Tool[] {
   return tools.filter((t) => t.status === "live");
 }
 
+/** Curated subset for the homepage grid; every tool still lists on /tools. */
 export function getFeaturedTools(): Tool[] {
-  return tools.filter((t) => t.featured);
+  return tools.filter((t) => t.status === "live" && t.featured);
+}
+
+// Filler words dropped from queries so "png to webp" matches on png + webp.
+const STOPWORDS = new Set(["a", "an", "and", "the", "to", "into", "of", "for", "from", "in", "my", "or", "with"]);
+
+/**
+ * Live filter for the directory and command palette. Every query word must appear in
+ * the tool's name, keywords, category, or description; results are ranked by where
+ * the words hit (name > keyword > category/description), registry order breaking ties.
+ */
+export function searchTools(query: string, pool: readonly Tool[] = tools): Tool[] {
+  const words = query
+    .toLowerCase()
+    .split(/[^a-z0-9.]+/)
+    .filter((w) => w && !STOPWORDS.has(w));
+  if (!words.length) return [...pool];
+
+  const scored: { tool: Tool; score: number; i: number }[] = [];
+  pool.forEach((tool, i) => {
+    const name = tool.name.toLowerCase();
+    const keywords = tool.keywords.join(" ").toLowerCase();
+    const rest = `${CATEGORY_LABELS[tool.category]} ${tool.description}`.toLowerCase();
+    let score = 0;
+    for (const w of words) {
+      if (name.includes(w)) score += 3;
+      else if (keywords.includes(w)) score += 2;
+      else if (rest.includes(w)) score += 1;
+      else return;
+    }
+    scored.push({ tool, score, i });
+  });
+  return scored.sort((a, b) => b.score - a.score || a.i - b.i).map((s) => s.tool);
 }

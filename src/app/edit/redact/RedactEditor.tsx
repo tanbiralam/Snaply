@@ -8,11 +8,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { site } from "@/lib/site";
+import { clientToImage, normalizeRect } from "@/lib/resize";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Download, Eraser, ImageIcon, Undo2 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 
 type RedactMode = "pixelate" | "blur" | "solid";
 
@@ -32,13 +32,13 @@ const MODES: { id: RedactMode; label: string }[] = [
   { id: "solid", label: "Black bar" },
 ];
 
-function applyEffect(
-  ctx: CanvasRenderingContext2D,
-  base: CanvasImageSource,
-  r: Region
-) {
+// Effects sample the work canvas as it stands (earlier redactions included), never the
+// original image — otherwise a blur/pixelate drawn over an earlier black bar re-exposes
+// what the bar hid.
+function applyEffect(ctx: CanvasRenderingContext2D, r: Region) {
   const { x, y, w, h } = r;
   if (w < 1 || h < 1) return;
+  const src = ctx.canvas;
 
   if (r.mode === "solid") {
     ctx.fillStyle = "#000"; // exported content (censor bar), not UI chrome
@@ -47,12 +47,22 @@ function applyEffect(
   }
 
   if (r.mode === "blur") {
+    // Snapshot the region plus the kernel's reach (~3σ) so edges blur from real neighbours.
+    const pad = Math.ceil(r.strength * 3);
+    const sx = Math.max(0, Math.floor(x - pad));
+    const sy = Math.max(0, Math.floor(y - pad));
+    const sw = Math.min(src.width, Math.ceil(x + w + pad)) - sx;
+    const sh = Math.min(src.height, Math.ceil(y + h + pad)) - sy;
+    const snap = document.createElement("canvas");
+    snap.width = sw;
+    snap.height = sh;
+    snap.getContext("2d")?.drawImage(src, sx, sy, sw, sh, 0, 0, sw, sh);
     ctx.save();
     ctx.beginPath();
     ctx.rect(x, y, w, h);
     ctx.clip();
     ctx.filter = `blur(${r.strength}px)`;
-    ctx.drawImage(base, 0, 0);
+    ctx.drawImage(snap, sx, sy);
     ctx.restore(); // also resets ctx.filter
     return;
   }
@@ -66,19 +76,10 @@ function applyEffect(
   off.height = th;
   const octx = off.getContext("2d");
   if (!octx) return;
-  octx.drawImage(base, x, y, w, h, 0, 0, tw, th);
+  octx.drawImage(src, x, y, w, h, 0, 0, tw, th);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(off, 0, 0, tw, th, x, y, w, h);
   ctx.imageSmoothingEnabled = true;
-}
-
-function normalizeRect(a: { x: number; y: number }, b: { x: number; y: number }) {
-  return {
-    x: Math.min(a.x, b.x),
-    y: Math.min(a.y, b.y),
-    w: Math.abs(a.x - b.x),
-    h: Math.abs(a.y - b.y),
-  };
 }
 
 export default function RedactEditor() {
@@ -90,7 +91,12 @@ export default function RedactEditor() {
   const [image, setImage] = useState<string | null>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [regions, setRegions] = useState<Region[]>([]);
-  const [draft, setDraft] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [draft, setDraft] = useState<{
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  } | null>(null);
   const [mode, setMode] = useState<RedactMode>("pixelate");
   const [strength, setStrength] = useState(14);
 
@@ -142,7 +148,7 @@ export default function RedactEditor() {
     if (!ctx) return;
     ctx.clearRect(0, 0, size.w, size.h);
     ctx.drawImage(base, 0, 0, size.w, size.h);
-    for (const r of regions) applyEffect(ctx, base, r);
+    for (const r of regions) applyEffect(ctx, r);
   }, [regions, size, image]);
 
   // Draw region outlines + the in-progress drag rect (display only, never exported).
@@ -165,32 +171,35 @@ export default function RedactEditor() {
   }, [draft, regions, size]);
 
   // Map a pointer event to natural image coordinates.
-  const toImageCoords = useCallback((e: React.PointerEvent) => {
-    const canvas = overlayRef.current;
-    if (!canvas || !size) return null;
-    const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * size.w;
-    const y = ((e.clientY - rect.top) / rect.height) * size.h;
-    return {
-      x: Math.max(0, Math.min(size.w, x)),
-      y: Math.max(0, Math.min(size.h, y)),
-    };
-  }, [size]);
+  const toImageCoords = useCallback(
+    (e: React.PointerEvent) => {
+      const canvas = overlayRef.current;
+      if (!canvas || !size) return null;
+      return clientToImage(e, canvas, size.w, size.h);
+    },
+    [size]
+  );
 
-  const onPointerDown = useCallback((e: React.PointerEvent) => {
-    const p = toImageCoords(e);
-    if (!p) return;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    dragStart.current = p;
-    setDraft({ x: p.x, y: p.y, w: 0, h: 0 });
-  }, [toImageCoords]);
+  const onPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      const p = toImageCoords(e);
+      if (!p) return;
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      dragStart.current = p;
+      setDraft({ x: p.x, y: p.y, w: 0, h: 0 });
+    },
+    [toImageCoords]
+  );
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    if (!dragStart.current) return;
-    const p = toImageCoords(e);
-    if (!p) return;
-    setDraft(normalizeRect(dragStart.current, p));
-  }, [toImageCoords]);
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!dragStart.current) return;
+      const p = toImageCoords(e);
+      if (!p) return;
+      setDraft(normalizeRect(dragStart.current, p));
+    },
+    [toImageCoords]
+  );
 
   const onPointerUp = useCallback(() => {
     const d = draft;
@@ -221,17 +230,7 @@ export default function RedactEditor() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
       <header className="flex h-14 shrink-0 items-center justify-between border-b hairline px-5">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image
-            src="/logo.png"
-            alt={`${site.name} logo`}
-            width={28}
-            height={28}
-            className="h-7 w-7 rounded-lg"
-            priority
-          />
-          <span className="font-semibold tracking-tight text-[15px]">{site.name}</span>
-        </Link>
+        <BrandMark />
         <span className="text-sm text-muted-foreground">Redact &amp; Blur</span>
         <ThemeToggle />
       </header>
@@ -259,7 +258,11 @@ export default function RedactEditor() {
             </div>
           ) : (
             <div className="w-full max-w-lg">
-              <ImageUpload onImageUpload={handleImageUpload} hasImage={false} />
+              <ImageUpload
+                onImageUpload={handleImageUpload}
+                hasImage={false}
+                label="photo"
+              />
             </div>
           )}
         </main>
@@ -296,7 +299,9 @@ export default function RedactEditor() {
                     <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                       {mode === "blur" ? "Blur radius" : "Pixel size"}
                     </span>
-                    <span className="text-xs tabular-nums text-muted-foreground">{strength}px</span>
+                    <span className="text-xs tabular-nums text-muted-foreground">
+                      {strength}px
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -310,7 +315,8 @@ export default function RedactEditor() {
               )}
 
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Drag on the image to cover sensitive areas. New regions use the style above.
+                Drag on the image to cover sensitive areas. New regions use the
+                style above.
               </p>
 
               <div className="mt-auto flex flex-col gap-2">

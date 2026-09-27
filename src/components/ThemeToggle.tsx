@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
@@ -13,7 +14,15 @@ export const ThemeToggle = () => {
 
   const toggleTheme = () => {
     if (!mounted) return;
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+    const next = resolvedTheme === "dark" ? "light" : "dark";
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || !document.startViewTransition) {
+      setTheme(next);
+      return;
+    }
+    // flushSync forces the DOM mutation to happen inside this callback, synchronously,
+    // so the browser's "after" snapshot for the crossfade reflects the new theme.
+    document.startViewTransition(() => flushSync(() => setTheme(next)));
   };
 
   return (
