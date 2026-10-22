@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ImageUpload } from "@/components/ImageUpload";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { site } from "@/lib/site";
-import { drawImageCover, roundRect } from "@/lib/canvasHelpers";
+import { roundRect } from "@/lib/canvasHelpers";
 import { encodeIco } from "@/lib/encode";
 import { zipSync, type ZipEntry } from "@/lib/zip";
 import { cn } from "@/lib/utils";
@@ -92,6 +92,36 @@ function drawTextIcon(
   ctx.fillStyle = fg;
   ctx.fillText(label, size / 2, size / 2 + fontSize * 0.04);
   return canvas;
+}
+
+/**
+ * Center-crops `img` to a square and scales it to `size`, halving step by step.
+ * A single big drawImage jump (e.g. 1024→16) aliases badly in Safari/Firefox
+ * even with imageSmoothingQuality "high".
+ */
+function drawSquareDownscaled(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  size: number
+) {
+  let src: CanvasImageSource = img;
+  let s = Math.min(img.naturalWidth, img.naturalHeight);
+  let sx = (img.naturalWidth - s) / 2;
+  let sy = (img.naturalHeight - s) / 2;
+  while (s >= size * 2) {
+    const half = Math.floor(s / 2);
+    const step = document.createElement("canvas");
+    step.width = step.height = half;
+    const sctx = step.getContext("2d");
+    if (!sctx) break;
+    sctx.imageSmoothingQuality = "high";
+    sctx.drawImage(src, sx, sy, s, s, 0, 0, half, half);
+    src = step;
+    sx = sy = 0;
+    s = half;
+  }
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(src, sx, sy, s, s, 0, 0, size, size);
 }
 
 function useLoadedImage(src: string | null): HTMLImageElement | null {
@@ -199,10 +229,14 @@ export default function FaviconEditor() {
       const ctx = canvas?.getContext("2d");
       if (!ctx || !canvas) continue;
       ctx.clearRect(0, 0, size, size);
-      ctx.imageSmoothingQuality = "high";
-      drawImageCover(ctx, img, size, size);
+      // iOS renders transparent apple-touch-icon pixels as black.
+      if (size === 180) {
+        ctx.fillStyle = themeColor;
+        ctx.fillRect(0, 0, size, size);
+      }
+      drawSquareDownscaled(ctx, img, size);
     }
-  }, [img]);
+  }, [img, themeColor]);
 
   const reset = useCallback(() => {
     if (mode === "image") {
@@ -238,60 +272,65 @@ export default function FaviconEditor() {
     const toBlob = (canvas: HTMLCanvasElement) =>
       new Promise<Blob | null>((res) => canvas.toBlob(res, "image/png"));
 
-    const entries: ZipEntry[] = [];
-    for (const [sizeStr, fileName] of Object.entries(PNG_EXPORTS)) {
-      const canvas = canvasRefs.current.get(Number(sizeStr));
-      const blob = canvas && (await toBlob(canvas));
-      if (blob)
-        entries.push({
-          name: fileName,
-          data: new Uint8Array(await blob.arrayBuffer()),
-        });
+    try {
+      const entries: ZipEntry[] = [];
+      for (const [sizeStr, fileName] of Object.entries(PNG_EXPORTS)) {
+        const canvas = canvasRefs.current.get(Number(sizeStr));
+        const blob = canvas && (await toBlob(canvas));
+        if (blob)
+          entries.push({
+            name: fileName,
+            data: new Uint8Array(await blob.arrayBuffer()),
+          });
+      }
+
+      const icoCanvases = ICO_SIZES.map((s) => canvasRefs.current.get(s)).filter(
+        (c): c is HTMLCanvasElement => !!c
+      );
+      const icoBlob = await encodeIco(icoCanvases);
+      entries.push({
+        name: "favicon.ico",
+        data: new Uint8Array(await icoBlob.arrayBuffer()),
+      });
+
+      const manifest = {
+        name,
+        short_name: name.slice(0, 12),
+        icons: [
+          {
+            src: "/android-chrome-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "/android-chrome-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+        ],
+        theme_color: themeColor,
+        background_color: themeColor,
+        display: "standalone",
+      };
+      entries.push({
+        name: "site.webmanifest",
+        data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
+      });
+
+      const zipBlob = zipSync(entries);
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${site.name.toLowerCase()}-favicon-package.zip`;
+      a.click();
+      // Revoking synchronously can cancel the download in Safari.
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+      toast.success("Favicon package downloaded", {
+        description: `${entries.length} files`,
+      });
+    } catch {
+      toast.error("Couldn't build the favicon package");
     }
-
-    const icoCanvases = ICO_SIZES.map((s) => canvasRefs.current.get(s)).filter(
-      (c): c is HTMLCanvasElement => !!c
-    );
-    const icoBlob = await encodeIco(icoCanvases);
-    entries.push({
-      name: "favicon.ico",
-      data: new Uint8Array(await icoBlob.arrayBuffer()),
-    });
-
-    const manifest = {
-      name,
-      short_name: name.slice(0, 12),
-      icons: [
-        {
-          src: "/android-chrome-192x192.png",
-          sizes: "192x192",
-          type: "image/png",
-        },
-        {
-          src: "/android-chrome-512x512.png",
-          sizes: "512x512",
-          type: "image/png",
-        },
-      ],
-      theme_color: themeColor,
-      background_color: themeColor,
-      display: "standalone",
-    };
-    entries.push({
-      name: "site.webmanifest",
-      data: new TextEncoder().encode(JSON.stringify(manifest, null, 2)),
-    });
-
-    const zipBlob = zipSync(entries);
-    const url = URL.createObjectURL(zipBlob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${site.name.toLowerCase()}-favicon-package.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Favicon package downloaded", {
-      description: `${entries.length} files`,
-    });
   }, [img, name, themeColor]);
 
   return (
@@ -481,7 +520,7 @@ export default function FaviconEditor() {
                   <code className="rounded bg-secondary px-1 font-mono">
                     theme-color
                   </code>{" "}
-                  meta tag.
+                  meta tag, and as the Apple touch icon&apos;s background.
                 </p>
               </div>
 

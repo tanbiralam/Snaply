@@ -14,6 +14,13 @@ change.
 
 ## Completed
 
+- **Favicon Generator export fixes** (2026-10-22, branch `fix/favicon-export`, all in `FaviconEditor.tsx`)
+  - `apple-touch-icon.png` (180px) now has the theme color drawn behind it. iOS renders transparent pixels in that slot as black, so a transparent logo used to become a black tile on the home screen. The "App details" hint now mentions this.
+  - Every size is now scaled by repeated halving (`drawSquareDownscaled`) instead of one `drawImageCover` jump. A large source scaled straight to 16px aliased in Safari/Firefox. Center-crop behavior is unchanged.
+  - `download()` is wrapped in try/catch with an error toast. An `encodeIco`/`toBlob` failure used to do nothing silently.
+  - `URL.revokeObjectURL` is now deferred with `setTimeout(…, 0)`, because revoking synchronously after `a.click()` can cancel the download in Safari.
+  - Verified with `eslint` and `tsc --noEmit` only. The export has **not** been checked in a real browser yet.
+
 - **Homepage tool grid curated down from all 11 to 6 + a "More tools" card** (2026-09-27, user-reported: showing every tool on the homepage makes the `/tools` directory pointless)
   - This was a real regression from the Phase 4 homepage rebuild (2026-09-25), which deliberately dropped the old featured/pill-strip split for "show everything, hand off to the directory for browsing" — reasonable when there were fewer tools, but at 11 (soon 14+) it meant the homepage and `/tools` showed literally the same content, so the directory's actual job (search, category filter) had no reason to exist as a *separate* page.
   - Re-added a `featured?: boolean` field to the `Tool` registry type (removed in that same Phase 4 pass for being unused at the time — reintroduced now because there's a real, current reason for it) plus a `getFeaturedTools()` helper, matching the existing `getLiveTools()` pattern. Marked 6 tools `featured: true` — Screenshot Stylizer, OG Image Maker, Resize & Crop, Redact & Blur, Remove Background, Compress & Convert — one deliberate pick per category pair, weighted toward the most differentiated tools (the ML background removal, the privacy-forward redact tool) rather than just registry order.
