@@ -8,7 +8,7 @@
 
 Snaply is an open-source, in-browser image toolkit. Every tool runs entirely client-side — no uploads, no accounts, no server round-trips. Create, edit, and optimize images without sacrificing privacy, and verify that claim yourself: it's all public source.
 
-🔗 **Live:** [snaply.tanbir.in](https://snaply.tanbir.in)
+🔗 **Live:** [snaply.live](https://snaply.live)
 
 ---
 

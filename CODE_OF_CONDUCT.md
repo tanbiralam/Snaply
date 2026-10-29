@@ -48,7 +48,7 @@ representing the community in public spaces.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the maintainer via the contact listed on the [Snaply website](https://snaply.tanbir.in). All complaints will be reviewed and
+reported to the maintainer via the contact listed on the [Snaply website](https://snaply.live). All complaints will be reviewed and
 investigated promptly and fairly.
 
 ## Attribution
