@@ -5,7 +5,7 @@ change.
 
 ## Current Phase
 
-- In progress — post-launch expansion (QR shipped; SVG Optimizer, BlurHash, Watermark batch next).
+- In progress — post-launch expansion (QR + SVG Optimizer shipped; BlurHash, Watermark batch next).
 
 ## Current Goal
 
@@ -13,6 +13,17 @@ change.
 - Batch 2026-09-24 (D Resize & Crop, E Watermark, F Quote Card) shipped — every tool in `project-overview.md` is live. Unit 4 (directory + palette) shipped the same day.
 
 ## Completed
+
+- **SVG Optimizer** (2026-11-03, branch `feat/svg-optimizer`, stacked on `feat/qr-code-generator`, route `/optimize/svg-optimizer`)
+  - `svgo@4.1.0` added. `src/lib/svg.ts` dynamic-imports `svgo/browser` inside `optimizeSvg`, so it ships as its own ~550KB chunk fetched on first optimize (invariant 4). Config: `preset-default` + `multipass`, adjustable `floatPrecision` (0–6, default 3, persisted under `svg-optimizer`). SVGO 4's preset keeps `viewBox` and `<title>`. SVGO's parser is the validator: malformed input throws a user-facing message.
+  - Editor: dropzone (.svg only, 5 MB cap), paste-markup textarea, and a global paste listener on the empty state. Original/optimized previews are rendered as `<img src="blob:…">`, so scripts or `onload` inside an uploaded SVG never execute. Shows % saved and bytes before→after ("Already optimal" when nothing shrinks), plus copy markup, download `<name>.min.svg`, and New SVG.
+  - Shared helper move: `formatBytes` moved from `CompressEditor.tsx` (private) to `src/lib/utils.ts`; under 10 KB it now shows one decimal (SVGs are often 1–5 KB). Compress was re-checked.
+  - Temporary `svg-optimizer.webp` thumbnail rendered from HTML in the style of the QR card. Replace it with a generated illustration if wanted.
+  - Verified: `tsc`, lint, `pnpm build` (route static). Node: Inkscape-style sample 1816→549 B with editor namespaces/metadata gone, viewBox and title kept; malformed, plain-text and HTML input all rejected. Playwright on `next start`, in both themes:
+    - SVGO's code (`convertPathData`) is in neither the route's initial JS nor the homepage's, and its chunk loads on the first optimize.
+    - 3 files (Inkscape-style 70% smaller, `placeholder.svg` 1%, a 200-path Illustrator-style file 44%) download smaller, and the before/after rasters match (≤15 of 640k channels differ >32, only on anti-aliased edges).
+    - Precision 3→0 shrinks output and persists across reload. Malformed and non-SVG files show a toast. An SVG with `<script>` and `onload` did not execute. The paste flow works, 390px has no overflow, and the tool appears in `/tools` search, Cmd+K ("minify") and the sitemap. Zero console errors.
+    - QR e2e and a Compress smoke test re-run clean.
 
 - **QR Code Generator** (2026-11-03, branch `feat/qr-code-generator`, route `/create/qr-code`)
   - New dependency `qrcode-generator@2.0.4` (MIT, zero deps), approved by the user. It only produces the module matrix; drawing, SVG output, color checks, and settings live in `src/lib/qr.ts`.
@@ -345,7 +356,7 @@ change.
   - **Shared steps for every new tool**: registry entry (`tools.ts`), icon added to `ToolIcon`'s import map, `page.tsx` + `<Name>Editor.tsx` under its category route, homepage thumbnail if the card needs one, `project-overview.md` drops "_(planned)_", README tool list, this tracker.
   - **Shared verification for every unit**: `tsc --noEmit`, `pnpm lint`, `pnpm build` (new route prerenders); Playwright on `next start` in both themes: tool loads with zero console errors, appears in `/tools` search + Cmd+K + tool rail + `/sitemap.xml`, no horizontal overflow at 390px; one real download opened and checked.
   1. ~~**QR Code Generator**~~ — **shipped 2026-11-03**, see Completed.
-  2. **SVG Optimizer** (`/optimize/svg-optimizer`, branch `feat/svg-optimizer`)
+  2. ~~**SVG Optimizer**~~ — **shipped 2026-11-03**, see Completed. Original plan:
      - Build: upload or paste an SVG; `svgo/browser` dynamic-imported on first optimize (invariant 4); before/after size + % saved; side-by-side preview; copy and download. Toggles limited to safe presets (keep viewBox, optional precision).
      - Safety: render the preview through `<img src="blob:">` (scripts can't run), never `innerHTML`; reject non-SVG and malformed input with a toast.
      - Verify: build output shows SVGO in its own chunk, not in shared/global JS; a sample Figma/Illustrator SVG shrinks and renders identically (pixel diff of before/after canvas rasters); malformed SVG shows an error rather than a crash; an SVG with `<script>` doesn't execute.
