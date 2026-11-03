@@ -14,7 +14,7 @@ import {
 } from "@/lib/decode";
 import { encodeBmp, encodeIco, icoSize } from "@/lib/encode";
 import { parseDim, targetSize } from "@/lib/resize";
-import { cn } from "@/lib/utils";
+import { cn, formatBytes } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   AppWindow,
@@ -191,12 +191,6 @@ function ConvertGlyph({ from, to }: { from: string; to: string }) {
       </div>
     </div>
   );
-}
-
-function formatBytes(n: number): string {
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(0)} KB`;
-  return `${(n / 1024 / 1024).toFixed(2)} MB`;
 }
 
 // ─── Item model ───────────────────────────────────────────────────────────────

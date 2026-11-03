@@ -5,7 +5,7 @@ change.
 
 ## Current Phase
 
-- In progress — post-launch expansion (QR shipped; SVG Optimizer, BlurHash, Watermark batch next).
+- In progress — post-launch expansion (QR, SVG Optimizer, BlurHash shipped; Watermark batch next).
 
 ## Current Goal
 
@@ -13,6 +13,30 @@ change.
 - Batch 2026-09-24 (D Resize & Crop, E Watermark, F Quote Card) shipped — every tool in `project-overview.md` is live. Unit 4 (directory + palette) shipped the same day.
 
 ## Completed
+
+- **BlurHash Generator** (2026-11-03, branch `feat/blurhash`, stacked on `feat/svg-optimizer`, route `/optimize/blurhash`)
+  - No new dependency. `src/lib/blurhash.ts` is a hand-written encoder/decoder (pure functions, no DOM). It follows the spec/C reference, using the **absolute** AC maximum. The `blurhash` npm package (v2.0.5) uses the *signed* maximum, which clips strongly negative components. It also computes `punch | 1`, which breaks fractional punch, so `punch` was left out (not needed). `blurhashSize` validates every character and the length, with user-facing errors.
+  - Editor: reuses `ImageUpload` plus paste, and encodes from a ≤64px canvas copy (BlurHash keeps ≤9 frequencies per axis, so more pixels only add cost). X/Y component sliders are persisted under `blurhash`. The placeholder preview is decoded from the hash itself. Copy BlurHash, copy CSS (a 32px decoded PNG data URL as `background-image` + `background-size: cover` + `aspect-ratio`), New image. Thumbnail `blurhash.webp`: the user's generated illustration, resized from 1672×941 to 900×507.
+  - Verified: `tsc`, lint, `pnpm build` (route static). Node vs. the npm reference with its one-line abs-max fix applied: 25 encode + 25 decode cases match exactly (5 synthetic images × 5 component grids, incl. 1×1, 9×9, 9×1, non-square). The README example hash decodes identically. Round-trip drift equals the reference's (6.27/255). Fidelity on the checker image: spec error 63.7 vs. npm 67.0 at 9×9, and the npm package differs from the spec in 4/10 cases. Bad length, characters and component counts all throw.
+  - Verified in Playwright on `next start`, both themes:
+    - the hash passes the npm package's `isBlurhashValid`, and its DC term matches the image's linear-light mean within 6/255
+    - 9×9 gives 166 chars and 1×1 gives 6; components persist across reload
+    - clipboard holds the exact hash and the CSS; the CSS applies (100px wide → 63px tall)
+    - a 6000×3753 PNG encodes in 240 ms with the page responsive
+    - fixed a mobile overlap (figures were allowed to shrink below the image height; aside now capped at `max-h-96` like QR); 390px has no overflow
+    - `/tools` search ("placeholder"), Cmd+K ("lqip") and the sitemap find it; zero console errors
+    - QR and SVG e2e suites re-run clean
+
+- **SVG Optimizer** (2026-11-03, branch `feat/svg-optimizer`, stacked on `feat/qr-code-generator`, route `/optimize/svg-optimizer`)
+  - `svgo@4.1.0` added. `src/lib/svg.ts` dynamic-imports `svgo/browser` inside `optimizeSvg`, so it ships as its own ~550KB chunk fetched on first optimize (invariant 4). Config: `preset-default` + `multipass`, adjustable `floatPrecision` (0–6, default 3, persisted under `svg-optimizer`). SVGO 4's preset keeps `viewBox` and `<title>`. SVGO's parser is the validator: malformed input throws a user-facing message.
+  - Editor: dropzone (.svg only, 5 MB cap), paste-markup textarea, and a global paste listener on the empty state. Original/optimized previews are rendered as `<img src="blob:…">`, so scripts or `onload` inside an uploaded SVG never execute. Shows % saved and bytes before→after ("Already optimal" when nothing shrinks), plus copy markup, download `<name>.min.svg`, and New SVG.
+  - Shared helper move: `formatBytes` moved from `CompressEditor.tsx` (private) to `src/lib/utils.ts`; under 10 KB it now shows one decimal (SVGs are often 1–5 KB). Compress was re-checked.
+  - `svg-optimizer.webp` thumbnail: the user's generated illustration, resized from 1672×941 to 900×507.
+  - Verified: `tsc`, lint, `pnpm build` (route static). Node: Inkscape-style sample 1816→549 B with editor namespaces/metadata gone, viewBox and title kept; malformed, plain-text and HTML input all rejected. Playwright on `next start`, in both themes:
+    - SVGO's code (`convertPathData`) is in neither the route's initial JS nor the homepage's, and its chunk loads on the first optimize.
+    - 3 files (Inkscape-style 70% smaller, `placeholder.svg` 1%, a 200-path Illustrator-style file 44%) download smaller, and the before/after rasters match (≤15 of 640k channels differ >32, only on anti-aliased edges).
+    - Precision 3→0 shrinks output and persists across reload. Malformed and non-SVG files show a toast. An SVG with `<script>` and `onload` did not execute. The paste flow works, 390px has no overflow, and the tool appears in `/tools` search, Cmd+K ("minify") and the sitemap. Zero console errors.
+    - QR e2e and a Compress smoke test re-run clean.
 
 - **QR Code Generator** (2026-11-03, branch `feat/qr-code-generator`, route `/create/qr-code`)
   - New dependency `qrcode-generator@2.0.4` (MIT, zero deps), approved by the user. It only produces the module matrix; drawing, SVG output, color checks, and settings live in `src/lib/qr.ts`.
@@ -345,11 +369,11 @@ change.
   - **Shared steps for every new tool**: registry entry (`tools.ts`), icon added to `ToolIcon`'s import map, `page.tsx` + `<Name>Editor.tsx` under its category route, homepage thumbnail if the card needs one, `project-overview.md` drops "_(planned)_", README tool list, this tracker.
   - **Shared verification for every unit**: `tsc --noEmit`, `pnpm lint`, `pnpm build` (new route prerenders); Playwright on `next start` in both themes: tool loads with zero console errors, appears in `/tools` search + Cmd+K + tool rail + `/sitemap.xml`, no horizontal overflow at 390px; one real download opened and checked.
   1. ~~**QR Code Generator**~~ — **shipped 2026-11-03**, see Completed.
-  2. **SVG Optimizer** (`/optimize/svg-optimizer`, branch `feat/svg-optimizer`)
+  2. ~~**SVG Optimizer**~~ — **shipped 2026-11-03**, see Completed. Original plan:
      - Build: upload or paste an SVG; `svgo/browser` dynamic-imported on first optimize (invariant 4); before/after size + % saved; side-by-side preview; copy and download. Toggles limited to safe presets (keep viewBox, optional precision).
      - Safety: render the preview through `<img src="blob:">` (scripts can't run), never `innerHTML`; reject non-SVG and malformed input with a toast.
      - Verify: build output shows SVGO in its own chunk, not in shared/global JS; a sample Figma/Illustrator SVG shrinks and renders identically (pixel diff of before/after canvas rasters); malformed SVG shows an error rather than a crash; an SVG with `<script>` doesn't execute.
-  3. **BlurHash Generator** (`/optimize/blurhash`, branch `feat/blurhash`)
+  3. ~~**BlurHash Generator**~~ — **shipped 2026-11-03**, see Completed. Original plan:
      - Build: hand-written encoder + decoder in `src/lib/blurhash.ts` (~100 lines, spec at blurha.sh); image decoded via `decode.ts`, downscaled to ≤64px on canvas before encoding; X/Y component sliders (1–9); decoded placeholder preview beside the original; copy string, plus ready-to-paste CSS/HTML snippet.
      - Verify: `tsx` assert script checks the encoder against the reference implementation's published test vectors and round-trips encode→decode; big (e.g. 6000px) image encodes without freezing the tab.
   4. **Watermark batch mode** (existing `/edit/watermark`, branch `feat/watermark-batch`)

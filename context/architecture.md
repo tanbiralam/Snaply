@@ -11,7 +11,7 @@
 | Rendering   | HTML Canvas 2D API                | Shared image pipeline (draw, frame, export) for all tools |
 | ML          | @imgly/background-removal         | In-browser background removal model (lazy-loaded)         |
 | QR          | qrcode-generator                  | QR module matrix only (MIT, zero deps, ~20KB); drawing/export stays in `src/lib/qr.ts` |
-| SVG         | SVGO _(planned, not yet added)_    | Bundled for client-side SVG minification, lazy-loaded on first use within `/optimize/svg-optimizer` — same lazy-load rule as the ML model (invariant 4) |
+| SVG         | SVGO 4 (`svgo/browser`)            | Bundled for client-side SVG minification, lazy-loaded on first use within `/optimize/svg-optimizer` — same lazy-load rule as the ML model (invariant 4) |
 | Persistence | Browser localStorage              | Per-tool settings persisted across sessions               |
 | Hosting     | Static hosting / CDN              | App ships as static assets (no server runtime required)   |
 
@@ -26,6 +26,8 @@
 
 - **localStorage**: Per-tool settings and preferences (last-used presets, quality values, dimensions). Keyed by tool slug. This is the only persistence layer — it is per-device and per-browser.
   - `watermark` — JSON `WmSettings` (`src/lib/watermark.ts`): kind, text, font, color, size, opacity, rotation, position, margin, tile. Read through `parseWm`, which clamps/validates each field and falls back per field. The logo image is never stored.
+  - `blurhash` — JSON `{ x: number, y: number }` (components per axis, integers 1–9); invalid values fall back to 4×3.
+  - `svg-optimizer` — JSON `{ precision: number }` (0–6, integer); invalid values fall back to 3.
   - `qr-code` — JSON `QrSettings` (`src/lib/qr.ts`): text, ecc, size, margin, fg, bg. Read through `parseQr`, which validates/clamps each field and falls back per field. The center logo is never stored.
 - **In-memory (Canvas / Blob)**: The working image and all generated output. Images exist only as in-memory canvas data and download Blobs; they are never serialized to a server, and only leave the browser via an explicit user-initiated download.
 

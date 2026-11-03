@@ -9,7 +9,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 1. Ship a single launchable version containing 12 tools across three categories (Create / Edit / Optimize), each on its own route. **Shipped** (as 11 routes — Convert lives inside Compress & Convert).
 2. Keep 100% of image processing client-side so the "no uploads, no limits, no ads" promise is structurally true, not just marketing.
 3. Make the app read as one polished product — via categorized routing, a shared tool registry, and a searchable directory — rather than a pile of disconnected utilities.
-4. **Post-launch expansion (planned, not yet built)**: add QR Code Generator (shipped 2026-11-03), SVG Optimizer, and BlurHash Generator (3 new routes, bringing the total to 14), plus batch support for Watermark — see Features and `progress-tracker.md`'s Next Up.
+4. **Post-launch expansion (planned, not yet built)**: add QR Code Generator (shipped 2026-11-03), SVG Optimizer (shipped 2026-11-03), and BlurHash Generator (shipped 2026-11-03) (3 new routes, bringing the total to 14), plus batch support for Watermark — see Features and `progress-tracker.md`'s Next Up.
 
 ## Core User Flow
 
@@ -43,8 +43,8 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 - **Compress** — quality slider with live file-size preview (`/optimize/compress`)
 - **Convert** — PNG / JPEG / WebP / AVIF format conversion (`/optimize/convert`)
-- **SVG Optimizer** _(planned)_ — minify/clean an uploaded SVG (strip editor metadata, collapse whitespace, simplify paths) via a bundled SVGO build; before/after size comparison (`/optimize/svg-optimizer`)
-- **BlurHash Generator** _(planned)_ — upload an image, get its compact BlurHash placeholder string (for `<img>`/CSS blur-up placeholders) plus a copy-to-clipboard action (`/optimize/blurhash`)
+- **SVG Optimizer** — upload or paste an SVG; SVGO `preset-default` + multipass strips editor metadata, rounds numbers (adjustable decimal precision 0–6), and simplifies paths, keeping `viewBox` and `<title>`; before/after previews and size comparison, copy markup, download `.min.svg` (`/optimize/svg-optimizer`)
+- **BlurHash Generator** — upload or paste an image, get its BlurHash string (1–9 components per axis, default 4×3) with a side-by-side decoded preview, copy-to-clipboard, and a copyable CSS fallback (a tiny decoded PNG as `background-image`, with the source aspect ratio) for no-JS blur-up (`/optimize/blurhash`)
 
 ### Shell & Navigation
 
