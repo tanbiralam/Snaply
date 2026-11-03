@@ -7,15 +7,22 @@ interface ImageUploadProps {
   hasImage: boolean;
   /** What this tool's input actually is, for the dropzone copy. */
   label?: string;
+  /** Batch mode: when set, accepts several files and hands over the raw Files instead of a data URL. */
+  onFiles?: (files: File[]) => void;
 }
 
-export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot' }: ImageUploadProps) => {
+export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot', onFiles }: ImageUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
+      if (onFiles) {
+        const files = Array.from(e.dataTransfer.files).filter((f) => f.type.match(/image\/(png|jpeg|webp)/));
+        if (files.length) onFiles(files);
+        return;
+      }
       const file = e.dataTransfer.files[0];
       if (file && file.type.match(/image\/(png|jpeg|webp)/)) {
         const reader = new FileReader();
@@ -25,7 +32,7 @@ export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot' }: I
         reader.readAsDataURL(file);
       }
     },
-    [onImageUpload]
+    [onImageUpload, onFiles]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -40,6 +47,12 @@ export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot' }: I
 
   const handleFileInput = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onFiles) {
+        const files = Array.from(e.target.files ?? []);
+        e.target.value = '';
+        if (files.length) onFiles(files);
+        return;
+      }
       const file = e.target.files?.[0];
       if (file) {
         const reader = new FileReader();
@@ -49,7 +62,7 @@ export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot' }: I
         reader.readAsDataURL(file);
       }
     },
-    [onImageUpload]
+    [onImageUpload, onFiles]
   );
 
   return (
@@ -69,6 +82,7 @@ export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot' }: I
       <input
         type="file"
         accept="image/png,image/jpeg,image/webp"
+        multiple={!!onFiles}
         onChange={handleFileInput}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
       />
@@ -92,7 +106,7 @@ export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot' }: I
       </div>
       <div className="text-center">
         <p className="font-medium text-sm text-foreground">
-          {hasImage ? `Replace ${label}` : isDragging ? 'Drop to upload' : `Drop ${label} here`}
+          {hasImage ? `Replace ${label}` : isDragging ? 'Drop to upload' : `Drop ${onFiles ? `${label}s` : label} here`}
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {hasImage

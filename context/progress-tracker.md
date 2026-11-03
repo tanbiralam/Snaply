@@ -5,7 +5,7 @@ change.
 
 ## Current Phase
 
-- In progress — post-launch expansion (QR, SVG Optimizer, BlurHash shipped; Watermark batch next).
+- In progress — post-launch expansion (all four units shipped: QR, SVG Optimizer, BlurHash, Watermark batch).
 
 ## Current Goal
 
@@ -13,6 +13,21 @@ change.
 - Batch 2026-09-24 (D Resize & Crop, E Watermark, F Quote Card) shipped — every tool in `project-overview.md` is live. Unit 4 (directory + palette) shipped the same day.
 
 ## Completed
+
+- **Watermark batch mode** (2026-11-03, branch `feat/watermark-batch`, existing route `/edit/watermark`)
+  - `ImageUpload` gained an optional `onFiles(files)` prop: when set, the input is `multiple` and drop/pick hand over raw `File`s. Without it the component behaves exactly as before, so other tools are untouched.
+  - `WatermarkEditor` now holds a list of items (object URLs, revoked on remove/clear/unmount). It previews the active one, with a thumbnail strip below the canvas (click to preview, hover × to remove, + tile to add more; paste adds too). The same settings apply to all.
+  - Export: with 1 image, today's exact flow (`snaply-watermarked-<ts>.<ext>`, "Replace"). With 2 or more: "Download all N (.zip)" renders each image on its own full-size canvas one at a time (progress "Processing n/N"), keeping each source's format and size, named `<name>-watermarked.<ext>`. "This image only" still downloads the previewed one, and "Clear all" replaces "Replace".
+  - Unreadable files are skipped with one toast and the rest still load. A per-image export failure is reported and the others still zip. `ponytail:` note: the zip is built in memory, so very large batches are bounded by RAM.
+  - Shared helper: `uniqueName(name, taken)` moved into `src/lib/zip.ts` from Compress's inline loop; Compress now uses it too.
+  - Verified: `tsc`, lint, `pnpm build`. Playwright on `next start`, both themes:
+    - single image: JPG download with the old filename pattern, the mark lands bottom-right, Replace works
+    - 11 mixed files (PNG/JPEG/WebP, 64×48 to 1672×941, two both named `photo.png`) plus a corrupt file: the corrupt one is skipped with a toast; preview switching, remove and add-more work
+    - the zip, opened with the system `unzip`, has 11 uniquely named files, each with its original size and real format (magic bytes checked), and the watermark bottom-right at 23–25% of width (pixel-diff bounding box)
+    - turning on tile applies to all 11; "This image only" gives a single file
+    - fixed 390px horizontal overflow (the "+" tile's sr-only input escaped the scrolling strip because the tile wasn't `relative`)
+    - Compress zip with two `photo.png` inputs gives `photo.webp` + `photo-1.webp`; zero console errors
+  - Not checked: Safari/Firefox, and batches larger than ~11 images.
 
 - **BlurHash Generator** (2026-11-03, branch `feat/blurhash`, stacked on `feat/svg-optimizer`, route `/optimize/blurhash`)
   - No new dependency. `src/lib/blurhash.ts` is a hand-written encoder/decoder (pure functions, no DOM). It follows the spec/C reference, using the **absolute** AC maximum. The `blurhash` npm package (v2.0.5) uses the *signed* maximum, which clips strongly negative components. It also computes `punch | 1`, which breaks fractional punch, so `punch` was left out (not needed). `blurhashSize` validates every character and the length, with user-facing errors.
@@ -376,7 +391,7 @@ change.
   3. ~~**BlurHash Generator**~~ — **shipped 2026-11-03**, see Completed. Original plan:
      - Build: hand-written encoder + decoder in `src/lib/blurhash.ts` (~100 lines, spec at blurha.sh); image decoded via `decode.ts`, downscaled to ≤64px on canvas before encoding; X/Y component sliders (1–9); decoded placeholder preview beside the original; copy string, plus ready-to-paste CSS/HTML snippet.
      - Verify: `tsx` assert script checks the encoder against the reference implementation's published test vectors and round-trips encode→decode; big (e.g. 6000px) image encodes without freezing the tab.
-  4. **Watermark batch mode** (existing `/edit/watermark`, branch `feat/watermark-batch`)
+  4. ~~**Watermark batch mode**~~ — **shipped 2026-11-03**, see Completed. Original plan:
      - Build: dropzone accepts multiple files; thumbnail strip to pick which image previews; the same settings apply to all; "Download all (.zip)" via `src/lib/zip.ts`, processing images one at a time with progress; a single image keeps today's exact flow.
      - Verify: 1 image behaves exactly as before (regression); 10 mixed-format/size images → zip opens, all 10 files watermarked at correct proportional size, filenames unique; one corrupt file is skipped with a toast, the rest still export.
 
