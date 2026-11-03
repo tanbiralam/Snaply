@@ -14,7 +14,7 @@ Snaply is an open-source, in-browser image toolkit. Every tool runs entirely cli
 
 ## Tools
 
-All 13 tools are live. Add a 14th by following the [registry pattern](#adding-a-tool) — see [CONTRIBUTING.md](CONTRIBUTING.md).
+All 14 tools are live. Add a 15th by following the [registry pattern](#adding-a-tool) — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### 🎨 Create
 
@@ -43,6 +43,7 @@ All 13 tools are live. Add a 14th by following the [registry pattern](#adding-a-
 | ---------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------- |
 | **Compress & Convert**  | `/optimize/compress`  | Bulk-compress and convert images between PNG, JPEG, WebP, AVIF, BMP, and ICO, with batch ZIP download.     |
 | **SVG Optimizer**       | `/optimize/svg-optimizer` | Minify SVGs (strip editor metadata, round numbers, simplify paths) with a before/after size comparison. SVGO is lazy-loaded on first use. |
+| **BlurHash Generator**  | `/optimize/blurhash`  | Turn an image into a compact BlurHash placeholder string, with a live preview and a no-JavaScript CSS fallback. |
 
 ---
 
@@ -103,7 +104,7 @@ There is no test suite or CI pipeline; every change is verified with `tsc --noEm
 | Syntax highlighting  | Shiki                              |
 | QR encoding          | `qrcode-generator` (MIT, zero-dependency) |
 | SVG minification     | SVGO (`svgo/browser`), lazy-loaded on first use |
-| Image encode/decode, ZIP, EXIF | Hand-rolled, zero-dependency (`src/lib/encode.ts`, `decode.ts`, `zip.ts`, `exif.ts`) |
+| Image encode/decode, ZIP, EXIF, BlurHash | Hand-rolled, zero-dependency (`src/lib/encode.ts`, `decode.ts`, `zip.ts`, `exif.ts`, `blurhash.ts`) |
 | Analytics            | Vercel Analytics                   |
 
 Snaply deliberately avoids heavy dependencies for anything the platform or a few hundred lines of TypeScript can already do — see [CONTRIBUTING.md](CONTRIBUTING.md#design-principles).
@@ -120,7 +121,7 @@ src/
 │   ├── tools/page.tsx              # /tools directory (search + category chips)
 │   ├── create/                     # screenshot, og-image, code-snippet, favicon, quote, qr-code
 │   ├── edit/                       # resize, metadata, redact, remove-background, watermark
-│   └── optimize/                   # compress, svg-optimizer
+│   └── optimize/                   # compress, svg-optimizer, blurhash
 ├── components/
 │   ├── ui/                         # shadcn/ui primitives — regenerate via CLI, don't hand-edit
 │   ├── landing/                    # landing page sections (HeroVisual, Faq, FinalCta, PrivacyComparison)
@@ -135,7 +136,7 @@ src/
 │   ├── site.ts                     # branding, URLs, logo/OG-image config
 │   ├── canvasHelpers.ts, ogRender.ts, quoteRender.ts, deviceMockups.ts
 │   ├── encode.ts, decode.ts        # zero-dep image codecs (BMP/ICO/PPM/TGA/ICNS, etc.)
-│   ├── exif.ts, watermark.ts, resize.ts, zip.ts, qr.ts, svg.ts, codeHighlighter.ts
+│   ├── exif.ts, watermark.ts, resize.ts, zip.ts, qr.ts, svg.ts, blurhash.ts, codeHighlighter.ts
 │   └── utils.ts
 ├── types/                          # shared TypeScript types
 └── index.css                       # design tokens + global styles

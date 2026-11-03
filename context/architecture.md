@@ -26,6 +26,7 @@
 
 - **localStorage**: Per-tool settings and preferences (last-used presets, quality values, dimensions). Keyed by tool slug. This is the only persistence layer — it is per-device and per-browser.
   - `watermark` — JSON `WmSettings` (`src/lib/watermark.ts`): kind, text, font, color, size, opacity, rotation, position, margin, tile. Read through `parseWm`, which clamps/validates each field and falls back per field. The logo image is never stored.
+  - `blurhash` — JSON `{ x: number, y: number }` (components per axis, integers 1–9); invalid values fall back to 4×3.
   - `svg-optimizer` — JSON `{ precision: number }` (0–6, integer); invalid values fall back to 3.
   - `qr-code` — JSON `QrSettings` (`src/lib/qr.ts`): text, ecc, size, margin, fg, bg. Read through `parseQr`, which validates/clamps each field and falls back per field. The center logo is never stored.
 - **In-memory (Canvas / Blob)**: The working image and all generated output. Images exist only as in-memory canvas data and download Blobs; they are never serialized to a server, and only leave the browser via an explicit user-initiated download.
