@@ -35,7 +35,7 @@ All 14 tools are live. Add a 15th by following the [registry pattern](#adding-a-
 | **Metadata Viewer**    | `/edit/metadata`           | See exactly what's hidden in a photo — GPS location, camera, timestamps — then strip it losslessly.  |
 | **Redact & Blur**      | `/edit/redact`             | Draw regions to permanently pixelate or blur sensitive information.                                  |
 | **Remove Background**  | `/edit/remove-background`  | Remove image backgrounds with an in-browser ML model — nothing is uploaded.                          |
-| **Watermark**          | `/edit/watermark`          | Stamp text or a logo onto an image — pick a corner or tile it across, with size/opacity/rotation.    |
+| **Watermark**          | `/edit/watermark`          | Stamp text or a logo onto an image — pick a corner or tile it across, with size/opacity/rotation. Batch mode watermarks many images at once and downloads a zip. |
 
 ### ⚡ Optimize
 

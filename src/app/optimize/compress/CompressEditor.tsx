@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { site } from "@/lib/site";
-import { zipSync } from "@/lib/zip";
+import { uniqueName, zipSync } from "@/lib/zip";
 import {
   canDecode,
   decodeImage,
@@ -508,17 +508,12 @@ export default function CompressEditor() {
     if (!done.length) return;
     setZipping(true);
     try {
-      // Track every name actually emitted (not just originals), so a generated "a-1.png"
-      // can't collide with a real input that was already called "a-1.png".
       const taken = new Set<string>();
       const entries = await Promise.all(
-        done.map(async (i) => {
-          let name = i.outName!;
-          for (let n = 1; taken.has(name); n++)
-            name = i.outName!.replace(/(\.[^.]+)$/, `-${n}$1`);
-          taken.add(name);
-          return { name, data: new Uint8Array(await i.outBlob!.arrayBuffer()) };
-        })
+        done.map(async (i) => ({
+          name: uniqueName(i.outName!, taken),
+          data: new Uint8Array(await i.outBlob!.arrayBuffer()),
+        }))
       );
       const url = URL.createObjectURL(zipSync(entries));
       triggerDownload(url, `${site.name.toLowerCase()}-images.zip`);

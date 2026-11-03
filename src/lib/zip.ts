@@ -19,6 +19,17 @@ function crc32(buf: Uint8Array): number {
   return (c ^ 0xffffffff) >>> 0;
 }
 
+/**
+ * `name`, or `name-1.ext`, `name-2.ext`… if taken. Records the result in `taken`, so a
+ * generated "a-1.png" can't collide with a real input that was already called "a-1.png".
+ */
+export function uniqueName(name: string, taken: Set<string>): string {
+  let out = name;
+  for (let n = 1; taken.has(out); n++) out = name.replace(/(\.[^.]+)?$/, `-${n}$1`);
+  taken.add(out);
+  return out;
+}
+
 export interface ZipEntry {
   name: string;
   data: Uint8Array;

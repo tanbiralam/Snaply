@@ -9,7 +9,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 1. Ship a single launchable version containing 12 tools across three categories (Create / Edit / Optimize), each on its own route. **Shipped** (as 11 routes — Convert lives inside Compress & Convert).
 2. Keep 100% of image processing client-side so the "no uploads, no limits, no ads" promise is structurally true, not just marketing.
 3. Make the app read as one polished product — via categorized routing, a shared tool registry, and a searchable directory — rather than a pile of disconnected utilities.
-4. **Post-launch expansion (planned, not yet built)**: add QR Code Generator (shipped 2026-11-03), SVG Optimizer (shipped 2026-11-03), and BlurHash Generator (shipped 2026-11-03) (3 new routes, bringing the total to 14), plus batch support for Watermark — see Features and `progress-tracker.md`'s Next Up.
+4. **Post-launch expansion (planned, not yet built)**: add QR Code Generator (shipped 2026-11-03), SVG Optimizer (shipped 2026-11-03), and BlurHash Generator (shipped 2026-11-03) (3 new routes, bringing the total to 14), plus batch support for Watermark (all shipped 2026-11-03) — see Features and `progress-tracker.md`'s Next Up.
 
 ## Core User Flow
 
@@ -37,7 +37,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 - **Metadata Viewer** — view embedded EXIF/GPS/device metadata and strip it losslessly (`/edit/metadata`)
 - **Redact & Blur** — draw regions to permanently pixelate/blur sensitive info (`/edit/redact`)
 - **Remove Background** — in-browser ML background removal, lazy-loaded (`/edit/remove-background`)
-- **Watermark** — text or logo overlay with position/opacity controls (`/edit/watermark`). **Batch support planned**: apply the same watermark settings across multiple uploaded images in one pass, download as a zip (reusing `src/lib/zip.ts`) — currently single-image only.
+- **Watermark** — text or logo overlay with position/opacity controls (`/edit/watermark`). **Batch mode**: drop or pick several images (or add more from the thumbnail strip); the same settings apply to all; "Download all (.zip)" renders them one at a time in their original formats and sizes. Unreadable files are skipped with a toast. A single image keeps the original one-file download.
 
 ### Optimize
 
