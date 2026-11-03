@@ -122,6 +122,16 @@ export const tools: readonly Tool[] = [
     icon: "Quote",
     status: "live",
   },
+  {
+    slug: "qr-code",
+    category: "create",
+    name: "QR Code Generator",
+    description:
+      "Turn text or a URL into a downloadable QR code with custom size, colors, error correction, and an optional center logo.",
+    keywords: ["qr", "qr code", "barcode", "url", "link", "scan", "svg", "logo"],
+    icon: "QrCode",
+    status: "live",
+  },
 
   {
     slug: "resize",

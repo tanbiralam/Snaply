@@ -14,7 +14,7 @@ Snaply is an open-source, in-browser image toolkit. Every tool runs entirely cli
 
 ## Tools
 
-All 11 tools are live. Add a 12th by following the [registry pattern](#adding-a-tool) — see [CONTRIBUTING.md](CONTRIBUTING.md).
+All 12 tools are live. Add a 13th by following the [registry pattern](#adding-a-tool) — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### 🎨 Create
 
@@ -25,6 +25,7 @@ All 11 tools are live. Add a 12th by following the [registry pattern](#adding-a-
 | **Code Snippet**        | `/create/code-snippet`| Turn a code snippet into a shareable, syntax-highlighted image with custom backgrounds and window chrome.         |
 | **Favicon Generator**   | `/create/favicon`     | Turn a logo into a full favicon & app icon package — every size, a multi-res `.ico`, manifest, and embed code.    |
 | **Quote Card**          | `/create/quote`       | Turn text, a name, a handle, and an avatar into social-post and quote graphics.                                   |
+| **QR Code Generator**   | `/create/qr-code`     | Turn text or a URL into a downloadable QR code (PNG or SVG) with custom size, colors, error correction, and an optional center logo. |
 
 ### ✏️ Edit
 
@@ -99,6 +100,7 @@ There is no test suite or CI pipeline; every change is verified with `tsc --noEm
 | Theme                | next-themes                        |
 | Background removal   | `@imgly/background-removal` (WASM), lazy-loaded on first use |
 | Syntax highlighting  | Shiki                              |
+| QR encoding          | `qrcode-generator` (MIT, zero-dependency) |
 | Image encode/decode, ZIP, EXIF | Hand-rolled, zero-dependency (`src/lib/encode.ts`, `decode.ts`, `zip.ts`, `exif.ts`) |
 | Analytics            | Vercel Analytics                   |
 
@@ -114,7 +116,7 @@ src/
 │   ├── layout.tsx, page.tsx, not-found.tsx, providers.tsx
 │   ├── sitemap.ts, robots.ts       # registry-generated, no manual URL list
 │   ├── tools/page.tsx              # /tools directory (search + category chips)
-│   ├── create/                     # screenshot, og-image, code-snippet, favicon, quote
+│   ├── create/                     # screenshot, og-image, code-snippet, favicon, quote, qr-code
 │   ├── edit/                       # resize, metadata, redact, remove-background, watermark
 │   └── optimize/                   # compress
 ├── components/
@@ -131,7 +133,7 @@ src/
 │   ├── site.ts                     # branding, URLs, logo/OG-image config
 │   ├── canvasHelpers.ts, ogRender.ts, quoteRender.ts, deviceMockups.ts
 │   ├── encode.ts, decode.ts        # zero-dep image codecs (BMP/ICO/PPM/TGA/ICNS, etc.)
-│   ├── exif.ts, watermark.ts, resize.ts, zip.ts, codeHighlighter.ts
+│   ├── exif.ts, watermark.ts, resize.ts, zip.ts, qr.ts, codeHighlighter.ts
 │   └── utils.ts
 ├── types/                          # shared TypeScript types
 └── index.css                       # design tokens + global styles

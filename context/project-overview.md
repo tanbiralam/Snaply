@@ -9,7 +9,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 1. Ship a single launchable version containing 12 tools across three categories (Create / Edit / Optimize), each on its own route. **Shipped** (as 11 routes — Convert lives inside Compress & Convert).
 2. Keep 100% of image processing client-side so the "no uploads, no limits, no ads" promise is structurally true, not just marketing.
 3. Make the app read as one polished product — via categorized routing, a shared tool registry, and a searchable directory — rather than a pile of disconnected utilities.
-4. **Post-launch expansion (planned, not yet built)**: add QR Code Generator, SVG Optimizer, and BlurHash Generator (3 new routes, bringing the total to 14), plus batch support for Watermark — see Features and `progress-tracker.md`'s Next Up.
+4. **Post-launch expansion (planned, not yet built)**: add QR Code Generator (shipped 2026-11-03), SVG Optimizer, and BlurHash Generator (3 new routes, bringing the total to 14), plus batch support for Watermark — see Features and `progress-tracker.md`'s Next Up.
 
 ## Core User Flow
 
@@ -29,7 +29,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 - **OG Image Generator** — title/subtitle/screenshot to social & blog cards (`/create/og-image`)
 - **Favicon Generator** — logo, letter, or emoji to a full favicon/app-icon package (multi-res .ico, PNGs, manifest, embed code) (`/create/favicon`)
 - **Quote Card** — text + name + handle + avatar to tweet/quote graphics (`/create/quote`)
-- **QR Code Generator** _(planned)_ — text/URL to a downloadable QR code image, with size and color/foreground-background controls (`/create/qr-code`)
+- **QR Code Generator** — text/URL to a downloadable QR code (PNG or SVG), with error-correction level, size, quiet zone, foreground/background colors, and an optional center logo/image (10–25% of the code width; adding one switches error correction to H) (`/create/qr-code`)
 
 ### Edit
 
