@@ -1,5 +1,6 @@
 import {
   ArrowRightLeft,
+  Blend,
   Code,
   Crop,
   Eraser,
@@ -20,6 +21,7 @@ import {
    Add an import here when a registry entry uses a new icon. */
 const icons: Record<string, LucideIcon> = {
   ArrowRightLeft,
+  Blend,
   Code,
   Crop,
   Eraser,

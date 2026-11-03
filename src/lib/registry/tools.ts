@@ -260,6 +260,16 @@ export const tools: readonly Tool[] = [
     icon: "FileCode",
     status: "live",
   },
+  {
+    slug: "blurhash",
+    category: "optimize",
+    name: "BlurHash Generator",
+    description:
+      "Turn an image into a compact BlurHash placeholder string, with a live preview and a no-JavaScript CSS fallback.",
+    keywords: ["blurhash", "placeholder", "blur", "lazy load", "lqip", "hash", "loading", "css"],
+    icon: "Blend",
+    status: "live",
+  },
 ];
 
 /** Canonical route for a tool: /category/slug. */
