@@ -29,6 +29,7 @@
   - `blurhash` — JSON `{ x: number, y: number }` (components per axis, integers 1–9); invalid values fall back to 4×3.
   - `svg-optimizer` — JSON `{ precision: number }` (0–6, integer); invalid values fall back to 3.
   - `qr-code` — JSON `QrSettings` (`src/lib/qr.ts`): text, ecc, size, margin, fg, bg. Read through `parseQr`, which validates/clamps each field and falls back per field. The center logo is never stored.
+  - `gradient` — JSON `GradientSettings` (`src/lib/gradient.ts`): shape, style, seed, width/height (must match a `GRADIENT_SIZES` preset), scale, warp, light, grain, colors (4 hex), dot, angle. Read through `parseGradient`, which clamps/validates each field and falls back per field (settings saved by the first version, with ink/paper, still load).
 - **In-memory (Canvas / Blob)**: The working image and all generated output. Images exist only as in-memory canvas data and download Blobs; they are never serialized to a server, and only leave the browser via an explicit user-initiated download.
 
 ## Privacy Model

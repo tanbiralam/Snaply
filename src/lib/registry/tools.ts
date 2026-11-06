@@ -132,6 +132,27 @@ export const tools: readonly Tool[] = [
     icon: "QrCode",
     status: "live",
   },
+  {
+    slug: "gradient",
+    category: "create",
+    name: "Gradient Generator",
+    description:
+      "Generate grainy fluid gradients and halftone backgrounds from code — shuffle, tweak, and export up to 4K.",
+    keywords: [
+      "gradient",
+      "background",
+      "wallpaper",
+      "mesh gradient",
+      "noise",
+      "grain",
+      "halftone",
+      "abstract",
+      "aurora",
+      "4k",
+    ],
+    icon: "Waves",
+    status: "live",
+  },
 
   {
     slug: "resize",

@@ -14,6 +14,17 @@ change.
 
 ## Completed
 
+- **Gradient Generator** (2026-11-06, branch `feat/gradient-generator`, route `/create/gradient`)
+  - No new dependency. `src/lib/gradient.ts` is pure (no DOM). A **shape** function is sampled on a 96-sample grid, stretched to 0–1, tone-mapped by `light` (gamma), and upscaled to the output with a separable cubic B-spline. That upscale is what makes it soft, so there is no blur pass and preview == export at any size.
+    - Shapes: `flow` (two-level domain-warped fbm, stretched 3:1 along a seeded direction, so it makes ribbons), `blobs` (3–9 seeded gaussians, noise-warped), `swirl` (a one-armed spiral around a seeded center, squashed into an ellipse, bent by noise, arms brightness-modulated so some fade, dark core).
+    - Styles: `fluid` (palette LUT), `halftone` (rotated screen, jittered centers, sqrt radius so dot area tracks brightness, light dots on the darkest stop), `dots` (LED grid with a near-constant radius; brightness is carried by color, never fully off).
+    - Grain is value-domain dither (noise added *before* the palette lookup). Low amounts read as film grain; high amounts give spray-paint stipple. Grain cells scale with output size (long side / 1000) so 4K matches the preview.
+  - Revision after the user's reference set (w2 silk, w3 haze, w4 vortex, w5 LED, halftone print): the first version had a single isotropic noise and an overlay grain, so every output looked alike. Each reference now has a named **Look** (plus Liquid, a chrome variant), tuned by rendering contact sheets of 5 seeds per look and comparing them to the references.
+  - Editor: Looks grid with live 96px thumbnails, Shape/Style chips, Shuffle, size presets, 8 palettes plus 4 editable stops, sliders (dot size/angle only for halftone/dots, then scale, warp, light, grain). Previews at a 1080px long side; export renders full size on an offscreen canvas (0.14–0.27s at 4K on the main thread; `ponytail:` note to move it to a worker if it janks). Settings persist under `gradient`. Thumbnail `gradient.webp` is a 900×507 Silk render from the tool itself, not an illustrated promo still.
+  - Bug found and fixed: field min/max were tracked in Float64 but stored as Float32, so an extreme sample could round outside 0–1 and `x ** gamma` gave NaN (a black block). min/max now use `Math.fround`.
+  - Verified: `tsc`, lint, `pnpm build` (route static). In Node: deterministic per seed, the seed changes the output, `parseGradient` fallbacks work, and the field stays in [0,1] for 6 looks × 3 shapes × 40 seeds × 4 aspect ratios. Playwright on `next start`: looks set shape/style, dot sliders appear only for halftone/dots, a 4K JPG download (3840×2160), settings persist across reload, v1-shaped storage loads, light theme, no overflow at 390px, zero page errors (only the local `_vercel/insights` 404s).
+  - Not checked: Safari/Firefox, clipboard copy.
+
 - **Watermark batch mode** (2026-11-03, branch `feat/watermark-batch`, existing route `/edit/watermark`)
   - `ImageUpload` gained an optional `onFiles(files)` prop: when set, the input is `multiple` and drop/pick hand over raw `File`s. Without it the component behaves exactly as before, so other tools are untouched.
   - `WatermarkEditor` now holds a list of items (object URLs, revoked on remove/clear/unmount). It previews the active one, with a thumbnail strip below the canvas (click to preview, hover × to remove, + tile to add more; paste adds too). The same settings apply to all.
