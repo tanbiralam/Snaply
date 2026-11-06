@@ -14,6 +14,7 @@ import {
   ScanSearch,
   Squircle,
   Stamp,
+  Waves,
   type LucideIcon,
 } from "lucide-react";
 
@@ -35,6 +36,7 @@ const icons: Record<string, LucideIcon> = {
   ScanSearch,
   Squircle,
   Stamp,
+  Waves,
 };
 
 export function ToolIcon({

@@ -30,6 +30,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 - **Favicon Generator** — logo, letter, or emoji to a full favicon/app-icon package (multi-res .ico, PNGs, manifest, embed code) (`/create/favicon`)
 - **Quote Card** — text + name + handle + avatar to tweet/quote graphics (`/create/quote`)
 - **QR Code Generator** — text/URL to a downloadable QR code (PNG or SVG), with error-correction level, size, quiet zone, foreground/background colors, and an optional center logo/image (10–25% of the code width; adding one switches error correction to H) (`/create/qr-code`)
+- **Gradient Generator** — artistic procedural backgrounds from code, no upload. **Surprise me** randomizes everything (shape, style, palette, sliders, effects) within tuned ranges, and **Generate** makes a new color-harmony palette in OKLCH. You can also pick one of 16 **Looks** or mix any of 8 **shapes** (Flow, Blobs, Swirl, Mesh, Aurora, Waves, Rays, Marble) with any of 9 **styles** (Fluid, Halftone, Dots, Glass, Poster, Lines, Pixel, Stipple, CRT). There are 12 palettes plus 4 editable stops; sliders for scale, warp, light and grain (fine grain up to spray stipple), plus cell size and angle where the style uses them; and effects (bloom, aberration, vignette). Shuffle picks a new seed for the same settings. Size presets: Phone 1080×1920, Desktop, QHD, 4K, Square, OG. The same settings give the same image at any size. Exports PNG or JPG, or copies PNG (`/create/gradient`)
 
 ### Edit
 
@@ -57,7 +58,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 ### In Scope
 
-- The 14 tools listed above (11 shipped, 3 planned), each on its own categorized route
+- The 15 tools listed above (all shipped; Gradient Generator added 2026-11-06), each on its own categorized route
 - The marketing landing page, the `/tools` directory, and the command palette
 - A shared canvas rendering pipeline, presets, and export system reused by all raster tools (SVG Optimizer works on markup, not pixels, and is exempt — see `architecture.md`)
 - Batch processing for Watermark specifically (multiple images, one settings pass, zip download)
@@ -75,7 +76,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 ## Success Criteria
 
-1. A user can open any of the 14 tools from a categorized route and complete its task fully in-browser with no network image upload.
+1. A user can open any of the 15 tools from a categorized route and complete its task fully in-browser with no network image upload.
 2. Typing in the `/tools` search box live-filters cards by name and keyword (e.g. "shrink" surfaces Compress, "png to webp" surfaces Convert).
 3. The homepage shows exactly the featured tools plus a pill strip, and every nav surface (homepage grid, directory, sitemap, metadata) is generated from the single tool registry with no drift.
 4. Cmd+K opens a working command palette on every page that navigates to any tool.
