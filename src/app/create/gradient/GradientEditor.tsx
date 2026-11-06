@@ -4,21 +4,25 @@ import { useEffect, useRef, useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { BrandMark } from "@/components/BrandMark";
 import {
+  ANGLE_STYLES,
+  CELL_STYLES,
   GRADIENT_LOOKS,
   GRADIENT_PALETTES,
+  GRADIENT_SHAPES,
   GRADIENT_SIZES,
+  GRADIENT_STYLES,
   RANGES,
   defaultGradient,
+  generatePalette,
   parseGradient,
   renderGradient,
+  surpriseGradient,
   type GradientSettings,
-  type GradientShape,
-  type GradientStyle,
 } from "@/lib/gradient";
 import { site } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Copy, Dices, Download, RotateCcw } from "lucide-react";
+import { Copy, Dices, Download, RefreshCw, RotateCcw, Sparkles } from "lucide-react";
 
 const STORAGE_KEY = "gradient";
 /** Preview long side; the export renders the same image at full size. */
@@ -38,17 +42,7 @@ const ghostBtn =
   "inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border hairline text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-50";
 const swatch = "h-7 w-full cursor-pointer rounded-md border border-input bg-background p-0.5";
 
-const SHAPES: { id: GradientShape; label: string }[] = [
-  { id: "flow", label: "Flow" },
-  { id: "blobs", label: "Blobs" },
-  { id: "swirl", label: "Swirl" },
-];
-
-const STYLES: { id: GradientStyle; label: string }[] = [
-  { id: "fluid", label: "Fluid" },
-  { id: "halftone", label: "Halftone" },
-  { id: "dots", label: "Dots" },
-];
+const randomSeed = () => Math.floor(Math.random() * 1_000_000);
 
 /** Small square previews of each look, rendered once on the client. */
 const lookThumbs = () =>
@@ -179,7 +173,7 @@ export default function GradientEditor() {
     }
   };
 
-  const shuffle = () => set("seed", Math.floor(Math.random() * 1_000_000));
+  const shuffle = () => set("seed", randomSeed());
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -208,11 +202,12 @@ export default function GradientEditor() {
           <div className="flex h-full flex-col gap-5 p-4">
             <div>
               <span className={kicker}>Looks</span>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-4 gap-1.5">
                 {GRADIENT_LOOKS.map((look, i) => (
                   <button
                     key={look.name}
                     type="button"
+                    aria-label={`${look.name} look`}
                     onClick={() => setS((p) => ({ ...p, ...look.settings }))}
                     className="group relative overflow-hidden rounded-md border hairline transition-colors duration-120 hover:border-primary"
                   >
@@ -231,8 +226,8 @@ export default function GradientEditor() {
 
             <div>
               <span className={kicker}>Shape</span>
-              <div className="grid grid-cols-3 gap-1.5">
-                {SHAPES.map((o) => (
+              <div className="grid grid-cols-4 gap-1.5">
+                {GRADIENT_SHAPES.map((o) => (
                   <button
                     key={o.id}
                     type="button"
@@ -249,7 +244,7 @@ export default function GradientEditor() {
             <div>
               <span className={kicker}>Style</span>
               <div className="grid grid-cols-3 gap-1.5">
-                {STYLES.map((o) => (
+                {GRADIENT_STYLES.map((o) => (
                   <button
                     key={o.id}
                     type="button"
@@ -263,10 +258,26 @@ export default function GradientEditor() {
               </div>
             </div>
 
-            <button type="button" onClick={shuffle} className={cn(ghostBtn, "flex-none")}>
-              <Dices className="h-4 w-4" />
-              Shuffle
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setS((p) => surpriseGradient(randomSeed(), p.width, p.height))}
+                title="Randomize everything: shape, style, colors, and effects"
+                className={cn(ghostBtn, "border-primary text-primary hover:text-primary")}
+              >
+                <Sparkles className="h-4 w-4" />
+                Surprise me
+              </button>
+              <button
+                type="button"
+                onClick={shuffle}
+                title="New random pattern, same settings"
+                className={ghostBtn}
+              >
+                <Dices className="h-4 w-4" />
+                Shuffle
+              </button>
+            </div>
 
             <div>
               <span className={kicker}>Size</span>
@@ -293,7 +304,17 @@ export default function GradientEditor() {
             </div>
 
             <div>
-              <span className={kicker}>Palette</span>
+              <span className={cn(kicker, "flex items-center justify-between")}>
+                Palette
+                <button
+                  type="button"
+                  onClick={() => set("colors", generatePalette(randomSeed()))}
+                  className="inline-flex items-center gap-1 normal-case tracking-normal transition-colors hover:text-foreground"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Generate
+                </button>
+              </span>
               <div className="grid grid-cols-4 gap-1.5">
                 {GRADIENT_PALETTES.map((p) => {
                   const active = p.colors.join() === s.colors.join();
@@ -328,25 +349,25 @@ export default function GradientEditor() {
               </div>
             </div>
 
-            {s.style !== "fluid" && (
-              <>
-                <Slider
-                  label="Dot size"
-                  value={s.dot}
-                  display={`${s.dot}px`}
-                  range={RANGES.dot}
-                  step={1}
-                  onChange={(v) => set("dot", v)}
-                />
-                <Slider
-                  label="Angle"
-                  value={s.angle}
-                  display={`${s.angle}°`}
-                  range={RANGES.angle}
-                  step={1}
-                  onChange={(v) => set("angle", v)}
-                />
-              </>
+            {CELL_STYLES.includes(s.style) && (
+              <Slider
+                label="Cell size"
+                value={s.dot}
+                display={`${s.dot}px`}
+                range={RANGES.dot}
+                step={1}
+                onChange={(v) => set("dot", v)}
+              />
+            )}
+            {ANGLE_STYLES.includes(s.style) && (
+              <Slider
+                label="Angle"
+                value={s.angle}
+                display={`${s.angle}°`}
+                range={RANGES.angle}
+                step={1}
+                onChange={(v) => set("angle", v)}
+              />
             )}
 
             <Slider
@@ -381,6 +402,25 @@ export default function GradientEditor() {
               step={0.01}
               onChange={(v) => set("grain", v)}
             />
+
+            <span className={cn(kicker, "-mb-3")}>Effects</span>
+            {(
+              [
+                ["bloom", "Bloom"],
+                ["aberration", "Aberration"],
+                ["vignette", "Vignette"],
+              ] as const
+            ).map(([key, label]) => (
+              <Slider
+                key={key}
+                label={label}
+                value={s[key]}
+                display={`${Math.round(s[key] * 100)}%`}
+                range={RANGES[key]}
+                step={0.05}
+                onChange={(v) => set(key, v)}
+              />
+            ))}
 
             <div className="mt-auto flex flex-col gap-2">
               <div className="flex gap-2">
