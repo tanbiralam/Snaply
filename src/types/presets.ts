@@ -97,6 +97,32 @@ export const presetCategories: PresetCategory[] = [
           grainIntensity: 0,
         },
       },
+      {
+        id: "img-vice-silhouettes",
+        name: "Vice Silhouettes",
+        settings: {
+          padding: 56,
+          borderRadius: 16,
+          shadowIntensity: 50,
+          useGradient: false,
+          backgroundImage: "/backgrounds/vice-silhouettes.webp",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
+      {
+        id: "img-vice-palms",
+        name: "Vice Palms",
+        settings: {
+          padding: 56,
+          borderRadius: 16,
+          shadowIntensity: 50,
+          useGradient: false,
+          backgroundImage: "/backgrounds/vice-palms.webp",
+          blurBackground: false,
+          grainIntensity: 0,
+        },
+      },
     ],
   },
 
