@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import RemoveBackgroundEditor from "./RemoveBackgroundEditor";
 
-const tool = getTool("edit", "remove-background");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("edit", "remove-background");
 
 export default function RemoveBackgroundPage() {
-  return <RemoveBackgroundEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("edit", "remove-background")} />
+      <RemoveBackgroundEditor />
+    </>
+  );
 }

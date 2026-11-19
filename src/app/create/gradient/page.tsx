@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import GradientEditor from "./GradientEditor";
 
-const tool = getTool("create", "gradient");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("create", "gradient");
 
 export default function GradientPage() {
-  return <GradientEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("create", "gradient")} />
+      <GradientEditor />
+    </>
+  );
 }

@@ -442,3 +442,5 @@ change.
 - The editor's components remain in `src/components/` unchanged; only the page moved.
 
 - **Two new Image Backgrounds presets** ("Vice Silhouettes", "Vice Palms"): sources from `new_ss-bg/` converted to webp in `public/backgrounds/` and registered in `src/types/presets.ts`. Shared by every tool using `StylePresets`.
+
+- **SEO pass (2026-11-19)**: tool pages now use `toolMetadata()` (`src/lib/seo.ts`) so OG/Twitter title, description and URL match the tool instead of inheriting the homepage's; keywords emitted; `SoftwareApplication` JSON-LD per tool (`JsonLd` component) and `WebSite` JSON-LD on `/`; `ToolShell` renders an `sr-only` `<h1>` with the tool name (tool pages previously had none). Not done: per-tool OG images, sitemap `lastModified`.

@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import FaviconEditor from "./FaviconEditor";
 
-const tool = getTool("create", "favicon");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("create", "favicon");
 
 export default function FaviconPage() {
-  return <FaviconEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("create", "favicon")} />
+      <FaviconEditor />
+    </>
+  );
 }

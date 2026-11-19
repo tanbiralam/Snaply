@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import SvgOptimizerEditor from "./SvgOptimizerEditor";
 
-const tool = getTool("optimize", "svg-optimizer");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("optimize", "svg-optimizer");
 
 export default function SvgOptimizerPage() {
-  return <SvgOptimizerEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("optimize", "svg-optimizer")} />
+      <SvgOptimizerEditor />
+    </>
+  );
 }

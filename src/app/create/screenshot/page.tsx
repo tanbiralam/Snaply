@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import ScreenshotEditor from "./ScreenshotEditor";
 
-const tool = getTool("create", "screenshot");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("create", "screenshot");
 
 export default function ScreenshotPage() {
-  return <ScreenshotEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("create", "screenshot")} />
+      <ScreenshotEditor />
+    </>
+  );
 }
