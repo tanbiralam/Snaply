@@ -440,3 +440,5 @@ change.
 
 - The Unit 1 brief described the editor as living at `src/app/page.tsx` with types in `src/types/beautifier.ts`; in the actual repo, `/` is a landing page, the editor was at `src/app/editor/page.tsx`, and types live in `src/types/` (`index.ts`, `settings.ts`, `presets.ts`, `code.ts`, `devices.ts`). The move was done from the real location.
 - The editor's components remain in `src/components/` unchanged; only the page moved.
+
+- **Two new Image Backgrounds presets** ("Vice Silhouettes", "Vice Palms"): sources from `new_ss-bg/` converted to webp in `public/backgrounds/` and registered in `src/types/presets.ts`. Shared by every tool using `StylePresets`.
