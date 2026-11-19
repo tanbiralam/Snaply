@@ -85,8 +85,12 @@ function ToolRail() {
 
 /** Category-layout shell: the tool rail beside the tool's own full-height page. */
 export function ToolShell({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const tool = getLiveTools().find((t) => toolPath(t) === pathname);
   return (
     <div className="flex h-screen overflow-hidden">
+      {/* every tool page needs exactly one h1 for crawlers/screen readers */}
+      {tool && <h1 className="sr-only">{tool.name}</h1>}
       <ToolRail />
       <div className="min-w-0 flex-1">{children}</div>
     </div>

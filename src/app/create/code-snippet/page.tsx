@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import CodeSnippetEditor from "./CodeSnippetEditor";
 
-const tool = getTool("create", "code-snippet");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("create", "code-snippet");
 
 export default function CodeSnippetPage() {
-  return <CodeSnippetEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("create", "code-snippet")} />
+      <CodeSnippetEditor />
+    </>
+  );
 }

@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import ResizeEditor from "./ResizeEditor";
 
-const tool = getTool("edit", "resize");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("edit", "resize");
 
 export default function ResizePage() {
-  return <ResizeEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("edit", "resize")} />
+      <ResizeEditor />
+    </>
+  );
 }

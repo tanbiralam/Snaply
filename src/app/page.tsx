@@ -8,6 +8,7 @@ import { Footer } from "@/components/Footer";
 import { FeaturedToolCard } from "@/components/FeaturedToolCard";
 import { HeroVisual } from "@/components/landing/HeroVisual";
 import { PrivacyComparison } from "@/components/landing/PrivacyComparison";
+import { JsonLd } from "@/components/JsonLd";
 import { Faq } from "@/components/landing/Faq";
 import { FinalCta } from "@/components/landing/FinalCta";
 
@@ -55,6 +56,15 @@ export default function LandingPage() {
         backgroundSize: "22px 22px",
       }}
     >
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: site.name,
+          url: site.url,
+          description: site.description,
+        }}
+      />
       <Navbar />
 
       <main>

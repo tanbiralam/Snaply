@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import QrCodeEditor from "./QrCodeEditor";
 
-const tool = getTool("create", "qr-code");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("create", "qr-code");
 
 export default function QrCodePage() {
-  return <QrCodeEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("create", "qr-code")} />
+      <QrCodeEditor />
+    </>
+  );
 }

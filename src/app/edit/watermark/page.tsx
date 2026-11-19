@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import WatermarkEditor from "./WatermarkEditor";
 
-const tool = getTool("edit", "watermark");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("edit", "watermark");
 
 export default function WatermarkPage() {
-  return <WatermarkEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("edit", "watermark")} />
+      <WatermarkEditor />
+    </>
+  );
 }

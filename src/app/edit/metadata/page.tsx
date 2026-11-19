@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import MetadataEditor from "./MetadataEditor";
 
-const tool = getTool("edit", "metadata");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("edit", "metadata");
 
 export default function MetadataPage() {
-  return <MetadataEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("edit", "metadata")} />
+      <MetadataEditor />
+    </>
+  );
 }

@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { getTool, toolPath } from "@/lib/registry/tools";
+import { toolMetadata, toolJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/JsonLd";
 import CompressEditor from "./CompressEditor";
 
-const tool = getTool("optimize", "compress");
-
-export const metadata: Metadata = {
-  title: tool?.name,
-  description: tool?.description,
-  alternates: { canonical: tool ? toolPath(tool) : undefined },
-};
+export const metadata: Metadata = toolMetadata("optimize", "compress");
 
 export default function CompressPage() {
-  return <CompressEditor />;
+  return (
+    <>
+      <JsonLd data={toolJsonLd("optimize", "compress")} />
+      <CompressEditor />
+    </>
+  );
 }
