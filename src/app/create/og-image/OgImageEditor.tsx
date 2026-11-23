@@ -5,6 +5,7 @@ import {
   AlignCenter,
   AlignLeft,
   Check,
+  Columns2,
   Code2,
   Copy,
   Download,
@@ -32,6 +33,7 @@ import {
   defaultOg,
   FONT_CHOICES,
   FONT_PRELOAD,
+  OG_GENERATED,
   OG_GRADIENTS,
   OG_MESH,
   OG_W,
@@ -46,6 +48,7 @@ const TEMPLATES: { id: OgTemplate; label: string; icon: typeof AlignLeft }[] = [
   { id: "spotlight", label: "Spotlight", icon: AlignLeft },
   { id: "centered", label: "Centered", icon: AlignCenter },
   { id: "showcase", label: "Showcase", icon: PanelRight },
+  { id: "split", label: "Split", icon: Columns2 },
 ];
 
 // One-click looks: each sets template + font + background + colours together.
@@ -253,6 +256,38 @@ const RECIPES: { label: string; patch: Partial<OgSettings> }[] = [
       grain: 0,
     },
   },
+  {
+    // Paper panel + a Gradient Generator render on the right, framed image card
+    label: "Split paper",
+    patch: {
+      template: "split",
+      font: "sans",
+      bgType: "generated",
+      genIndex: 3,
+      overlay: 0,
+      panelColor: "#f1efea",
+      eyebrow: "NEW",
+      cta: "Try it free",
+      accent: "#0b8a5c",
+      grain: 0,
+    },
+  },
+  {
+    // Launch card — soft silk render, eyebrow pill + button
+    label: "Silk launch",
+    patch: {
+      template: "centered",
+      font: "display",
+      bgType: "generated",
+      genIndex: 0,
+      overlay: 0.2,
+      eyebrow: "NOW LIVE",
+      cta: "Get started",
+      accent: "#f0abfc",
+      textColor: "#ffffff",
+      grain: 0,
+    },
+  },
 ];
 
 type Platform = "none" | "x" | "linkedin" | "slack" | "google";
@@ -314,6 +349,7 @@ export default function OgImageEditor() {
   const bg = useLoadedImage(bgSrc);
   const logo = useLoadedImage(logoSrc);
   const shot = useLoadedImage(shotSrc);
+  const gen = useLoadedImage(s.bgType === "generated" ? (OG_GENERATED[s.genIndex] ?? OG_GENERATED[0])?.src ?? null : null);
 
   const set = useCallback(
     <K extends keyof OgSettings>(key: K, val: OgSettings[K]) => {
@@ -341,9 +377,9 @@ export default function OgImageEditor() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    const imgs: OgImages = { bg, logo, shot };
+    const imgs: OgImages = { bg, gen, logo, shot };
     shotRectRef.current = drawOg(ctx, s, imgs).shotRect;
-  }, [s, bg, logo, shot, fontsReady, platform]);
+  }, [s, bg, gen, logo, shot, fontsReady, platform]);
 
   // ── Drag the screenshot in the preview ──────────────────────────────────────
   const toOg = useCallback((clientX: number, clientY: number) => {
@@ -617,7 +653,7 @@ export default function OgImageEditor() {
 
             {/* Template */}
             <Section title="Template">
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-4 gap-2">
                 {TEMPLATES.map((t) => {
                   const active = s.template === t.id;
                   return (
@@ -691,6 +727,15 @@ export default function OgImageEditor() {
                   className={cn(inputCls, "resize-none")}
                 />
               </Field>
+              <Field label="Button">
+                <input
+                  type="text"
+                  value={s.cta}
+                  onChange={(e) => set("cta", e.target.value)}
+                  placeholder="e.g. Try it free (leave empty to hide)"
+                  className={inputCls}
+                />
+              </Field>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Brand">
                   <input
@@ -728,7 +773,7 @@ export default function OgImageEditor() {
                 />
               </div>
               <p className="text-2xs text-muted-foreground">
-                Screenshot shows in the Spotlight &amp; Showcase templates.
+                Screenshot shows in the Spotlight, Showcase &amp; Split templates.
               </p>
 
               {shotSrc && s.template !== "centered" && (
@@ -788,7 +833,7 @@ export default function OgImageEditor() {
             {/* Background */}
             <Section title="Background">
               <div className="flex gap-1 rounded-lg border hairline p-0.5">
-                {(["gradient", "mesh", "solid", "image"] as const).map((t) => (
+                {(["generated", "gradient", "mesh", "solid", "image"] as const).map((t) => (
                   <button
                     key={t}
                     type="button"
@@ -800,10 +845,32 @@ export default function OgImageEditor() {
                         : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    {t}
+                    {t === "generated" ? "Art" : t}
                   </button>
                 ))}
               </div>
+
+              {s.bgType === "generated" && (
+                <div className="grid grid-cols-4 gap-2">
+                  {OG_GENERATED.map((g, i) => {
+                    const active = s.genIndex === i;
+                    return (
+                      <button
+                        key={g.name}
+                        type="button"
+                        title={g.name}
+                        aria-label={`${g.name} background`}
+                        onClick={() => set("genIndex", i)}
+                        className={cn(
+                          "h-10 rounded-lg bg-cover bg-center ring-offset-2 ring-offset-background transition-all",
+                          active ? "ring-2 ring-primary" : "ring-1 ring-border hover:ring-strong"
+                        )}
+                        style={{ backgroundImage: `url(${g.thumb})` }}
+                      />
+                    );
+                  })}
+                </div>
+              )}
 
               {s.bgType === "mesh" && (
                 <div className="grid grid-cols-4 gap-2">
@@ -887,15 +954,17 @@ export default function OgImageEditor() {
                 />
               )}
 
-              {s.bgType === "image" && (
+              {(s.bgType === "image" || s.bgType === "generated") && (
                 <>
-                  <ImageSlot
-                    label="Background image"
-                    has={!!bgSrc}
-                    full
-                    onPick={(f) => readFile(f, setBgSrc)}
-                    onClear={() => setBgSrc(null)}
-                  />
+                  {s.bgType === "image" && (
+                    <ImageSlot
+                      label="Background image"
+                      has={!!bgSrc}
+                      full
+                      onPick={(f) => readFile(f, setBgSrc)}
+                      onClear={() => setBgSrc(null)}
+                    />
+                  )}
                   <Field
                     label={`Dark overlay · ${Math.round(s.overlay * 100)}%`}
                   >
@@ -928,6 +997,13 @@ export default function OgImageEditor() {
                 value={s.accent}
                 onChange={(v) => set("accent", v)}
               />
+              {s.template === "split" && (
+                <ColorField
+                  label="Panel (text colour follows it)"
+                  value={s.panelColor}
+                  onChange={(v) => set("panelColor", v)}
+                />
+              )}
               <Field label="Text">
                 <div className="flex items-center gap-2">
                   <button
