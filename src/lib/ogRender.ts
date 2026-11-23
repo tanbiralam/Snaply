@@ -3,6 +3,7 @@
 // architecture invariant — no pixel math is reinvented here.
 
 import { angleToGradientPoints, drawGrain, drawImageCover, roundRect } from "@/lib/canvasHelpers";
+import { presetCategories } from "@/types/presets";
 
 export const OG_W = 1200;
 export const OG_H = 630;
@@ -38,8 +39,14 @@ export const FONT_PRELOAD = [
   '600 16px "Fraunces OG"',
 ];
 
-export type OgTemplate = "spotlight" | "centered" | "showcase";
-export type OgBg = "gradient" | "mesh" | "solid" | "image";
+export type OgTemplate = "spotlight" | "centered" | "showcase" | "split";
+export type OgBg = "gradient" | "mesh" | "solid" | "image" | "generated";
+
+/** Gradient Generator renders, shared with the Screenshot Stylizer's Gradients presets. */
+export const OG_GENERATED: { name: string; src: string; thumb: string }[] =
+  (presetCategories.find((c) => c.id === "gradients")?.presets ?? [])
+    .filter((p) => p.settings.backgroundImage)
+    .map((p) => ({ name: p.name, src: p.settings.backgroundImage!, thumb: p.thumb ?? p.settings.backgroundImage! }));
 
 export const OG_MESH: {
   name: string;
@@ -153,6 +160,8 @@ export interface OgSettings {
   eyebrow: string;
   title: string;
   subtitle: string;
+  /** Button label under the text; empty hides it. */
+  cta: string;
   brand: string;
   handle: string;
   bgType: OgBg;
@@ -161,6 +170,9 @@ export interface OgSettings {
   gradientAngle: number;
   solidColor: string;
   meshIndex: number;
+  genIndex: number; // OG_GENERATED entry for the "generated" background
+  /** Split template: the solid text panel on the left. Text colour is picked for contrast. */
+  panelColor: string;
   grain: number; // film-grain overlay over the background, 0–100
   overlay: number; // dark overlay over a background image, 0–1
   accent: string;
@@ -181,6 +193,8 @@ export interface Rect {
 
 export interface OgImages {
   bg: HTMLImageElement | null;
+  /** The loaded OG_GENERATED image, when bgType is "generated". */
+  gen?: HTMLImageElement | null;
   logo: HTMLImageElement | null;
   shot: HTMLImageElement | null;
 }
@@ -209,6 +223,7 @@ export const defaultOg: OgSettings = {
   title: "Build something people love",
   subtitle:
     "A privacy-first toolkit for crafting beautiful share images — right in your browser.",
+  cta: "",
   brand: "Snaply",
   handle: "snaply.live",
   bgType: "gradient",
@@ -217,6 +232,8 @@ export const defaultOg: OgSettings = {
   gradientAngle: OG_GRADIENTS[0].angle,
   solidColor: "#0f172a",
   meshIndex: 0,
+  genIndex: 0,
+  panelColor: "#f1efea",
   grain: 0,
   overlay: 0.35,
   accent: "#818cf8",
@@ -234,6 +251,20 @@ export function withAlpha(hex: string, a: number): string {
   if (h.length === 3) h = h.split("").map((c) => c + c).join("");
   const n = parseInt(h, 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
+/** Near-black or white, whichever reads better on `hex`. */
+export function inkOn(hex: string): string {
+  let h = hex.replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const n = parseInt(h, 16);
+  const lin = (c: number) => {
+    const v = c / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  };
+  const L = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  // Contrast vs white = 1.05/(L+.05); vs ink(#111, L≈.0056) = (L+.05)/.0556. Pick the larger.
+  return 1.05 / (L + 0.05) >= (L + 0.05) / 0.0556 ? "#ffffff" : "#111111";
 }
 
 export function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number): string[] {
@@ -283,6 +314,82 @@ function fitTitle(
   const lines = all.slice(0, maxLines);
   if (all.length > maxLines) lines[maxLines - 1] = ellipsize(ctx, lines[maxLines - 1], maxW);
   return { size: min, lines, lineHeight: Math.round(min * 1.12) };
+}
+
+/** Largest title (≤ maxLines) whose block fits `maxH`; ellipsized at `min` if nothing fits. */
+function fitTitleIn(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxW: number,
+  maxH: number,
+  maxLines: number,
+  max: number,
+  min: number,
+  family: string,
+  weight: number
+): Fitted {
+  for (let size = max; size >= min; size -= 2) {
+    ctx.font = `${weight} ${size}px ${family}`;
+    const lines = wrap(ctx, text, maxW);
+    const lineHeight = Math.round(size * 1.12);
+    if (lines.length <= maxLines && lines.length * lineHeight <= maxH) {
+      return { size, lines: balance(ctx, text, maxW, lines), lineHeight };
+    }
+  }
+  const lineHeight = Math.round(min * 1.12);
+  return fitTitle(ctx, text, maxW, Math.max(1, Math.min(maxLines, Math.floor(maxH / lineHeight))), min, min, family, weight);
+}
+
+/** Narrowest wrap with the same line count, so the last line isn't a lone word (text-wrap: balance). */
+function balance(ctx: CanvasRenderingContext2D, text: string, maxW: number, lines: string[]): string[] {
+  if (lines.length < 2 || text.includes("\n")) return lines;
+  let lo = maxW * 0.5;
+  let hi = maxW;
+  let best = lines;
+  for (let i = 0; i < 12; i++) {
+    const mid = (lo + hi) / 2;
+    const l = wrap(ctx, text, mid);
+    if (l.length === lines.length) {
+      best = l;
+      hi = mid;
+    } else lo = mid;
+  }
+  return best;
+}
+
+/** Subtitle lines, capped (last one ellipsized). Sets ctx.font. */
+function subtitleLines(ctx: CanvasRenderingContext2D, text: string, maxW: number, px: number, cap = 3): string[] {
+  if (!text) return [];
+  ctx.font = `400 ${px}px ${FONT}`;
+  const all = wrap(ctx, text, maxW);
+  const lines = all.slice(0, cap);
+  if (all.length > cap) lines[cap - 1] = ellipsize(ctx, lines[cap - 1], maxW);
+  return lines;
+}
+
+/**
+ * Title + subtitle sharing `availH` with `otherH` of fixed parts (eyebrow,
+ * button…). The subtitle gives up lines (cap → 1) before the title is
+ * ellipsized, since the title carries the card.
+ */
+function fitCopy(
+  ctx: CanvasRenderingContext2D,
+  s: Pick<OgSettings, "title" | "subtitle">,
+  colW: number,
+  availH: number,
+  otherH: number,
+  t: { maxLines: number; max: number; min: number; family: string; weight: number },
+  sub: { px: number; lh: number; gap: number; cap: number; maxW?: number }
+): { title: Fitted; subLines: string[]; subH: number } {
+  let last: { title: Fitted; subLines: string[]; subH: number } | null = null;
+  for (let cap = sub.cap; cap >= 1; cap--) {
+    const subLines = subtitleLines(ctx, s.subtitle, sub.maxW ?? colW, sub.px, cap);
+    const subH = subLines.length ? sub.gap + subLines.length * sub.lh : 0;
+    const title = fitTitleIn(ctx, s.title, colW, availH - otherH - subH, t.maxLines, t.max, t.min, t.family, t.weight);
+    last = { title, subLines, subH };
+    if (!title.lines[title.lines.length - 1]?.endsWith("…")) break;
+  }
+  return last!;
 }
 
 /** Mark a line as truncated: drop whole words (then characters, for one long word) until "…" fits. */
@@ -335,13 +442,21 @@ function drawShot(
   ctx: CanvasRenderingContext2D,
   img: HTMLImageElement,
   base: Rect,
-  s: OgSettings
+  s: OgSettings,
+  /** White mat around the image, like a printed photo (Split template). */
+  frame = 0
 ): Rect {
-  const w = base.w * s.shotScale;
-  const h = base.h * s.shotScale;
+  let w = base.w * s.shotScale;
+  let h = base.h * s.shotScale;
+  if (frame && s.shotFit === "contain") {
+    // A matted print takes the photo's shape instead of letterboxing it.
+    const k = Math.min((w - 2 * frame) / img.naturalWidth, (h - 2 * frame) / img.naturalHeight);
+    w = img.naturalWidth * k + 2 * frame;
+    h = img.naturalHeight * k + 2 * frame;
+  }
   const x = base.x + (base.w - w) / 2 + s.shotX;
   const y = base.y + (base.h - h) / 2 + s.shotY;
-  const r = 18;
+  const r = 18 + frame;
 
   ctx.save();
   ctx.shadowColor = "rgba(0,0,0,0.35)";
@@ -353,21 +468,26 @@ function drawShot(
   ctx.fill();
   ctx.restore();
 
+  // Image area, inset by the frame.
+  const ix = x + frame;
+  const iy = y + frame;
+  const iw2 = w - 2 * frame;
+  const ih2 = h - 2 * frame;
   ctx.save();
   ctx.beginPath();
-  roundRect(ctx, x, y, w, h, r);
+  roundRect(ctx, ix, iy, iw2, ih2, r - frame);
   ctx.clip();
   ctx.fillStyle = "#ffffff";
-  ctx.fillRect(x, y, w, h);
+  ctx.fillRect(ix, iy, iw2, ih2);
   if (s.shotFit === "cover") {
-    coverRect(ctx, img, x, y, w, h);
+    coverRect(ctx, img, ix, iy, iw2, ih2);
   } else {
     const iw = img.naturalWidth;
     const ih = img.naturalHeight;
-    const scale = Math.min(w / iw, h / ih);
+    const scale = Math.min(iw2 / iw, ih2 / ih);
     const dw = iw * scale;
     const dh = ih * scale;
-    ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+    ctx.drawImage(img, ix + (iw2 - dw) / 2, iy + (ih2 - dh) / 2, dw, dh);
   }
   ctx.restore();
   return { x, y, w, h };
@@ -400,13 +520,14 @@ export type BgSettings = Pick<
 export function drawBackground(
   ctx: CanvasRenderingContext2D,
   s: BgSettings,
-  imgs: Pick<OgImages, "bg">,
+  imgs: Pick<OgImages, "bg" | "gen">,
   W: number = OG_W,
   H: number = OG_H
 ) {
   ctx.clearRect(0, 0, W, H);
-  if (s.bgType === "image" && imgs.bg) {
-    drawImageCover(ctx, imgs.bg, W, H);
+  const photo = s.bgType === "image" ? imgs.bg : s.bgType === "generated" ? imgs.gen : null;
+  if (photo) {
+    drawImageCover(ctx, photo, W, H);
     if (s.overlay > 0) {
       ctx.fillStyle = `rgba(0,0,0,${s.overlay})`;
       ctx.fillRect(0, 0, W, H);
@@ -426,6 +547,52 @@ export function drawBackground(
   }
   // Film grain over the whole background (content rect collapsed to nothing).
   if (s.grain > 0) drawGrain(ctx, W, H, s.grain, -10, -10, 0, 0, 0);
+}
+
+// ─── shared pieces ──────────────────────────────────────────────────────────
+
+const PILL_H = 44;
+const CTA_H = 60;
+
+/** Tinted pill label. `x` is the left edge, or the center when ctx.textAlign is "center". Returns its height. */
+function drawEyebrowPill(ctx: CanvasRenderingContext2D, label: string, color: string, x: number, y: number): number {
+  const centered = ctx.textAlign === "center";
+  ctx.font = `600 20px ${FONT}`;
+  setSpacing(ctx, 2);
+  const t = label.toUpperCase();
+  const pw = ctx.measureText(t).width + 40;
+  const left = centered ? x - pw / 2 : x;
+  ctx.beginPath();
+  roundRect(ctx, left, y, pw, PILL_H, PILL_H / 2);
+  ctx.fillStyle = withAlpha(color, 0.16);
+  ctx.fill();
+  ctx.fillStyle = color;
+  ctx.textBaseline = "middle";
+  ctx.fillText(t, centered ? x : left + 20, y + PILL_H / 2 + 1);
+  setSpacing(ctx, 0);
+  return PILL_H;
+}
+
+/** Accent button with an arrow. Same alignment rule as drawEyebrowPill. Returns its height. */
+function drawCta(ctx: CanvasRenderingContext2D, label: string, accent: string, x: number, y: number): number {
+  const centered = ctx.textAlign === "center";
+  ctx.font = `600 26px ${FONT}`;
+  const t = `${label}  →`;
+  const bw = ctx.measureText(t).width + 60;
+  const left = centered ? x - bw / 2 : x;
+  ctx.save();
+  ctx.shadowColor = withAlpha(accent, 0.45);
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetY = 8;
+  ctx.beginPath();
+  roundRect(ctx, left, y, bw, CTA_H, CTA_H / 2);
+  ctx.fillStyle = accent;
+  ctx.fill();
+  ctx.restore();
+  ctx.fillStyle = inkOn(accent);
+  ctx.textBaseline = "middle";
+  ctx.fillText(t, centered ? x : left + 30, y + CTA_H / 2 + 1);
+  return CTA_H;
 }
 
 // ─── templates ──────────────────────────────────────────────────────────────
@@ -455,21 +622,18 @@ function drawSpotlight(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgIma
     brandBottom = P + 70;
   }
 
-  // Measure the eyebrow + title + subtitle block to vertically center it.
-  const title = fitTitle(ctx, s.title, colW, 4, 78, 40, head.family, head.weight);
-  ctx.font = `400 30px ${FONT}`;
-  const subLines = s.subtitle ? wrap(ctx, s.subtitle, colW) : [];
+  // Measure the eyebrow + title + subtitle + button block; the title gets
+  // whatever height is left, then the block is vertically centered.
   const subLH = 42;
   const barH = 6;
   const eyebrowH = s.eyebrow ? 30 : 0;
-  const blockH =
-    barH + 22 +
-    eyebrowH + (s.eyebrow ? 18 : 0) +
-    title.lines.length * title.lineHeight +
-    (subLines.length ? 22 + subLines.length * subLH : 0);
-
   const bandTop = brandBottom;
   const bandBottom = OG_H - P - 30;
+  const otherH = barH + 22 + eyebrowH + (s.eyebrow ? 18 : 0) + (s.cta ? 36 + CTA_H : 0);
+  const { title, subLines, subH } = fitCopy(ctx, s, colW, bandBottom - bandTop, otherH,
+    { maxLines: 4, max: 78, min: 40, family: head.family, weight: head.weight },
+    { px: 30, lh: subLH, gap: 22, cap: 3 });
+  const blockH = otherH + subH + title.lines.length * title.lineHeight;
   let y = bandTop + Math.max(0, (bandBottom - bandTop - blockH) / 2);
 
   // Accent bar.
@@ -510,6 +674,8 @@ function drawSpotlight(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgIma
     }
   }
 
+  if (s.cta) drawCta(ctx, s.cta, s.accent, P, y + 36);
+
   // Handle (bottom).
   if (s.handle) {
     ctx.fillStyle = muted;
@@ -532,19 +698,18 @@ function drawCentered(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImag
   const muted = withAlpha(text, 0.74);
   const head = HEADINGS[s.font];
 
-  const title = fitTitle(ctx, s.title, maxW, 3, 82, 44, head.family, head.weight);
-  ctx.font = `400 30px ${FONT}`;
-  const subLines = s.subtitle ? wrap(ctx, s.subtitle, maxW - 120) : [];
   const subLH = 42;
   const logoH = imgs.logo ? 80 + 28 : 0;
   const eyebrowH = s.eyebrow ? 44 + 24 : 0;
-  const blockH =
-    logoH +
-    eyebrowH +
-    title.lines.length * title.lineHeight +
-    (subLines.length ? 24 + subLines.length * subLH : 0);
+  const otherH = logoH + eyebrowH + (s.cta ? 36 + CTA_H : 0);
+  // Keep clear of the handle line at the bottom (baseline OG_H - 54).
+  const availH = OG_H - 50 - 100;
+  const { title, subLines, subH } = fitCopy(ctx, s, maxW, availH, otherH,
+    { maxLines: 3, max: 82, min: 44, family: head.family, weight: head.weight },
+    { px: 30, lh: subLH, gap: 24, cap: 2, maxW: maxW - 120 });
+  const blockH = otherH + subH + title.lines.length * title.lineHeight;
 
-  let y = Math.max(70, (OG_H - blockH) / 2 - 20);
+  let y = Math.max(50, (OG_H - 50 - blockH) / 2);
   ctx.textAlign = "center";
 
   if (imgs.logo) {
@@ -586,6 +751,8 @@ function drawCentered(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImag
       y += subLH;
     }
   }
+
+  if (s.cta) drawCta(ctx, s.cta, s.accent, cx, y + 36);
 
   if (s.handle || s.brand) {
     ctx.fillStyle = muted;
@@ -635,21 +802,26 @@ function drawShowcase(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImag
   }
 
   const head = HEADINGS[s.font];
-  const title = fitTitle(ctx, s.title, colW, 5, 60, 34, head.family, head.weight);
-  ctx.font = `400 26px ${FONT}`;
-  const subLines = s.subtitle ? wrap(ctx, s.subtitle, colW) : [];
   const subLH = 38;
-  const blockH =
-    6 + 20 +
-    title.lines.length * title.lineHeight +
-    (subLines.length ? 20 + subLines.length * subLH : 0);
-  y = Math.max(P + 70, (OG_H - blockH) / 2);
+  const top = P + 70;
+  const bottom = OG_H - P - 30;
+  const otherH = (s.eyebrow ? PILL_H + 20 : 6 + 20) + (s.cta ? 30 + CTA_H : 0);
+  const { title, subLines, subH } = fitCopy(ctx, s, colW, bottom - top, otherH,
+    { maxLines: 5, max: 60, min: 34, family: head.family, weight: head.weight },
+    { px: 26, lh: subLH, gap: 20, cap: 3 });
+  const blockH = otherH + subH + title.lines.length * title.lineHeight;
+  y = top + Math.max(0, (bottom - top - blockH) / 2);
 
-  ctx.fillStyle = s.accent;
-  ctx.beginPath();
-  roundRect(ctx, P, y, 48, 6, 3);
-  ctx.fill();
-  y += 26;
+  // Eyebrow pill replaces the accent bar when set.
+  if (s.eyebrow) {
+    y += drawEyebrowPill(ctx, s.eyebrow, s.accent, P, y) + 20;
+  } else {
+    ctx.fillStyle = s.accent;
+    ctx.beginPath();
+    roundRect(ctx, P, y, 48, 6, 3);
+    ctx.fill();
+    y += 26;
+  }
 
   ctx.fillStyle = text;
   ctx.font = `${head.weight} ${title.size}px ${head.family}`;
@@ -668,6 +840,88 @@ function drawShowcase(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImag
       y += subLH;
     }
   }
+
+  if (s.cta) drawCta(ctx, s.cta, s.accent, P, y + 30);
+
+  if (s.handle) {
+    ctx.fillStyle = muted;
+    ctx.font = `600 24px ${FONT}`;
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(s.handle, P, OG_H - 48);
+  }
+  return shotRect;
+}
+
+/** Solid text panel left; the background shows on the right with the image as a matted card on it. */
+function drawSplit(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages): Rect | null {
+  const P = 72;
+  const SPLIT = 600;
+  const ink = inkOn(s.panelColor);
+  const muted = withAlpha(ink, 0.68);
+  const colW = SPLIT - 2 * P;
+  const head = HEADINGS[s.font];
+
+  ctx.fillStyle = s.panelColor;
+  ctx.fillRect(0, 0, SPLIT, OG_H);
+
+  // Right: image card (or a soft placeholder until one is added).
+  const base: Rect = { x: SPLIT + 70, y: 90, w: OG_W - SPLIT - 140, h: OG_H - 180 };
+  let shotRect: Rect | null = null;
+  if (imgs.shot) {
+    shotRect = drawShot(ctx, imgs.shot, base, s, 14);
+  } else {
+    ctx.beginPath();
+    roundRect(ctx, base.x, base.y, base.w, base.h, 32);
+    ctx.fillStyle = "rgba(255,255,255,0.22)";
+    ctx.fill();
+  }
+
+  // Brand row.
+  if (imgs.logo || s.brand) {
+    let x = P;
+    if (imgs.logo) {
+      circleImage(ctx, imgs.logo, x, P, 48);
+      x += 62;
+    }
+    if (s.brand) {
+      ctx.fillStyle = ink;
+      ctx.font = `600 26px ${FONT}`;
+      ctx.textBaseline = "middle";
+      ctx.fillText(s.brand, x, P + 25);
+    }
+  }
+
+  const subLH = 38;
+  const top = P + 70;
+  const bottom = OG_H - P - 30;
+  const otherH = (s.eyebrow ? PILL_H + 22 : 0) + (s.cta ? 32 + CTA_H : 0);
+  const { title, subLines, subH } = fitCopy(ctx, s, colW, bottom - top, otherH,
+    { maxLines: 4, max: 66, min: 36, family: head.family, weight: head.weight },
+    { px: 26, lh: subLH, gap: 20, cap: 3 });
+  const blockH = otherH + subH + title.lines.length * title.lineHeight;
+  let y = top + Math.max(0, (bottom - top - blockH) / 2);
+
+  if (s.eyebrow) y += drawEyebrowPill(ctx, s.eyebrow, s.accent, P, y) + 22;
+
+  ctx.fillStyle = ink;
+  ctx.font = `${head.weight} ${title.size}px ${head.family}`;
+  ctx.textBaseline = "top";
+  for (const ln of title.lines) {
+    ctx.fillText(ln, P, y);
+    y += title.lineHeight;
+  }
+
+  if (subLines.length) {
+    y += 20;
+    ctx.fillStyle = muted;
+    ctx.font = `400 26px ${FONT}`;
+    for (const ln of subLines) {
+      ctx.fillText(ln, P, y);
+      y += subLH;
+    }
+  }
+
+  if (s.cta) drawCta(ctx, s.cta, s.accent, P, y + 32);
 
   if (s.handle) {
     ctx.fillStyle = muted;
@@ -695,6 +949,7 @@ export function drawOg(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgIma
   let shotRect: Rect | null = null;
   if (s.template === "centered") drawCentered(ctx, s, imgs);
   else if (s.template === "showcase") shotRect = drawShowcase(ctx, s, imgs);
+  else if (s.template === "split") shotRect = drawSplit(ctx, s, imgs);
   else shotRect = drawSpotlight(ctx, s, imgs);
   // Reset shared state so the next frame starts clean.
   ctx.textAlign = "left";
