@@ -91,10 +91,7 @@ export function Navbar({ overlay = false }: { overlay?: boolean }) {
       )}
     >
       <div className={cn("mx-auto flex max-w-content items-center gap-6 px-4 md:px-6", overlay ? "h-20" : "h-14")}>
-        {/* Source is 600×200, so it scales up cleanly. */}
-        <div className="[&_img]:h-10 [&_img]:w-auto">
-          <BrandMark />
-        </div>
+        <BrandMark size={overlay ? "lg" : "sm"} />
 
         <nav aria-label="Tool categories" className="hidden items-center gap-1 md:flex">
           {CATEGORIES.map((c) => (

@@ -11,13 +11,7 @@ export const site = {
 
   ogImage: {
     path: "/og-image.webp",
-    width: 1672,
-    height: 941,
-  },
-  logo: {
-    light: "/logo-light.webp",
-    dark: "/logo-dark.webp",
-    width: 84,
-    height: 28,
+    width: 2400,
+    height: 1260,
   },
 } as const;

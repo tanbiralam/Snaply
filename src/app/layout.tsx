@@ -17,7 +17,6 @@ export const metadata: Metadata = {
   },
   description: site.description,
   authors: [{ name: site.name }],
-  icons: { icon: "/favicon.ico" },
   openGraph: {
     title,
     description: site.description,
