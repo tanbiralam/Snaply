@@ -2,11 +2,48 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ImagePlus, Lock, X } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Lock, X } from "lucide-react";
+import photo from "../../../public/landing/hero.jpg";
 import { getToolsForFile, toolPath, type Tool } from "@/lib/registry/tools";
 import { setPendingFile } from "@/lib/pending-file";
 import { ToolIcon } from "@/components/ToolIcon";
 import { cn, formatBytes } from "@/lib/utils";
+
+// Three crops of the hero photo fanned like prints on a desk. They open up on
+// hover and spread further while a file is dragged over.
+const PRINTS = [
+  { pos: "20% 60%", rest: "-rotate-[9deg] -translate-x-7", open: "-rotate-[14deg] -translate-x-12", hover: "group-hover:-rotate-[12deg] group-hover:-translate-x-9" },
+  { pos: "85% 40%", rest: "rotate-[8deg] translate-x-7", open: "rotate-[14deg] translate-x-12", hover: "group-hover:rotate-[11deg] group-hover:translate-x-9" },
+  { pos: "50% 45%", rest: "-translate-y-1", open: "-translate-y-3", hover: "group-hover:-translate-y-2" },
+];
+
+function PhotoStack({ spread }: { spread: boolean }) {
+  return (
+    <span aria-hidden="true" className="relative mb-6 grid h-[72px] w-[96px] place-items-center">
+      {PRINTS.map((p) => (
+        <span
+          key={p.pos}
+          className={cn(
+            "absolute inset-0 overflow-hidden rounded-md bg-card p-1 shadow-elev-2 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+            spread ? p.open : cn(p.rest, p.hover)
+          )}
+        >
+          <span className="relative block h-full w-full overflow-hidden rounded-[3px]">
+            <Image
+              src={photo}
+              alt=""
+              fill
+              sizes="96px"
+              className="object-cover dark:brightness-[0.8] dark:saturate-[0.7]"
+              style={{ objectPosition: p.pos }}
+            />
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /**
  * Drop (or pick) a file → the tools that can open it. Picking one hands the
@@ -105,11 +142,7 @@ export function HeroDropzone() {
               }}
               className="sr-only"
             />
-            <ImagePlus
-              className="mb-5 h-8 w-8 text-muted-foreground transition-[color,transform] duration-160 ease-out group-hover:text-primary motion-safe:group-hover:-translate-y-0.5"
-              strokeWidth={1.25}
-              aria-hidden="true"
-            />
+            <PhotoStack spread={dragging} />
             <span className="text-xl font-semibold text-foreground">
               {dragging ? "Let go to find a tool" : "Drop an image to find a tool"}
             </span>

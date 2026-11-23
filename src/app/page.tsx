@@ -56,7 +56,7 @@ export default function LandingPage() {
 
       <main>
         {/* Hero: misty landscape photo, copy left, dropzone right */}
-        <section className="relative isolate overflow-hidden">
+        <section id="start" className="relative isolate overflow-hidden">
           <Image
             src={heroPhoto}
             alt=""
@@ -138,7 +138,7 @@ export default function LandingPage() {
 
         <Faq />
 
-        <FinalCta />
+        <FinalCta toolCount={getLiveTools().length} />
       </main>
 
       <Footer />

@@ -15,7 +15,7 @@ const columns: ToolCategory[][] = [["create"], ["edit", "optimize"]];
 function CategoryList({ category }: { category: ToolCategory }) {
   return (
     <nav aria-label={`${CATEGORY_LABELS[category]} tools`} className="flex flex-col gap-2">
-      <span className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+      <span className="text-sm font-medium text-foreground">
         {CATEGORY_LABELS[category]}
       </span>
       <ul className="flex flex-col gap-1.5">
@@ -63,7 +63,7 @@ export function Footer() {
           <span className="text-sm text-muted-foreground">
             Got feedback? Reach out on{" "}
             <a
-              href="https://x.com/iamtanbirr"
+              href={site.x}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-medium text-foreground underline decoration-muted-foreground/40 underline-offset-2 transition-colors duration-120 ease-out hover:decoration-foreground"
