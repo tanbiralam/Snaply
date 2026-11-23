@@ -151,11 +151,11 @@ export function CommandPaletteButton() {
       onClick={openCommandPalette}
       aria-label="Search tools"
       aria-keyshortcuts="Meta+K Control+K"
-      className="inline-flex h-8 items-center gap-2 rounded-md border px-3 text-sm text-muted-foreground transition-colors duration-120 ease-out hover:border-strong hover:text-foreground"
+      className="inline-flex h-10 items-center gap-2 rounded-full border bg-card/80 px-4 text-sm text-muted-foreground backdrop-blur transition-colors duration-120 ease-out hover:border-strong hover:text-foreground sm:w-56"
     >
       <Search className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
-      <span className="hidden sm:inline">Search</span>
-      <kbd className="hidden font-mono text-2xs sm:inline">{mod}K</kbd>
+      <span className="hidden sm:inline">Search tools</span>
+      <kbd className="ml-auto hidden rounded-md border bg-background px-1.5 font-mono text-2xs sm:inline">{mod}K</kbd>
     </button>
   );
 }

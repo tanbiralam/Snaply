@@ -11,6 +11,7 @@ import {
   optimizeSvg,
 } from "@/lib/svg";
 import { site } from "@/lib/site";
+import { takePendingFile } from "@/lib/pending-file";
 import { cn, formatBytes } from "@/lib/utils";
 import { toast } from "sonner";
 import { Copy, Download, FileCode, Loader2, RotateCcw, Upload } from "lucide-react";
@@ -105,6 +106,12 @@ export default function SvgOptimizerEditor() {
     },
     [load]
   );
+
+  // A file dropped on the homepage opens straight in here.
+  useEffect(() => {
+    const file = takePendingFile();
+    if (file) void onFile(file);
+  }, [onFile]);
 
   // Pasting SVG markup anywhere on the empty state loads it.
   useEffect(() => {

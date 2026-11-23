@@ -37,6 +37,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
+import { takePendingFile } from "@/lib/pending-file";
 
 // ─── Formats ────────────────────────────────────────────────────────────────
 
@@ -460,6 +461,12 @@ export default function CompressEditor() {
     },
     [bump]
   );
+
+  // A file dropped on the homepage opens straight in here.
+  useEffect(() => {
+    const file = takePendingFile();
+    if (file) addFiles([file]);
+  }, [addFiles]);
 
   const removeItem = useCallback((id: string) => {
     setItems((prev) => {

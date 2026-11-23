@@ -30,6 +30,7 @@
   - `svg-optimizer` — JSON `{ precision: number }` (0–6, integer); invalid values fall back to 3.
   - `qr-code` — JSON `QrSettings` (`src/lib/qr.ts`): text, ecc, size, margin, fg, bg. Read through `parseQr`, which validates/clamps each field and falls back per field. The center logo is never stored.
   - `gradient` — JSON `GradientSettings` (`src/lib/gradient.ts`): shape, style, seed, width/height (must match a `GRADIENT_SIZES` preset), scale, warp, light, grain, colors (4 hex), dot (cell size), angle, bloom, aberration, vignette. Read through `parseGradient`, which clamps/validates each field and falls back per field (settings saved by earlier versions still load).
+- **In-memory file handoff** (`src/lib/pending-file.ts`): the homepage dropzone keeps the picked `File` in a module variable and navigates client-side to the chosen tool; the tool takes it once on mount (`ImageUpload`, plus the Compress and SVG Optimizer editors, which have their own dropzones). It never touches storage or the network and is lost on a hard reload. Which tools are offered comes from the registry's `Tool.input` (`"image"` = PNG/JPEG/WebP, `"svg"`), via `getToolsForFile()`.
 - **In-memory (Canvas / Blob)**: The working image and all generated output. Images exist only as in-memory canvas data and download Blobs; they are never serialized to a server, and only leave the browser via an explicit user-initiated download.
 
 ## Privacy Model

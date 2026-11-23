@@ -13,7 +13,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 ## Core User Flow
 
-1. A first-time user lands on the homepage (`/`) and sees the hero, the privacy/free-forever pitch, 3–4 featured tool cards, and a compact pill strip listing the remaining tools.
+1. A first-time user lands on the homepage (`/`) and sees the photo hero with a dropzone: they drop an image, see the tools that can open it, and pick one, which opens with the image already loaded. Below: the featured tool cards, privacy pitch, FAQ.
 2. They click a featured card (or a pill, or "View all tools") and go straight to a tool page or the directory.
 3. A returning user goes directly to `/tools` (the searchable directory) or to a bookmarked tool page.
 4. On `/tools`, they filter the grid by typing (live filter-as-you-type) or tap a category chip (All / Create / Edit / Optimize) to narrow it down.
