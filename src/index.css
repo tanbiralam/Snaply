@@ -317,3 +317,30 @@
     transition: none;
   }
 }
+
+/* Live tool-card previews (LivePreviews.tsx): the pointer writes --px/--py.
+   Registering them makes them animatable, so a card eases back to rest when
+   the pointer leaves, and follows with a hint of smoothing while active. */
+@property --px {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.5;
+}
+@property --py {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.5;
+}
+.live-preview {
+  transition:
+    --px 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    --py 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.live-preview[data-active] {
+  transition-duration: 80ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-preview {
+    transition: none;
+  }
+}

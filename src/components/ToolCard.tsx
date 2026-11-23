@@ -20,14 +20,14 @@ function CardBody({ tool }: { tool: Tool }) {
   );
 }
 
-export function ToolCard({ tool }: { tool: Tool }) {
+export function ToolCard({ tool, eager = false }: { tool: Tool; eager?: boolean }) {
   if (tool.status === "live") {
     return (
       <Link
         href={toolPath(tool)}
         className={`${cardBase} hover:border-strong hover:shadow-card motion-safe:hover:-translate-y-0.5`}
       >
-        <ToolPreview slug={tool.slug} />
+        <ToolPreview slug={tool.slug} eager={eager} />
         <CardBody tool={tool} />
       </Link>
     );

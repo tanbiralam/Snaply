@@ -67,8 +67,9 @@ export function ToolDirectory() {
 
       {shown.length ? (
         <div className="mt-4 grid grid-cols-tools gap-4">
-          {shown.map((tool) => (
-            <ToolCard key={`${tool.category}/${tool.slug}`} tool={tool} />
+          {shown.map((tool, i) => (
+            // The first row is above the fold: load those previews eagerly (LCP).
+            <ToolCard key={`${tool.category}/${tool.slug}`} tool={tool} eager={i < 4} />
           ))}
         </div>
       ) : (
