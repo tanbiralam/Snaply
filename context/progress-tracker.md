@@ -14,6 +14,28 @@ change.
 
 ## Completed
 
+- **Screenshot Stylizer: drag to move + Scale (crop)** (2026-11-23, branch `feat/homepage-polish`). The user couldn't reposition the screenshot; at 1:1 it sat badly in the frame.
+  - `StyleSettings` gained `imageScale` (percent, default 100) and `imageOffset {x,y}` (fractions of the canvas size, so it survives padding/aspect changes; default centered). `CanvasRenderer` scales the frame + shadow + device chrome + screenshot around the frame center and shifts it. The canvas size is unchanged, so scale >100% plus a drag past an edge crops. The grain cut-out gets the placed rect. Export uses the same draw routine, so the download matches the preview.
+  - Interaction: pointer drag on the canvas (grab cursor, pointer capture, `touch-action: none`). The center is clamped inside the canvas. It snaps to the center lines within 1.5% (hold Alt to skip), and guide lines show when snapped. Double-click re-centers. The Style tab has a Scale slider (40–200%), a hint, and a Center button. Dragging doesn't clear the active preset, and a new upload starts centered.
+  - Offset is one object field because `SettingsPanel.updateSetting` spreads stale `settings`, so two calls in a row would clobber each other.
+  - Verified: `tsc`, lint. Playwright: drag moves it, snap guides appear, the Scale slider goes to 160, the bleed crop renders, the export (2624² at 1:1) matches the preview, Center and double-click reset, the preset stays active, zero page errors. Code Snippet (separate renderer) is untouched.
+
+- **Four halftone Image Background presets** (2026-11-23, branch `feat/homepage-polish`): Halftone Citrus / Lagoon / Ember / Peach, from user-supplied `ss-bg/` (careerkit / legal / pingwatch / snaply .png). Three were scans of a printed card with a cream paper border and a ✦ sparkle mark in the corner. They were cropped to the printed area (bounds detected by saturation, inset 24px), which removes both. All are converted with sharp to WebP q72, ≤2400px wide (306–910 KB, in line with the existing presets, whose thumbnails load the full image). Registered in `src/types/presets.ts` after Vice Palms. Verified in `/create/screenshot`: the four presets apply with zero errors and no failed background requests. The `ss-bg/` sources stay out of git.
+
+- **FAQ restyle v2** (2026-11-23, branch `feat/homepage-polish`). The user said the dashed FAQ no longer matched the other sections.
+  - Two columns, like the privacy section. Left: a sticky "Questions" heading and one line linking to GitHub issues. Right: rows separated by hairlines. The open row becomes an `elev-1` card, and its dividers fade out. The + sits in a round button that tints on hover/open and rotates to ×. The dashed rails, dashed card and centered header are gone. The exclusive accordion, height/fade animation and JSON-LD are kept.
+  - Bug found: pulling cards out with negative margins overflowed 390px and the column edge. The cards now stay inside the column.
+  - Verified: `tsc`, lint. Playwright light/dark at 1440px and light at 390px, no overflow, zero page errors.
+  - User-supplied cat meme (`public/landing/faq-cat.jpg`, 736×713, 46 KB; moved from the repo root) as a tilted print card, "Have another question? Ask on GitHub" → `/issues`. It straightens and lifts on hover. Desktop: below the heading in the left column. Mobile: after the questions (source order header → list → card, placed by grid rows on lg).
+  - Pending user choice: the dropzone photo stack shows three crops of one photo. Options offered: (1) the same photo with three tool effects (pixelated / cut-out on checkerboard / browser frame), recommended; (2) three file types; (3) three new Unsplash photos; (4) three generated gradients.
+
+- **Homepage "taste" pass: CTA, dropzone photo stack, footer** (2026-11-23, branch `feat/homepage-polish`)
+  - Final CTA: a framed `elev-3` panel holding the hero photo (with the same dark-theme recolor), which bookends the full-bleed hero. "Got an image to fix?" plus a tool count. The primary "Drop an image" smooth-scrolls to the hero (`#start`), and the secondary goes to "Browse all tools". The mono "Free · No uploads · No account" line is gone. `FinalCta` now takes `toolCount`.
+  - Dropzone: the icon was replaced by `PhotoStack`, three crops of the hero photo fanned like prints. They open a little on hover and spread further while a file is dragged over (ease-out-expo, off under reduced motion).
+  - Footer category labels: uppercase mono → normal sans (footer is shared with `/tools`).
+  - The FAQ layout is unchanged; the user approved it from their reference.
+  - Verified: `tsc`, lint. Playwright light/dark at 1440px and light at 390px: the CTA scrolls back to the top, the stack's rest/hover/drag states were screenshotted, no overflow, zero page errors.
+
 - **Homepage "taste" pass: privacy section** (2026-11-23, branch `feat/homepage-polish`)
   - Replaced the "PRIVACY" eyebrow, the "Private by architecture, not by policy" slogan, the two equal comparison boxes and the 4-up icon row with one verifiable claim. Left: "Your images never leave this tab." with two short paragraphs and one plain line (free, no account, MIT, link to the source). Right: an `elev-3` mock network panel listing a tool page's own assets, then a "photo.jpg dropped" divider and "No new requests · 0 B uploaded".
   - Kept honest: the panel shows the Compress page (sizes illustrative). Remove Background does fetch its ML model on first use, which is a download, not an upload.
@@ -23,7 +45,7 @@ change.
   - Diagnosis: the tells are default patterns more than missing shadows. Uppercase mono eyebrows everywhere, a two-color headline, a dashed dropzone with an icon in a tinted square, a 4-up icon feature row, an "X, not Y" slogan, flat 1px borders on everything, and the same rhythm in every section.
   - Done: new elevation tokens `--elev-1/2/3/inset` (see ui-context.md), defined in both themes. The hero lost its eyebrow and two-color headline, and "or press ⌘K anywhere" became plain "Free, no sign-up, open source.". The dropzone is a frosted `elev-3` panel with a recessed well (no dashed border), a plain icon, a pill primary button with a highlight and a tinted glow, and a normal-case footer. Tool cards have no border, `elev-1` → `elev-2` on hover with a 4px lift, and the preview zooms 3% on hover. The icon above the title and the "TOOLS" eyebrow are gone.
   - Verified: `tsc`, lint. Playwright screenshots light/dark at 1440px and at 390px, no overflow, zero page errors.
-  - Remaining (steps 3–5): sample-image stack in the dropzone; vary the section rhythm of the FAQ and final CTA; radius/grain/details pass.
+  - Remaining steps: done (see CTA/photo stack entry above).
 
 - **Homepage polish** (2026-11-23, branch `feat/homepage-polish`)
   - Orphan row fixed. Gradient Generator is now featured, so the grid is 7 tools + "More tools" = 8 cards. It uses fixed `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` instead of `grid-cols-tools` auto-fill, so the rows are always full (1/2/4 per row). `/tools` still uses auto-fill.
