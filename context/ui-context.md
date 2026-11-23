@@ -55,6 +55,14 @@ Shadows (light theme only; dark relies on borders + elevation tokens):
 | Card shadow  | `--shadow-card`  | `0 1px 2px rgba(21,32,26,0.06), 0 1px 3px rgba(21,32,26,0.10)`  |
 | Modal shadow | `--shadow-modal` | `0 8px 24px rgba(21,32,26,0.12), 0 2px 6px rgba(21,32,26,0.08)` |
 
+Landing elevation (homepage only, both themes; `shadow-elev-*` utilities, defined in `index.css`):
+
+- Each level is a 1px ring plus layered drop shadows, so elevated landing surfaces use **no border**. Light shadows are jade-tinted ink. Dark adds a faint inset top highlight and uses black shadows.
+- `elev-1`: resting card / button. `elev-2`: hovered card (paired with a `-translate-y-1` lift). `elev-3`: floating panel (hero dropzone, frosted `bg-card/70` + `backdrop-blur-2xl`). `elev-inset`: recessed well inside a panel.
+- The tool pages keep the border-based rules above.
+
+Landing copy rules (to avoid the generated look): no small uppercase monospace eyebrow labels, single-color headlines (no accent-colored half), and no icon-in-a-tinted-square decorations. Monospace is only for real data (dimensions, file sizes, the photo credit).
+
 ## Typography
 
 Fonts:

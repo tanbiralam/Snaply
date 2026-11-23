@@ -134,6 +134,18 @@
     --shadow-xl: 0 10px 30px -12px hsl(0 0% 0% / 0.45);
     --shadow-2xl: 0 18px 45px -15px hsl(0 0% 0% / 0.5);
 
+    /* Elevation (landing): a 1px ring replaces the border, a faint top
+       highlight catches light, and the drop shadow does the separating.
+       1 = resting card, 2 = hovered card, 3 = floating panel. */
+    --elev-1: 0 0 0 1px hsl(0 0% 100% / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.04),
+      0 1px 2px hsl(0 0% 0% / 0.3), 0 4px 12px -4px hsl(0 0% 0% / 0.4);
+    --elev-2: 0 0 0 1px hsl(0 0% 100% / 0.1), inset 0 1px 0 hsl(0 0% 100% / 0.06),
+      0 2px 4px hsl(0 0% 0% / 0.3), 0 18px 36px -12px hsl(0 0% 0% / 0.6);
+    --elev-3: 0 0 0 1px hsl(0 0% 100% / 0.08), inset 0 1px 0 hsl(0 0% 100% / 0.08),
+      0 4px 8px hsl(0 0% 0% / 0.25), 0 32px 64px -20px hsl(0 0% 0% / 0.7);
+    /* Recessed well inside a panel. */
+    --elev-inset: inset 0 1px 3px hsl(0 0% 0% / 0.35), inset 0 0 0 1px hsl(0 0% 100% / 0.05);
+
     --tracking-normal: 0em;
     --spacing: 0.25rem;
   }
@@ -217,6 +229,15 @@
     --shadow-xl: 0 1px 3px 0px hsl(147 21% 10% / 0.1),
       0 8px 10px -1px hsl(147 21% 10% / 0.1);
     --shadow-2xl: 0 1px 3px 0px hsl(147 21% 10% / 0.25);
+
+    --elev-1: 0 0 0 1px hsl(147 21% 10% / 0.06), 0 1px 2px hsl(147 21% 10% / 0.05),
+      0 3px 8px -2px hsl(147 21% 10% / 0.07);
+    --elev-2: 0 0 0 1px hsl(147 21% 10% / 0.08), 0 2px 4px hsl(147 21% 10% / 0.05),
+      0 16px 32px -12px hsl(147 21% 10% / 0.18);
+    --elev-3: 0 0 0 1px hsl(147 21% 10% / 0.06), inset 0 1px 0 hsl(0 0% 100% / 0.7),
+      0 2px 4px hsl(147 21% 10% / 0.04), 0 20px 40px -16px hsl(147 21% 10% / 0.2),
+      0 48px 96px -32px hsl(147 21% 10% / 0.24);
+    --elev-inset: inset 0 1px 2px hsl(147 21% 10% / 0.06), inset 0 0 0 1px hsl(147 21% 10% / 0.06);
   }
 }
 

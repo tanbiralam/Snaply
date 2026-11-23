@@ -37,6 +37,11 @@ export default function ScreenshotEditor() {
     setActivePreset(null);
   }, []);
 
+  // Dragging moves the screenshot without dropping the active preset.
+  const handleOffsetChange = useCallback((x: number, y: number) => {
+    setSettings((prev) => ({ ...prev, imageOffset: { x, y } }));
+  }, []);
+
   const handleResetStyle = useCallback(() => {
     setSettings(defaultSettings);
     setActivePreset(null);
@@ -45,6 +50,8 @@ export default function ScreenshotEditor() {
 
   const handleImageUpload = useCallback((dataUrl: string) => {
     setImage(dataUrl);
+    // A new screenshot starts centered.
+    setSettings((prev) => ({ ...prev, imageOffset: { x: 0, y: 0 } }));
     setImageAspectRatio(null);
     const img = new window.Image();
     img.onload = () => setImageAspectRatio(img.width / img.height);
@@ -120,6 +127,7 @@ export default function ScreenshotEditor() {
                   ref={imageCanvasRef}
                   image={image}
                   settings={settings}
+                  onOffsetChange={handleOffsetChange}
                 />
               </div>
               <div className="flex shrink-0 items-center gap-2">

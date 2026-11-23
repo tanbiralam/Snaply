@@ -103,6 +103,24 @@ const LayoutSection = ({ settings, updateSetting }: StyleTabProps) => (
       min={0} max={80} step={5}
       onChange={(v) => updateSetting("shadowIntensity", v)}
     />
+    <SliderRow
+      label="Scale" value={settings.imageScale ?? 100} unit="%"
+      min={40} max={200} step={5}
+      onChange={(v) => updateSetting("imageScale", v)}
+    />
+    <div className="flex items-center justify-between gap-3">
+      <p className="text-[11px] leading-snug text-muted-foreground">
+        Drag the screenshot to move it. Scale above 100% and drag past an edge to crop.
+      </p>
+      <button
+        type="button"
+        disabled={!settings.imageOffset?.x && !settings.imageOffset?.y}
+        onClick={() => updateSetting("imageOffset", { x: 0, y: 0 })}
+        className="h-7 shrink-0 rounded-md border hairline px-2.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+      >
+        Center
+      </button>
+    </div>
     <div className="space-y-1.5">
       <Label className="text-xs font-medium">Aspect ratio</Label>
       <Select

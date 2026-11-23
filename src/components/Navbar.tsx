@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef, useState, type PointerEvent } from "react";
 import Link from "next/link";
 import { ChevronDown, Github } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -24,13 +27,45 @@ const CATEGORIES = Object.keys(CATEGORY_LABELS) as ToolCategory[];
 
 function CategoryMenu({ category }: { category: ToolCategory }) {
   const items = getLiveTools().filter((t) => t.category === category);
+  // Mouse hover opens the menu; leaving closes it after a short delay so the
+  // pointer can cross the gap to the (portaled) content. Touch and keyboard
+  // keep Radix's normal click/Enter behavior.
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<number | undefined>(undefined);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const show = (e: PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    window.clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+  const hide = (e: PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => setOpen(false), 150);
+  };
   return (
-    <DropdownMenu modal={false}>
-      <DropdownMenuTrigger className="inline-flex h-9 items-center gap-1 rounded-full px-3 text-[15px] font-medium text-foreground/80 outline-none transition-colors duration-120 hover:bg-foreground/5 hover:text-foreground data-[state=open]:bg-foreground/5 data-[state=open]:text-foreground">
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+      <DropdownMenuTrigger
+        ref={triggerRef}
+        onPointerEnter={show}
+        onPointerLeave={hide}
+        // Already open from hover: a mouse click shouldn't toggle it shut.
+        onPointerDown={(e) => e.pointerType === "mouse" && e.preventDefault()}
+        className="inline-flex h-9 items-center gap-1 rounded-full px-3 text-[15px] font-medium text-foreground/80 outline-none transition-colors duration-120 hover:bg-foreground/5 hover:text-foreground data-[state=open]:bg-foreground/5 data-[state=open]:text-foreground">
         {CATEGORY_LABELS[category]}
         <ChevronDown className="h-4 w-4 opacity-60" strokeWidth={1.5} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" sideOffset={8} className="w-72 rounded-2xl p-2">
+      <DropdownMenuContent
+        align="start"
+        sideOffset={8}
+        onPointerEnter={show}
+        onPointerLeave={hide}
+        // A click on our own trigger counts as "outside" to Radix; ignore it.
+        onPointerDownOutside={(e) => {
+          if (triggerRef.current?.contains(e.target as Node)) e.preventDefault();
+        }}
+        className="w-72 rounded-2xl p-2"
+      >
         {items.map((tool) => (
           <DropdownMenuItem key={tool.slug} asChild className="cursor-pointer rounded-xl p-2">
             <Link href={toolPath(tool)} className="flex items-center gap-3">

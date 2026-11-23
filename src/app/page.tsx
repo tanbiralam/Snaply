@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import heroPhoto from "../../public/landing/hero.jpg";
-import { LayoutGrid } from "lucide-react";
 import { site } from "@/lib/site";
 import { getFeaturedTools, getLiveTools } from "@/lib/registry/tools";
 import { Navbar } from "@/components/Navbar";
@@ -25,23 +24,18 @@ function MoreToolsCard({ count }: { count: number }) {
   return (
     <Link
       href="/tools"
-      className="group flex flex-col overflow-hidden rounded-lg border bg-card transition-[border-color,transform,box-shadow] duration-120 ease-out hover:border-strong hover:shadow-card motion-safe:hover:-translate-y-0.5"
+      className="group flex flex-col overflow-hidden rounded-xl bg-card shadow-elev-1 transition-[transform,box-shadow] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-1"
     >
-      <div className="flex aspect-video w-full items-center justify-center bg-muted">
-        <span className="font-mono text-4xl font-semibold text-muted-foreground">
+      <div className="flex aspect-video w-full items-center justify-center bg-muted shadow-elev-inset">
+        <span className="text-5xl font-semibold tracking-tight text-muted-foreground transition-colors duration-160 group-hover:text-foreground">
           +{count}
         </span>
       </div>
-      <div className="flex flex-col gap-2 p-5">
-        <LayoutGrid className="h-5 w-5 text-primary" strokeWidth={1.5} />
-        <div className="flex flex-col gap-1">
-          <h3 className="text-lg font-medium text-card-foreground">
-            More tools
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Browse the full directory, or search with ⌘K.
-          </p>
-        </div>
+      <div className="flex flex-col gap-1 p-5">
+        <h3 className="text-lg font-medium text-card-foreground">More tools</h3>
+        <p className="text-sm text-muted-foreground">
+          Browse the full directory, or search with ⌘K.
+        </p>
       </div>
     </Link>
   );
@@ -62,7 +56,7 @@ export default function LandingPage() {
 
       <main>
         {/* Hero: misty landscape photo, copy left, dropzone right */}
-        <section className="relative isolate overflow-hidden">
+        <section id="start" className="relative isolate overflow-hidden">
           <Image
             src={heroPhoto}
             alt=""
@@ -88,12 +82,8 @@ export default function LandingPage() {
 
           <div className="mx-auto grid max-w-content items-center gap-12 px-4 pb-24 pt-32 md:px-6 lg:min-h-[760px] lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pt-28">
             <div>
-              <p className="font-mono text-2xs font-medium uppercase tracking-wider text-foreground/70">
-                Free · No sign-up · Open source
-              </p>
-              <h1 className="mt-5 text-[clamp(2.75rem,5.6vw,4.75rem)] font-bold leading-[0.98] tracking-[-0.045em] text-foreground">
-                Image tools that stay{" "}
-                <span className="text-primary">on your device.</span>
+              <h1 className="text-[clamp(2.75rem,5.6vw,4.75rem)] font-bold leading-[0.98] tracking-[-0.045em] text-foreground">
+                Image tools that stay on your device.
               </h1>
               <p className="mt-6 max-w-[460px] text-lg text-foreground/75">
                 Compress, resize, remove backgrounds, blur, watermark and make
@@ -102,12 +92,12 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
                 <Link
                   href="/tools"
-                  className="inline-flex h-11 items-center rounded-full border border-foreground/15 bg-background/70 px-5 text-sm font-medium text-foreground backdrop-blur transition-colors duration-120 hover:bg-background"
+                  className="inline-flex h-11 items-center rounded-full bg-card/85 px-5 text-sm font-medium text-foreground shadow-elev-1 backdrop-blur transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-px"
                 >
                   Browse all {getLiveTools().length} tools
                 </Link>
-                <span className="hidden font-mono text-2xs font-medium uppercase tracking-wider text-foreground/60 sm:inline">
-                  or press ⌘K anywhere
+                <span className="hidden text-sm text-foreground/60 sm:inline">
+                  Free, no sign-up, open source.
                 </span>
               </div>
             </div>
@@ -130,12 +120,11 @@ export default function LandingPage() {
           id="tools"
           className="mx-auto max-w-content scroll-mt-14 px-4 py-20 md:px-6"
         >
-          <p className="font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
-            Tools
-          </p>
-          <h2 className="mt-4 text-3xl font-bold">Popular tools</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Popular tools</h2>
 
-          <div className="mt-8 grid grid-cols-tools gap-4">
+          {/* Fixed 1/2/4 columns for exactly 8 cards (7 featured + More), so
+              no row is ever left with an orphan. */}
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {getFeaturedTools().map((tool) => (
               <FeaturedToolCard key={tool.slug} tool={tool} />
             ))}
@@ -149,7 +138,7 @@ export default function LandingPage() {
 
         <Faq />
 
-        <FinalCta />
+        <FinalCta toolCount={getLiveTools().length} />
       </main>
 
       <Footer />

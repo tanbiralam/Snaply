@@ -19,6 +19,12 @@ export interface StyleSettings {
   backgroundImage: string | null;
   /** Address-bar text shown in the browser device frame */
   browserUrl: string;
+  /** Screenshot size relative to its fitted size, in percent. Above 100 it
+   *  can run past the canvas edge, which crops it. */
+  imageScale: number;
+  /** Screenshot offset from center, as a fraction of canvas width/height, so
+   *  it survives padding and aspect-ratio changes. Set by dragging. */
+  imageOffset: { x: number; y: number };
 }
 
 export const defaultSettings: StyleSettings = {
@@ -36,4 +42,6 @@ export const defaultSettings: StyleSettings = {
   grainIntensity: 0,
   backgroundImage: null,
   browserUrl: "yoursite.com",
+  imageScale: 100,
+  imageOffset: { x: 0, y: 0 },
 };

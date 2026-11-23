@@ -2,11 +2,48 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ImagePlus, Lock, X } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Lock, X } from "lucide-react";
+import photo from "../../../public/landing/hero.jpg";
 import { getToolsForFile, toolPath, type Tool } from "@/lib/registry/tools";
 import { setPendingFile } from "@/lib/pending-file";
 import { ToolIcon } from "@/components/ToolIcon";
 import { cn, formatBytes } from "@/lib/utils";
+
+// Three crops of the hero photo fanned like prints on a desk. They open up on
+// hover and spread further while a file is dragged over.
+const PRINTS = [
+  { pos: "20% 60%", rest: "-rotate-[9deg] -translate-x-7", open: "-rotate-[14deg] -translate-x-12", hover: "group-hover:-rotate-[12deg] group-hover:-translate-x-9" },
+  { pos: "85% 40%", rest: "rotate-[8deg] translate-x-7", open: "rotate-[14deg] translate-x-12", hover: "group-hover:rotate-[11deg] group-hover:translate-x-9" },
+  { pos: "50% 45%", rest: "-translate-y-1", open: "-translate-y-3", hover: "group-hover:-translate-y-2" },
+];
+
+function PhotoStack({ spread }: { spread: boolean }) {
+  return (
+    <span aria-hidden="true" className="relative mb-6 grid h-[72px] w-[96px] place-items-center">
+      {PRINTS.map((p) => (
+        <span
+          key={p.pos}
+          className={cn(
+            "absolute inset-0 overflow-hidden rounded-md bg-card p-1 shadow-elev-2 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",
+            spread ? p.open : cn(p.rest, p.hover)
+          )}
+        >
+          <span className="relative block h-full w-full overflow-hidden rounded-[3px]">
+            <Image
+              src={photo}
+              alt=""
+              fill
+              sizes="96px"
+              className="object-cover dark:brightness-[0.8] dark:saturate-[0.7]"
+              style={{ objectPosition: p.pos }}
+            />
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
 
 /**
  * Drop (or pick) a file → the tools that can open it. Picking one hands the
@@ -29,13 +66,14 @@ export function HeroDropzone() {
 
   return (
     <div className="w-full">
-      <div className="rounded-2xl border border-foreground/10 bg-background/75 p-2 shadow-2xl backdrop-blur-xl">
+      {/* Frosted panel floating over the photo; the inner well is recessed. */}
+      <div className="rounded-[20px] bg-card/70 p-2 shadow-elev-3 backdrop-blur-2xl backdrop-saturate-150">
         {picked ? (
-          <div className="rounded-xl bg-card p-4 sm:p-5">
+          <div className="rounded-[14px] bg-card p-4 shadow-elev-inset sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate font-medium text-foreground">{picked.file.name}</p>
-                <p className="font-mono text-2xs uppercase tracking-wider text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {formatBytes(picked.file.size)} ·{" "}
                   {picked.tools.length
                     ? `${picked.tools.length} tools can open this`
@@ -59,7 +97,7 @@ export function HeroDropzone() {
                     <button
                       type="button"
                       onClick={() => open(tool)}
-                      className="group flex w-full items-center gap-3 rounded-lg border bg-background px-3 py-3 text-left transition-[border-color,transform] duration-120 ease-out hover:border-strong motion-safe:hover:-translate-y-0.5"
+                      className="group flex w-full items-center gap-3 rounded-lg bg-background px-3 py-3 text-left shadow-elev-1 transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-0.5"
                     >
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10">
                         <ToolIcon name={tool.icon} className="h-[18px] w-[18px] text-primary" />
@@ -91,8 +129,8 @@ export function HeroDropzone() {
               pick(e.dataTransfer.files[0]);
             }}
             className={cn(
-              "group flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition-colors duration-120 sm:py-14",
-              dragging ? "border-primary bg-primary/10" : "border-foreground/15 bg-card hover:border-primary/60"
+              "group flex cursor-pointer flex-col items-center rounded-[14px] px-6 py-12 text-center shadow-elev-inset transition-[background-color,box-shadow] duration-160 ease-out sm:py-14",
+              dragging ? "bg-primary/10 ring-2 ring-inset ring-primary" : "bg-card"
             )}
           >
             <input
@@ -104,24 +142,22 @@ export function HeroDropzone() {
               }}
               className="sr-only"
             />
-            <span className="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary transition-transform duration-120 ease-out motion-safe:group-hover:-translate-y-0.5">
-              <ImagePlus className="h-6 w-6" strokeWidth={1.5} />
-            </span>
+            <PhotoStack spread={dragging} />
             <span className="text-xl font-semibold text-foreground">
               {dragging ? "Let go to find a tool" : "Drop an image to find a tool"}
             </span>
             <span className="mt-1 text-sm text-muted-foreground">We'll show you what you can do with it.</span>
-            <span className="mt-6 inline-flex h-11 items-center rounded-md bg-primary px-6 font-medium text-primary-foreground transition-colors duration-120 ease-out group-hover:bg-primary-hover">
+            <span className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.2),0_1px_2px_hsl(var(--primary)/0.4),0_6px_16px_-6px_hsl(var(--primary)/0.6)] transition-[background-color,transform] duration-160 ease-out group-hover:bg-primary-hover motion-safe:group-hover:-translate-y-px">
               Choose an image
             </span>
           </label>
         )}
-        <div className="flex items-center justify-between gap-3 px-3 pb-1 pt-3 font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center justify-between gap-3 px-3 pb-1 pt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <Lock className="h-3 w-3" />
-            Never uploaded
+            <Lock className="h-3 w-3" aria-hidden="true" />
+            Never leaves your device
           </span>
-          <span>PNG · JPG · WEBP · SVG</span>
+          <span>PNG, JPG, WebP, SVG</span>
         </div>
       </div>
 

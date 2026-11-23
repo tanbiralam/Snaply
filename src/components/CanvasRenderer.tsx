@@ -33,7 +33,15 @@ import { toast } from "sonner";
 interface CanvasRendererProps {
   image: string | null;
   settings: StyleSettings;
+  /** Called while the screenshot is dragged; offsets are fractions of the
+   *  canvas size (see StyleSettings.imageOffset). */
+  onOffsetChange?: (x: number, y: number) => void;
 }
+
+/** Snap to the center line when this close (fraction of canvas size). */
+const SNAP = 0.015;
+/** Keep the screenshot's center inside the canvas. */
+const clampOffset = (v: number) => Math.max(-0.5, Math.min(0.5, v));
 
 export interface CanvasRendererRef {
   exportImage: (format?: "png" | "jpeg" | "webp", quality?: number) => string | null;
@@ -43,7 +51,7 @@ export interface CanvasRendererRef {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>(
-  ({ image, settings }, ref) => {
+  ({ image, settings, onOffsetChange }, ref) => {
     const canvasRef       = useRef<HTMLCanvasElement>(null);
     const containerRef    = useRef<HTMLDivElement>(null);
     const autoFitScaleRef = useRef(1);
@@ -55,6 +63,8 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
     const [containerHeight,setContainerHeight]= useState(500);
     const [isLoading,      setIsLoading]      = useState(false);
     const [zoomLevel,      setZoomLevel]      = useState<number | null>(null);
+    const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
+    const [dragging, setDragging] = useState(false);
 
     const { resolvedTheme } = useTheme();
     const isDark = resolvedTheme === "dark";
@@ -175,6 +185,17 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
         const { x: frameX, y: frameY } = getCenteredPosition(
           canvasW, canvasH, layout.frameWidth, layout.frameHeight, shadowOffsetX, shadowOffsetY
         );
+        // User placement: scale around the frame's center, then shift it.
+        const s  = (settings.imageScale ?? 100) / 100;
+        const cx = frameX + layout.frameWidth / 2;
+        const cy = frameY + layout.frameHeight / 2;
+        const dx = (settings.imageOffset?.x ?? 0) * canvasW;
+        const dy = (settings.imageOffset?.y ?? 0) * canvasH;
+        const place = () => {
+          ctx.translate(cx + dx, cy + dy);
+          ctx.scale(s, s);
+          ctx.translate(-cx, -cy);
+        };
 
         // 2. Blurred backdrop
         if (settings.blurBackground) {
@@ -197,12 +218,17 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
 
         // 2b. Grain overlay (background only)
         if (settings.grainIntensity > 0) {
+          // Grain skips the screenshot, so pass its placed (scaled + shifted) rect.
           drawGrain(
             ctx, canvasW, canvasH, settings.grainIntensity,
-            frameX + layout.contentX, frameY + layout.contentY,
-            layout.contentWidth, layout.contentHeight, layout.contentRadius
+            cx + dx + (frameX + layout.contentX - cx) * s,
+            cy + dy + (frameY + layout.contentY - cy) * s,
+            layout.contentWidth * s, layout.contentHeight * s, layout.contentRadius * s
           );
         }
+
+        ctx.save();
+        place();
 
         // 3. Drop shadow
         if (settings.shadowIntensity > 0) {
@@ -229,6 +255,7 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
           frameX + layout.contentX, frameY + layout.contentY,
           layout.contentWidth, layout.contentHeight, layout.contentRadius
         );
+        ctx.restore();
       },
        
       [loadedImage, loadedBgImage, settings, isDark]
@@ -271,6 +298,30 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
     const displayWidth   = Math.round(canvasSize.width  * effectiveScale);
     const displayHeight  = Math.round(canvasSize.height * effectiveScale);
 
+    // ── Drag to move the screenshot ─────────────────────────────────────────
+    const canDrag = !!onOffsetChange && !!loadedImage;
+    const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (!canDrag || e.button !== 0) return;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      dragRef.current = { x: e.clientX, y: e.clientY, ox: settings.imageOffset?.x ?? 0, oy: settings.imageOffset?.y ?? 0 };
+      setDragging(true);
+    };
+    const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      const d = dragRef.current;
+      if (!d || !onOffsetChange) return;
+      let x = clampOffset(d.ox + (e.clientX - d.x) / displayWidth);
+      let y = clampOffset(d.oy + (e.clientY - d.y) / displayHeight);
+      if (!e.altKey) {
+        if (Math.abs(x) < SNAP) x = 0;
+        if (Math.abs(y) < SNAP) y = 0;
+      }
+      onOffsetChange(x, y);
+    };
+    const endDrag = () => {
+      dragRef.current = null;
+      setDragging(false);
+    };
+
     // ── Render ──────────────────────────────────────────────────────────────
     return (
       <div
@@ -292,9 +343,22 @@ export const CanvasRenderer = forwardRef<CanvasRendererRef, CanvasRendererProps>
             ref={canvasRef}
             width={canvasSize.width}
             height={canvasSize.height}
-            style={{ width: displayWidth, height: displayHeight }}
-            className="block"
+            style={{ width: displayWidth, height: displayHeight, touchAction: canDrag ? "none" : undefined }}
+            className={canDrag ? (dragging ? "block cursor-grabbing" : "block cursor-grab") : "block"}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onDoubleClick={() => onOffsetChange?.(0, 0)}
+            title={canDrag ? "Drag to move · double-click to center" : undefined}
           />
+          {/* Center guides while dragging, shown when snapped. */}
+          {dragging && (settings.imageOffset?.x ?? 0) === 0 && (
+            <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-primary/70" />
+          )}
+          {dragging && (settings.imageOffset?.y ?? 0) === 0 && (
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-primary/70" />
+          )}
 
           {isLoading && (
             <div className="absolute inset-0 flex items-center justify-center bg-card/50 backdrop-blur-sm rounded-xl">
