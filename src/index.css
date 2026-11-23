@@ -272,3 +272,27 @@
     animation: none;
   }
 }
+
+/* FAQ accordion: the answer eases open/closed (height + fade). Uses
+   ::details-content + interpolate-size; browsers without them just snap. */
+.faq-item {
+  interpolate-size: allow-keywords;
+}
+.faq-item::details-content {
+  block-size: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    block-size 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 220ms ease-out,
+    content-visibility 220ms allow-discrete;
+}
+.faq-item[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq-item::details-content {
+    transition: none;
+  }
+}

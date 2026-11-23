@@ -31,7 +31,7 @@ export const ThemeToggle = () => {
       size="icon"
       onClick={toggleTheme}
       aria-label="Toggle theme"
-      className="rounded-lg border hairline hover:bg-secondary transition-colors"
+      className="rounded-full border hairline bg-card/80 hover:bg-secondary transition-colors"
     >
       {mounted && resolvedTheme === "dark" ? (
         <Sun className="h-4 w-4" />

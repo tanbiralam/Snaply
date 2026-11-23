@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { CATEGORY_LABELS, toolPath, type Tool } from "@/lib/registry/tools";
 import { ToolIcon } from "@/components/ToolIcon";
+import { ToolPreview } from "@/components/ToolPreview";
 
 const cardBase =
   "relative flex flex-col overflow-hidden rounded-lg border bg-card transition-[border-color,transform,box-shadow] duration-120 ease-out";
@@ -27,15 +27,7 @@ export function ToolCard({ tool }: { tool: Tool }) {
         href={toolPath(tool)}
         className={`${cardBase} hover:border-strong hover:shadow-card motion-safe:hover:-translate-y-0.5`}
       >
-        <div className="relative aspect-video w-full overflow-hidden bg-muted">
-          <Image
-            src={`/landing/thumbs/${tool.slug}.webp`}
-            alt=""
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 260px"
-            className="object-cover"
-          />
-        </div>
+        <ToolPreview slug={tool.slug} />
         <CardBody tool={tool} />
       </Link>
     );

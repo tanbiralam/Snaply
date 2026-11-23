@@ -16,6 +16,8 @@ export interface Tool {
   status: ToolStatus;
   /** Shown on the homepage's curated grid; every tool still appears on /tools regardless. */
   featured?: boolean;
+  /** What file the tool opens: drives the homepage dropzone's suggestions. */
+  input?: "image" | "svg";
 }
 
 export const CATEGORY_LABELS: Record<ToolCategory, string> = {
@@ -28,6 +30,7 @@ export const tools: readonly Tool[] = [
   // Create
   {
     slug: "screenshot",
+    input: "image",
     category: "create",
     name: "Screenshot Stylizer",
     description:
@@ -87,6 +90,7 @@ export const tools: readonly Tool[] = [
   },
   {
     slug: "favicon",
+    input: "image",
     category: "create",
     name: "Favicon Generator",
     description:
@@ -156,6 +160,7 @@ export const tools: readonly Tool[] = [
 
   {
     slug: "resize",
+    input: "image",
     category: "edit",
     name: "Resize & Crop",
     description:
@@ -178,6 +183,7 @@ export const tools: readonly Tool[] = [
   },
   {
     slug: "metadata",
+    input: "image",
     category: "edit",
     name: "Metadata Viewer",
     description:
@@ -197,6 +203,7 @@ export const tools: readonly Tool[] = [
   },
   {
     slug: "redact",
+    input: "image",
     category: "edit",
     name: "Redact & Blur",
     description:
@@ -208,6 +215,7 @@ export const tools: readonly Tool[] = [
   },
   {
     slug: "remove-background",
+    input: "image",
     category: "edit",
     name: "Remove Background",
     description:
@@ -224,6 +232,7 @@ export const tools: readonly Tool[] = [
   },
   {
     slug: "watermark",
+    input: "image",
     category: "edit",
     name: "Watermark",
     description:
@@ -246,6 +255,7 @@ export const tools: readonly Tool[] = [
   // Optimize
   {
     slug: "compress",
+    input: "image",
     category: "optimize",
     name: "Compress & Convert",
     description:
@@ -273,6 +283,7 @@ export const tools: readonly Tool[] = [
   },
   {
     slug: "svg-optimizer",
+    input: "svg",
     category: "optimize",
     name: "SVG Optimizer",
     description:
@@ -283,6 +294,7 @@ export const tools: readonly Tool[] = [
   },
   {
     slug: "blurhash",
+    input: "image",
     category: "optimize",
     name: "BlurHash Generator",
     description:
@@ -316,6 +328,12 @@ export function getLiveTools(): Tool[] {
 /** Curated subset for the homepage grid; every tool still lists on /tools. */
 export function getFeaturedTools(): Tool[] {
   return tools.filter((t) => t.status === "live" && t.featured);
+}
+
+/** Live tools that open a dropped file of this kind (homepage dropzone). */
+export function getToolsForFile(file: File): Tool[] {
+  const kind = file.type === "image/svg+xml" || /\.svg$/i.test(file.name) ? "svg" : /^image\/(png|jpeg|webp)$/.test(file.type) ? "image" : null;
+  return kind ? tools.filter((t) => t.status === "live" && t.input === kind) : [];
 }
 
 // Filler words dropped from queries so "png to webp" matches on png + webp.

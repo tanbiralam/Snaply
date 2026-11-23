@@ -1,4 +1,5 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { takePendingFile } from '@/lib/pending-file';
 import { Upload, Image as ImageIcon, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -34,6 +35,20 @@ export const ImageUpload = ({ onImageUpload, hasImage, label = 'screenshot', onF
     },
     [onImageUpload, onFiles]
   );
+
+  // A file dropped on the homepage opens straight into this tool.
+  useEffect(() => {
+    const file = takePendingFile();
+    if (!file) return;
+    if (onFiles) {
+      onFiles([file]); // may return a promise; never return it from an effect
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => onImageUpload(event.target?.result as string);
+    reader.readAsDataURL(file);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on mount
+  }, []);
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
