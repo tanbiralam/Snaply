@@ -156,6 +156,7 @@ export const tools: readonly Tool[] = [
     ],
     icon: "Waves",
     status: "live",
+    featured: true,
   },
 
   {

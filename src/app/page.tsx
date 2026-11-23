@@ -135,7 +135,9 @@ export default function LandingPage() {
           </p>
           <h2 className="mt-4 text-3xl font-bold">Popular tools</h2>
 
-          <div className="mt-8 grid grid-cols-tools gap-4">
+          {/* Fixed 1/2/4 columns for exactly 8 cards (7 featured + More), so
+              no row is ever left with an orphan. */}
+          <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {getFeaturedTools().map((tool) => (
               <FeaturedToolCard key={tool.slug} tool={tool} />
             ))}
