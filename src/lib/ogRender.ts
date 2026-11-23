@@ -39,7 +39,7 @@ export const FONT_PRELOAD = [
   '600 16px "Fraunces OG"',
 ];
 
-export type OgTemplate = "spotlight" | "centered" | "showcase" | "split";
+export type OgTemplate = "spotlight" | "centered" | "showcase" | "split" | "halo";
 export type OgBg = "gradient" | "mesh" | "solid" | "image" | "generated";
 
 /** Gradient Generator renders, shared with the Screenshot Stylizer's Gradients presets. */
@@ -251,6 +251,18 @@ export function withAlpha(hex: string, a: number): string {
   if (h.length === 3) h = h.split("").map((c) => c + c).join("");
   const n = parseInt(h, 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
+/** Linear blend of two hex colours, t = 0 → a, 1 → b. */
+export function mix(a: string, b: string, t: number): string {
+  const p = (h: string) => {
+    let x = h.replace("#", "");
+    if (x.length === 3) x = x.split("").map((c) => c + c).join("");
+    const n = parseInt(x, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const [ca, cb] = [p(a), p(b)];
+  return "#" + ca.map((v, i) => Math.round(v + (cb[i] - v) * t).toString(16).padStart(2, "0")).join("");
 }
 
 /** Near-black or white, whichever reads better on `hex`. */
@@ -852,31 +864,15 @@ function drawShowcase(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImag
   return shotRect;
 }
 
-/** Solid text panel left; the background shows on the right with the image as a matted card on it. */
-function drawSplit(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages): Rect | null {
+/**
+ * Left text column shared by Split and Halo: brand row, eyebrow pill, title,
+ * subtitle, button, handle. Title + subtitle are fitted to the space left.
+ */
+function drawTextColumn(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages, colW: number, ink: string) {
   const P = 72;
-  const SPLIT = 600;
-  const ink = inkOn(s.panelColor);
   const muted = withAlpha(ink, 0.68);
-  const colW = SPLIT - 2 * P;
   const head = HEADINGS[s.font];
 
-  ctx.fillStyle = s.panelColor;
-  ctx.fillRect(0, 0, SPLIT, OG_H);
-
-  // Right: image card (or a soft placeholder until one is added).
-  const base: Rect = { x: SPLIT + 70, y: 90, w: OG_W - SPLIT - 140, h: OG_H - 180 };
-  let shotRect: Rect | null = null;
-  if (imgs.shot) {
-    shotRect = drawShot(ctx, imgs.shot, base, s, 14);
-  } else {
-    ctx.beginPath();
-    roundRect(ctx, base.x, base.y, base.w, base.h, 32);
-    ctx.fillStyle = "rgba(255,255,255,0.22)";
-    ctx.fill();
-  }
-
-  // Brand row.
   if (imgs.logo || s.brand) {
     let x = P;
     if (imgs.logo) {
@@ -929,7 +925,95 @@ function drawSplit(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages)
     ctx.textBaseline = "alphabetic";
     ctx.fillText(s.handle, P, OG_H - 48);
   }
+}
+
+/** Solid text panel left; the background shows on the right with the image as a matted card on it. */
+function drawSplit(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages): Rect | null {
+  const SPLIT = 600;
+  ctx.fillStyle = s.panelColor;
+  ctx.fillRect(0, 0, SPLIT, OG_H);
+
+  // Right: image card (or a soft placeholder until one is added).
+  const base: Rect = { x: SPLIT + 70, y: 90, w: OG_W - SPLIT - 140, h: OG_H - 180 };
+  let shotRect: Rect | null = null;
+  if (imgs.shot) {
+    shotRect = drawShot(ctx, imgs.shot, base, s, 14);
+  } else {
+    ctx.beginPath();
+    roundRect(ctx, base.x, base.y, base.w, base.h, 32);
+    ctx.fillStyle = "rgba(255,255,255,0.22)";
+    ctx.fill();
+  }
+
+  drawTextColumn(ctx, s, imgs, SPLIT - 2 * 72, inkOn(s.panelColor));
   return shotRect;
+}
+
+/**
+ * Text left; on the right the image sits in a circle with a dark gap, an
+ * accent gradient ring and a soft glow behind it (podcast / avatar / product).
+ * Falls back to the logo, then to an empty disc. Scale + drag apply.
+ */
+function drawHalo(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages): Rect | null {
+  const r = 190 * s.shotScale;
+  const cx = 905 + s.shotX;
+  const cy = OG_H / 2 + s.shotY;
+  const ringW = Math.max(6, r * 0.055);
+  const ringR = r + ringW * 1.6;
+
+  // Glow: accent fading out well past the ring.
+  ctx.save();
+  // Starts at the ring so it reads as light spilling outward.
+  const glow = ctx.createRadialGradient(cx, cy, ringR, cx, cy, ringR + r * 0.8);
+  glow.addColorStop(0, withAlpha(s.accent, 0.6));
+  glow.addColorStop(0.35, withAlpha(s.accent, 0.22));
+  glow.addColorStop(1, withAlpha(s.accent, 0));
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, OG_W, OG_H);
+  ctx.restore();
+
+  // Ring: accent sweeping to a lighter tint and back (conic where supported).
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+  ctx.lineWidth = ringW;
+  if (typeof ctx.createConicGradient === "function") {
+    const g = ctx.createConicGradient(-Math.PI / 2, cx, cy);
+    g.addColorStop(0, s.accent);
+    g.addColorStop(0.5, mix(s.accent, "#ffffff", 0.55));
+    g.addColorStop(1, s.accent);
+    ctx.strokeStyle = g;
+  } else {
+    ctx.strokeStyle = s.accent;
+  }
+  ctx.stroke();
+  ctx.restore();
+
+  // Dark gap between ring and image, then the image.
+  ctx.beginPath();
+  ctx.arc(cx, cy, r + ringW * 0.9, 0, Math.PI * 2);
+  // Opaque, so the glow (drawn over the whole card) doesn't muddy the disc.
+  ctx.fillStyle = mix("#0a0a0f", s.accent, 0.08);
+  ctx.fill();
+  if (imgs.shot) {
+    circleImage(ctx, imgs.shot, cx - r, cy - r, r * 2);
+  } else if (imgs.logo) {
+    // Logos are marks, not photos: inset on the dark disc, whole (contain).
+    const lg = imgs.logo;
+    const box = r * 1.1;
+    const k = Math.min(box / lg.naturalWidth, box / lg.naturalHeight);
+    const w = lg.naturalWidth * k;
+    const h = lg.naturalHeight * k;
+    ctx.drawImage(lg, cx - w / 2, cy - h / 2, w, h);
+  } else {
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,0.06)";
+    ctx.fill();
+  }
+
+  drawTextColumn(ctx, s, imgs, 560 - 72, s.textColor);
+  return imgs.shot ? { x: cx - ringR, y: cy - ringR, w: ringR * 2, h: ringR * 2 } : null;
 }
 
 /** Set canvas letter-spacing where supported (recent browsers); no-op otherwise. */
@@ -950,6 +1034,7 @@ export function drawOg(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgIma
   if (s.template === "centered") drawCentered(ctx, s, imgs);
   else if (s.template === "showcase") shotRect = drawShowcase(ctx, s, imgs);
   else if (s.template === "split") shotRect = drawSplit(ctx, s, imgs);
+  else if (s.template === "halo") shotRect = drawHalo(ctx, s, imgs);
   else shotRect = drawSpotlight(ctx, s, imgs);
   // Reset shared state so the next frame starts clean.
   ctx.textAlign = "left";

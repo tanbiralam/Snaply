@@ -5,6 +5,7 @@ import {
   AlignCenter,
   AlignLeft,
   Check,
+  CircleDot,
   Columns2,
   Code2,
   Copy,
@@ -49,6 +50,7 @@ const TEMPLATES: { id: OgTemplate; label: string; icon: typeof AlignLeft }[] = [
   { id: "centered", label: "Centered", icon: AlignCenter },
   { id: "showcase", label: "Showcase", icon: PanelRight },
   { id: "split", label: "Split", icon: Columns2 },
+  { id: "halo", label: "Halo", icon: CircleDot },
 ];
 
 // One-click looks: each sets template + font + background + colours together.
@@ -254,6 +256,21 @@ const RECIPES: { label: string; patch: Partial<OgSettings> }[] = [
       accent: "#38bdf8",
       textColor: "#ffffff",
       grain: 0,
+    },
+  },
+  {
+    // Podcast / episode card — dark, image in a glowing ring, play-style button
+    label: "Podcast",
+    patch: {
+      template: "halo",
+      font: "sans",
+      bgType: "solid",
+      solidColor: "#0c0b16",
+      eyebrow: "EPISODE 24",
+      cta: "Listen now",
+      accent: "#fb923c",
+      textColor: "#ffffff",
+      grain: 8,
     },
   },
   {
@@ -653,7 +670,7 @@ export default function OgImageEditor() {
 
             {/* Template */}
             <Section title="Template">
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-5 gap-1.5">
                 {TEMPLATES.map((t) => {
                   const active = s.template === t.id;
                   return (
@@ -773,7 +790,7 @@ export default function OgImageEditor() {
                 />
               </div>
               <p className="text-2xs text-muted-foreground">
-                Screenshot shows in the Spotlight, Showcase &amp; Split templates.
+                Screenshot shows in every template except Centered. Halo crops it to a circle (or uses the logo).
               </p>
 
               {shotSrc && s.template !== "centered" && (
