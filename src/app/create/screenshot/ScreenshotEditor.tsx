@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { StyleSettings, defaultSettings, Preset } from "@/types";
+import { StyleSettings, defaultSettings, Preset, presetCategories } from "@/types";
 import { CanvasRenderer, CanvasRendererRef } from "@/components/CanvasRenderer";
 import { ExportButton } from "@/components/ExportButton";
 import { ShareMenu } from "@/components/ShareMenu";
@@ -14,12 +14,17 @@ import { ImageIcon, RotateCcw, SlidersHorizontal, X } from "lucide-react";
 import { site } from "@/lib/site";
 import { BrandMark } from "@/components/BrandMark";
 
+// Opens on the first generated gradient (Silk) instead of the shared flat
+// default, which Code Snippet still uses.
+const START_PRESET = presetCategories.find((c) => c.id === "gradients")!.presets[0];
+const startSettings: StyleSettings = { ...defaultSettings, ...START_PRESET.settings };
+
 export default function ScreenshotEditor() {
   const imageCanvasRef = useRef<CanvasRendererRef>(null);
 
   const [image, setImage] = useState<string | null>(null);
-  const [settings, setSettings] = useState<StyleSettings>(defaultSettings);
-  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [settings, setSettings] = useState<StyleSettings>(startSettings);
+  const [activePreset, setActivePreset] = useState<string | null>(START_PRESET.id);
   const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -43,8 +48,8 @@ export default function ScreenshotEditor() {
   }, []);
 
   const handleResetStyle = useCallback(() => {
-    setSettings(defaultSettings);
-    setActivePreset(null);
+    setSettings(startSettings);
+    setActivePreset(START_PRESET.id);
     toast.success("Style reset");
   }, []);
 

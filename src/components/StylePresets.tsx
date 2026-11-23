@@ -12,16 +12,17 @@ interface StylePresetsProps {
 
 // ─── Gradient swatch for a preset ────────────────────────────────────────────
 
-const PresetSwatch = ({ preset }: { preset: Preset }) => {
+const PresetSwatch = ({ preset, load }: { preset: Preset; load: boolean }) => {
   const s = preset.settings;
 
-  // Image-based background preset — show a thumbnail
+  // Image-based background preset — show a thumbnail. Collapsed panels stay in
+  // the DOM, so the full-size image is only requested once its panel opens.
   if (s.backgroundImage) {
     return (
       <span
-        className="w-7 h-7 rounded-md flex-shrink-0 ring-1 ring-border overflow-hidden"
+        className="w-7 h-7 rounded-md flex-shrink-0 ring-1 ring-border overflow-hidden bg-muted"
         style={{
-          backgroundImage: `url(${s.backgroundImage})`,
+          backgroundImage: load ? `url(${preset.thumb ?? s.backgroundImage})` : undefined,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -61,6 +62,8 @@ const CategoryPanel = ({
 }: CategoryPanelProps) => {
   const defaultOpen = presets.some((p) => p.id === activePreset);
   const [open, setOpen] = useState(defaultOpen);
+  // Stays true after the first open so thumbnails don't reload on every toggle.
+  const [opened, setOpened] = useState(defaultOpen);
 
   const hasActive = presets.some((p) => p.id === activePreset);
 
@@ -69,7 +72,10 @@ const CategoryPanel = ({
       {/* Category header */}
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen((v) => !v);
+          setOpened(true);
+        }}
         className={cn(
           "w-full flex items-center justify-between px-3 py-2 text-left transition-colors duration-150",
           "hover:bg-secondary",
@@ -113,7 +119,7 @@ const CategoryPanel = ({
                     : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
                 )}
               >
-                <PresetSwatch preset={preset} />
+                <PresetSwatch preset={preset} load={opened} />
 
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate text-inherit">
