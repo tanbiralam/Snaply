@@ -34,6 +34,7 @@ import {
   defaultOg,
   FONT_CHOICES,
   FONT_PRELOAD,
+  BACKDROP_TEMPLATES,
   OG_GENERATED,
   OG_GRADIENTS,
   OG_MESH,
@@ -271,6 +272,38 @@ const RECIPES: { label: string; patch: Partial<OgSettings> }[] = [
       accent: "#fb923c",
       textColor: "#ffffff",
       grain: 8,
+    },
+  },
+  {
+    // Warm paper panel, green field with concentric rings behind a framed photo
+    label: "Green rings",
+    patch: {
+      template: "split",
+      font: "sans",
+      bgType: "solid",
+      solidColor: "#3f9a5a",
+      panelColor: "#f1efe9",
+      backdrop: "rings",
+      eyebrow: "",
+      cta: "",
+      accent: "#14532d",
+      grain: 0,
+    },
+  },
+  {
+    // Light card, pastel blobs peeking out behind the screenshot
+    label: "Soft blobs",
+    patch: {
+      template: "showcase",
+      font: "display",
+      bgType: "solid",
+      solidColor: "#ffffff",
+      backdrop: "blobs",
+      eyebrow: "",
+      cta: "Try it free",
+      accent: "#7cb7e8",
+      textColor: "#0f172a",
+      grain: 0,
     },
   },
   {
@@ -658,7 +691,7 @@ export default function OgImageEditor() {
                   <button
                     key={r.label}
                     type="button"
-                    onClick={() => setS((prev) => ({ ...prev, ...r.patch }))}
+                    onClick={() => setS((prev) => ({ ...prev, backdrop: "none", ...r.patch }))}
                     className="inline-flex items-center gap-1 rounded-full border hairline bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-strong hover:text-foreground"
                   >
                     <Sparkles className="h-3 w-3" />
@@ -792,6 +825,27 @@ export default function OgImageEditor() {
               <p className="text-2xs text-muted-foreground">
                 Screenshot shows in every template except Centered. Halo crops it to a circle (or uses the logo).
               </p>
+              {BACKDROP_TEMPLATES.includes(s.template) && (
+                <Field label="Behind the image">
+                  <div className="flex gap-1 rounded-lg border hairline p-0.5">
+                    {(["none", "blobs", "rings", "glow"] as const).map((b) => (
+                      <button
+                        key={b}
+                        type="button"
+                        onClick={() => set("backdrop", b)}
+                        className={cn(
+                          "flex-1 rounded-md py-1.5 text-xs font-medium capitalize transition-colors",
+                          s.backdrop === b
+                            ? "bg-foreground text-background"
+                            : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        {b}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              )}
 
               {shotSrc && s.template !== "centered" && (
                 <div className="flex flex-col gap-3 rounded-lg border hairline bg-secondary/30 p-3">

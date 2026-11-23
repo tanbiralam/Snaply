@@ -41,6 +41,9 @@ export const FONT_PRELOAD = [
 
 export type OgTemplate = "spotlight" | "centered" | "showcase" | "split" | "halo";
 export type OgBg = "gradient" | "mesh" | "solid" | "image" | "generated";
+/** Decoration behind the image in Spotlight, Showcase and Split. */
+export type OgBackdrop = "none" | "blobs" | "rings" | "glow";
+export const BACKDROP_TEMPLATES: readonly OgTemplate[] = ["spotlight", "showcase", "split"];
 
 /** Gradient Generator renders, shared with the Screenshot Stylizer's Gradients presets. */
 export const OG_GENERATED: { name: string; src: string; thumb: string }[] =
@@ -173,6 +176,7 @@ export interface OgSettings {
   genIndex: number; // OG_GENERATED entry for the "generated" background
   /** Split template: the solid text panel on the left. Text colour is picked for contrast. */
   panelColor: string;
+  backdrop: OgBackdrop;
   grain: number; // film-grain overlay over the background, 0–100
   overlay: number; // dark overlay over a background image, 0–1
   accent: string;
@@ -234,6 +238,7 @@ export const defaultOg: OgSettings = {
   meshIndex: 0,
   genIndex: 0,
   panelColor: "#f1efea",
+  backdrop: "none",
   grain: 0,
   overlay: 0.35,
   accent: "#818cf8",
@@ -456,7 +461,9 @@ function drawShot(
   base: Rect,
   s: OgSettings,
   /** White mat around the image, like a printed photo (Split template). */
-  frame = 0
+  frame = 0,
+  /** Runs once the placed rect is known, before the card is drawn (backdrops). */
+  before?: (r: Rect) => void
 ): Rect {
   let w = base.w * s.shotScale;
   let h = base.h * s.shotScale;
@@ -469,6 +476,7 @@ function drawShot(
   const x = base.x + (base.w - w) / 2 + s.shotX;
   const y = base.y + (base.h - h) / 2 + s.shotY;
   const r = 18 + frame;
+  before?.({ x, y, w, h });
 
   ctx.save();
   ctx.shadowColor = "rgba(0,0,0,0.35)";
@@ -559,6 +567,95 @@ export function drawBackground(
   }
   // Film grain over the whole background (content rect collapsed to nothing).
   if (s.grain > 0) drawGrain(ctx, W, H, s.grain, -10, -10, 0, 0, 0);
+}
+
+// ─── backdrops ──────────────────────────────────────────────────────────────
+
+/**
+ * Shapes behind the image rect `r`, kept to x ≥ clipX so they never run under
+ * the text column. All take their colour from the accent.
+ *  - blobs: two flat soft circles peeking out from opposite corners
+ *  - rings: concentric outlines centred on the image, fading with distance
+ *  - glow:  a radial accent wash
+ * `hardEdge` (Split): clipX is a real panel edge, so shapes are simply cut
+ * there. Otherwise a cut would show as a stray vertical line, so blobs move
+ * clear of it and rings/glow are painted on a layer whose left edge fades out.
+ */
+const BACKDROP_FEATHER = 140;
+
+function drawBackdrop(ctx: CanvasRenderingContext2D, s: OgSettings, r: Rect, clipX: number, hardEdge = false) {
+  if (s.backdrop === "none") return;
+  const cx = r.x + r.w / 2;
+  const cy = r.y + r.h / 2;
+  const m = Math.min(r.w, r.h);
+
+  if (s.backdrop === "blobs") {
+    const r1 = m * 0.5;
+    const r2 = m * 0.4;
+    const x1 = hardEdge ? r.x + r.w * 0.06 : Math.max(r.x + r.w * 0.06, clipX + r1 + 8);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(clipX, 0, OG_W - clipX, OG_H);
+    ctx.clip();
+    ctx.fillStyle = withAlpha(mix(s.accent, "#ffffff", 0.35), 0.42);
+    ctx.beginPath();
+    ctx.arc(x1, r.y + r.h * 0.12, r1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = withAlpha(mix(s.accent, "#ffffff", 0.6), 0.5);
+    ctx.beginPath();
+    ctx.arc(r.x + r.w * 0.96, r.y + r.h * 0.9, r2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    return;
+  }
+
+  const paint = (c: CanvasRenderingContext2D) => {
+    if (s.backdrop === "rings") {
+      const reach = Math.hypot(OG_W, OG_H) * 0.6;
+      const fade = c.createRadialGradient(cx, cy, m * 0.3, cx, cy, reach);
+      fade.addColorStop(0, withAlpha(s.accent, 0.55));
+      fade.addColorStop(1, withAlpha(s.accent, 0));
+      c.strokeStyle = fade;
+      c.lineWidth = 2;
+      for (let rad = m * 0.62; rad < reach; rad += 34) {
+        c.beginPath();
+        c.arc(cx, cy, rad, 0, Math.PI * 2);
+        c.stroke();
+      }
+    } else {
+      const g = c.createRadialGradient(cx, cy, m * 0.2, cx, cy, Math.hypot(r.w, r.h) * 0.85);
+      g.addColorStop(0, withAlpha(s.accent, 0.55));
+      g.addColorStop(0.5, withAlpha(s.accent, 0.18));
+      g.addColorStop(1, withAlpha(s.accent, 0));
+      c.fillStyle = g;
+      c.fillRect(0, 0, OG_W, OG_H);
+    }
+  };
+
+  if (hardEdge) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(clipX, 0, OG_W - clipX, OG_H);
+    ctx.clip();
+    paint(ctx);
+    ctx.restore();
+    return;
+  }
+
+  // Paint on a layer, then fade its left edge to nothing by clipX.
+  const layer = document.createElement("canvas");
+  layer.width = OG_W;
+  layer.height = OG_H;
+  const lc = layer.getContext("2d");
+  if (!lc) return;
+  paint(lc);
+  lc.globalCompositeOperation = "destination-in";
+  const mask = lc.createLinearGradient(clipX, 0, clipX + BACKDROP_FEATHER, 0);
+  mask.addColorStop(0, "rgba(0,0,0,0)");
+  mask.addColorStop(1, "rgba(0,0,0,1)");
+  lc.fillStyle = mask;
+  lc.fillRect(0, 0, OG_W, OG_H);
+  ctx.drawImage(layer, 0, 0);
 }
 
 // ─── shared pieces ──────────────────────────────────────────────────────────
@@ -698,7 +795,8 @@ function drawSpotlight(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgIma
 
   // Screenshot (right).
   if (hasShot && imgs.shot) {
-    return drawShot(ctx, imgs.shot, { x: 700, y: 115, w: OG_W - 700 - 56, h: OG_H - 230 }, s);
+    return drawShot(ctx, imgs.shot, { x: 700, y: 115, w: OG_W - 700 - 56, h: OG_H - 230 }, s, 0,
+      (r) => drawBackdrop(ctx, s, r, 680));
   }
   return null;
 }
@@ -787,8 +885,9 @@ function drawShowcase(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImag
   const base: Rect = { x: panelX, y: 80, w: OG_W - panelX - 60, h: OG_H - 160 };
   let shotRect: Rect | null = null;
   if (imgs.shot) {
-    shotRect = drawShot(ctx, imgs.shot, base, s);
+    shotRect = drawShot(ctx, imgs.shot, base, s, 0, (r) => drawBackdrop(ctx, s, r, 540));
   } else {
+    drawBackdrop(ctx, s, base, 540);
     ctx.save();
     ctx.beginPath();
     roundRect(ctx, base.x, base.y, base.w, base.h, 18);
@@ -937,8 +1036,9 @@ function drawSplit(ctx: CanvasRenderingContext2D, s: OgSettings, imgs: OgImages)
   const base: Rect = { x: SPLIT + 70, y: 90, w: OG_W - SPLIT - 140, h: OG_H - 180 };
   let shotRect: Rect | null = null;
   if (imgs.shot) {
-    shotRect = drawShot(ctx, imgs.shot, base, s, 14);
+    shotRect = drawShot(ctx, imgs.shot, base, s, 14, (r) => drawBackdrop(ctx, s, r, SPLIT, true));
   } else {
+    drawBackdrop(ctx, s, base, SPLIT, true);
     ctx.beginPath();
     roundRect(ctx, base.x, base.y, base.w, base.h, 32);
     ctx.fillStyle = "rgba(255,255,255,0.22)";
