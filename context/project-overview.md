@@ -26,7 +26,7 @@ Pixltly is a free, privacy-first image toolkit that runs entirely in the browser
 
 - **Screenshot Stylizer** — backgrounds, padding, shadows, device frames (`/create/screenshot`)
 - **Code Snippet** — render code snippets as styled, syntax-highlighted images (`/create/code-snippet`)
-- **OG Image Generator** — title/subtitle/screenshot to social & blog cards (`/create/og-image`)
+- **OG Image Generator** — title/subtitle/screenshot to social & blog cards (`/create/og-image`). Templates: Spotlight, Centered, Showcase, Split, Halo; optional eyebrow pill and CTA button; backgrounds: gradient, mesh, solid, uploaded image, or "Art" (the Gradient Generator renders shared with the Screenshot Stylizer)
 - **Favicon Generator** — logo, letter, or emoji to a full favicon/app-icon package (multi-res .ico, PNGs, manifest, embed code) (`/create/favicon`)
 - **Quote Card** — text + name + handle + avatar to tweet/quote graphics (`/create/quote`)
 - **QR Code Generator** — text/URL to a downloadable QR code (PNG or SVG), with error-correction level, size, quiet zone, foreground/background colors, and an optional center logo/image (10–25% of the code width; adding one switches error correction to H) (`/create/qr-code`)
