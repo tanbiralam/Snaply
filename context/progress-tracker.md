@@ -14,6 +14,12 @@ change.
 
 ## Completed
 
+- **Homepage "taste" pass, step 1–2: hero + tool cards** (2026-11-23, branch `feat/homepage-polish`). The user still found the page "AI generated".
+  - Diagnosis: the tells are default patterns more than missing shadows. Uppercase mono eyebrows everywhere, a two-color headline, a dashed dropzone with an icon in a tinted square, a 4-up icon feature row, an "X, not Y" slogan, flat 1px borders on everything, and the same rhythm in every section.
+  - Done: new elevation tokens `--elev-1/2/3/inset` (see ui-context.md), defined in both themes. The hero lost its eyebrow and two-color headline, and "or press ⌘K anywhere" became plain "Free, no sign-up, open source.". The dropzone is a frosted `elev-3` panel with a recessed well (no dashed border), a plain icon, a pill primary button with a highlight and a tinted glow, and a normal-case footer. Tool cards have no border, `elev-1` → `elev-2` on hover with a 4px lift, and the preview zooms 3% on hover. The icon above the title and the "TOOLS" eyebrow are gone.
+  - Verified: `tsc`, lint. Playwright screenshots light/dark at 1440px and at 390px, no overflow, zero page errors.
+  - Remaining (steps 3–5): sample-image stack in the dropzone; privacy section (4-up icon row, "not by policy" slogan, mono labels) → one strong statement; vary the section rhythm of the FAQ and final CTA; radius/grain/details pass.
+
 - **Homepage polish** (2026-11-23, branch `feat/homepage-polish`)
   - Orphan row fixed. Gradient Generator is now featured, so the grid is 7 tools + "More tools" = 8 cards. It uses fixed `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4` instead of `grid-cols-tools` auto-fill, so the rows are always full (1/2/4 per row). `/tools` still uses auto-fill.
   - The navbar category menus open on mouse hover (`Navbar` is now a client component). A 150ms close delay lets the pointer cross the gap to the portaled content. Hover and click ignore non-mouse pointers, so touch and keyboard keep Radix's click/Enter behavior. Bug found in testing: a click on a hover-opened trigger closed the menu, because Radix treats the trigger as "outside" the content. Fixed with `onPointerDownOutside` ignoring the trigger.

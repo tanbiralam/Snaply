@@ -137,7 +137,11 @@ export default {
               xl: 'var(--shadow-xl)',
               '2xl': 'var(--shadow-2xl)',
               card: 'var(--shadow-card)',
-              modal: 'var(--shadow-modal)'
+              modal: 'var(--shadow-modal)',
+              'elev-1': 'var(--elev-1)',
+              'elev-2': 'var(--elev-2)',
+              'elev-3': 'var(--elev-3)',
+              'elev-inset': 'var(--elev-inset)'
           },
           fontFamily: {
               sans: ['var(--font-sans)'],

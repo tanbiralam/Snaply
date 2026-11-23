@@ -29,13 +29,14 @@ export function HeroDropzone() {
 
   return (
     <div className="w-full">
-      <div className="rounded-2xl border border-foreground/10 bg-background/75 p-2 shadow-2xl backdrop-blur-xl">
+      {/* Frosted panel floating over the photo; the inner well is recessed. */}
+      <div className="rounded-[20px] bg-card/70 p-2 shadow-elev-3 backdrop-blur-2xl backdrop-saturate-150">
         {picked ? (
-          <div className="rounded-xl bg-card p-4 sm:p-5">
+          <div className="rounded-[14px] bg-card p-4 shadow-elev-inset sm:p-5">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate font-medium text-foreground">{picked.file.name}</p>
-                <p className="font-mono text-2xs uppercase tracking-wider text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   {formatBytes(picked.file.size)} ·{" "}
                   {picked.tools.length
                     ? `${picked.tools.length} tools can open this`
@@ -59,7 +60,7 @@ export function HeroDropzone() {
                     <button
                       type="button"
                       onClick={() => open(tool)}
-                      className="group flex w-full items-center gap-3 rounded-lg border bg-background px-3 py-3 text-left transition-[border-color,transform] duration-120 ease-out hover:border-strong motion-safe:hover:-translate-y-0.5"
+                      className="group flex w-full items-center gap-3 rounded-lg bg-background px-3 py-3 text-left shadow-elev-1 transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-0.5"
                     >
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10">
                         <ToolIcon name={tool.icon} className="h-[18px] w-[18px] text-primary" />
@@ -91,8 +92,8 @@ export function HeroDropzone() {
               pick(e.dataTransfer.files[0]);
             }}
             className={cn(
-              "group flex cursor-pointer flex-col items-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition-colors duration-120 sm:py-14",
-              dragging ? "border-primary bg-primary/10" : "border-foreground/15 bg-card hover:border-primary/60"
+              "group flex cursor-pointer flex-col items-center rounded-[14px] px-6 py-12 text-center shadow-elev-inset transition-[background-color,box-shadow] duration-160 ease-out sm:py-14",
+              dragging ? "bg-primary/10 ring-2 ring-inset ring-primary" : "bg-card"
             )}
           >
             <input
@@ -104,24 +105,26 @@ export function HeroDropzone() {
               }}
               className="sr-only"
             />
-            <span className="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary transition-transform duration-120 ease-out motion-safe:group-hover:-translate-y-0.5">
-              <ImagePlus className="h-6 w-6" strokeWidth={1.5} />
-            </span>
+            <ImagePlus
+              className="mb-5 h-8 w-8 text-muted-foreground transition-[color,transform] duration-160 ease-out group-hover:text-primary motion-safe:group-hover:-translate-y-0.5"
+              strokeWidth={1.25}
+              aria-hidden="true"
+            />
             <span className="text-xl font-semibold text-foreground">
               {dragging ? "Let go to find a tool" : "Drop an image to find a tool"}
             </span>
             <span className="mt-1 text-sm text-muted-foreground">We'll show you what you can do with it.</span>
-            <span className="mt-6 inline-flex h-11 items-center rounded-md bg-primary px-6 font-medium text-primary-foreground transition-colors duration-120 ease-out group-hover:bg-primary-hover">
+            <span className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.2),0_1px_2px_hsl(var(--primary)/0.4),0_6px_16px_-6px_hsl(var(--primary)/0.6)] transition-[background-color,transform] duration-160 ease-out group-hover:bg-primary-hover motion-safe:group-hover:-translate-y-px">
               Choose an image
             </span>
           </label>
         )}
-        <div className="flex items-center justify-between gap-3 px-3 pb-1 pt-3 font-mono text-2xs font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="flex items-center justify-between gap-3 px-3 pb-1 pt-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <Lock className="h-3 w-3" />
-            Never uploaded
+            <Lock className="h-3 w-3" aria-hidden="true" />
+            Never leaves your device
           </span>
-          <span>PNG · JPG · WEBP · SVG</span>
+          <span>PNG, JPG, WebP, SVG</span>
         </div>
       </div>
 
