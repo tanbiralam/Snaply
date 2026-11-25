@@ -254,6 +254,8 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* The grey box ignores rounded corners; active: press states replace it. */
+    -webkit-tap-highlight-color: transparent;
   }
 
   * {

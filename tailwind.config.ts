@@ -5,6 +5,8 @@ export default {
   darkMode: ["selector", '[data-theme="dark"]'],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
+  // Touch has no hover: without this, a tap leaves hover lifts stuck on.
+  future: { hoverOnlyWhenSupported: true },
   theme: {
       container: {
           center: true,

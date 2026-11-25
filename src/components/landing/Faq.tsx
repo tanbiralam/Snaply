@@ -71,7 +71,7 @@ export function Faq() {
               name="faq"
               className="faq-item group relative rounded-2xl transition-[background-color,box-shadow] duration-160 ease-out after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-border after:transition-opacity last:after:hidden open:bg-card open:shadow-elev-1 open:after:opacity-0 md:after:inset-x-6 [&:has(+[open])]:after:opacity-0"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-4 py-5 text-base font-medium transition-colors duration-120 hover:text-foreground md:px-6 md:text-lg [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-4 py-5 text-base font-medium transition-colors duration-120 hover:text-foreground active:bg-secondary/60 md:px-6 md:text-lg [&::-webkit-details-marker]:hidden">
                 {faq.question}
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-muted-foreground transition-[background-color,color,transform] duration-160 ease-out group-hover:bg-secondary group-hover:text-foreground group-open:rotate-45 group-open:bg-secondary group-open:text-foreground">
                   <Plus className="h-4 w-4" strokeWidth={1.75} aria-hidden="true" />

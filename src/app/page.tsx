@@ -24,7 +24,7 @@ function MoreToolsCard({ count }: { count: number }) {
   return (
     <Link
       href="/tools"
-      className="group flex flex-col overflow-hidden rounded-xl bg-card shadow-elev-1 transition-[transform,box-shadow] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-1"
+      className="group flex flex-col overflow-hidden rounded-xl bg-card shadow-elev-1 transition-[transform,box-shadow] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-1 motion-safe:active:scale-[0.98] active:duration-75"
     >
       <div className="flex aspect-video w-full items-center justify-center bg-muted shadow-elev-inset">
         <span className="text-5xl font-semibold tracking-tight text-muted-foreground transition-colors duration-160 group-hover:text-foreground">
@@ -92,7 +92,7 @@ export default function LandingPage() {
               <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3">
                 <Link
                   href="/tools"
-                  className="inline-flex h-11 items-center rounded-full bg-card/85 px-5 text-sm font-medium text-foreground shadow-elev-1 backdrop-blur transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-px"
+                  className="inline-flex h-11 items-center rounded-full bg-card/85 px-5 text-sm font-medium text-foreground shadow-elev-1 backdrop-blur transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.97] active:duration-75"
                 >
                   Browse all {getLiveTools().length} tools
                 </Link>

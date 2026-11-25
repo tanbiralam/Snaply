@@ -35,13 +35,13 @@ export function FinalCta({ toolCount }: { toolCount: number }) {
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <a
               href="#start"
-              className="inline-flex h-12 items-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.2),0_1px_2px_hsl(var(--primary)/0.4),0_6px_16px_-6px_hsl(var(--primary)/0.6)] transition-[background-color,transform] duration-160 ease-out hover:bg-primary-hover motion-safe:hover:-translate-y-px"
+              className="inline-flex h-12 items-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.2),0_1px_2px_hsl(var(--primary)/0.4),0_6px_16px_-6px_hsl(var(--primary)/0.6)] transition-[background-color,transform] duration-160 ease-out hover:bg-primary-hover motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.97] active:duration-75"
             >
               Drop an image
             </a>
             <Link
               href="/tools"
-              className="inline-flex h-12 items-center rounded-full bg-card/85 px-6 font-medium text-foreground shadow-elev-1 backdrop-blur transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-px"
+              className="inline-flex h-12 items-center rounded-full bg-card/85 px-6 font-medium text-foreground shadow-elev-1 backdrop-blur transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-px motion-safe:active:scale-[0.97] active:duration-75"
             >
               Browse all tools
             </Link>

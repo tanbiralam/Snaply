@@ -355,7 +355,7 @@ export default function WatermarkEditor() {
                         type="button"
                         aria-label={`Remove ${item.name}`}
                         onClick={() => removeItem(item.id)}
-                        className="absolute -right-1.5 -top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full border hairline bg-background text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100"
+                        className="absolute -right-1.5 -top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full border hairline bg-background text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                       >
                         <X className="h-3 w-3" />
                       </button>
