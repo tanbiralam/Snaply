@@ -13,9 +13,9 @@ import { cn } from "@/lib/utils";
   over a card drives two CSS variables, --px/--py (0–1), so following the
   cursor costs no React re-renders. They're registered with @property in
   index.css, so a card follows with slight smoothing and eases back to rest
-  when the pointer leaves. Touch has no hover, so the first time a card
-  scrolls into view it plays one short demo sweep (skipped under
-  prefers-reduced-motion). Unknown slugs fall back to the plain photo.
+  when the pointer leaves. Cards play one short demo sweep when they
+  scroll into view: once with a mouse, every time on touch (no hover to
+  scrub with). Skipped under prefers-reduced-motion. Unknown slugs fall back to the plain photo.
 */
 
 /** Set by ToolPreview for cards above the fold, so their photo isn't lazy-loaded (LCP). */
@@ -125,6 +125,7 @@ function useLive(rest: Pt, sweep: Pt[], onPoint?: (p: Pt) => void) {
 
     // One demo sweep through `sweep` points (eased per segment) on first view.
     const demo = () => {
+      stopDemo();
       const pts = [rest, ...sweep, rest];
       const seg = 650;
       const t0 = performance.now();
@@ -144,12 +145,15 @@ function useLive(rest: Pt, sweep: Pt[], onPoint?: (p: Pt) => void) {
       demoRaf = requestAnimationFrame(step);
     };
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Touch can't scrub the preview, so replay the sweep each time the card
+    // scrolls back in; with a mouse, once is enough.
+    const replay = window.matchMedia("(hover: none)").matches;
     const io = reduce
       ? null
       : new IntersectionObserver(
           ([en]) => {
             if (!en.isIntersecting) return;
-            io?.disconnect();
+            if (!replay) io?.disconnect();
             demo();
           },
           { threshold: 0.6 }

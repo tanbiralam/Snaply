@@ -812,7 +812,7 @@ export default function CompressEditor() {
                       type="button"
                       onClick={() => removeItem(it.id)}
                       aria-label="Remove"
-                      className="absolute right-2 top-2 z-20 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 backdrop-blur transition-opacity hover:text-foreground group-hover:opacity-100"
+                      className="absolute right-2 top-2 z-20 rounded-full bg-background/80 p-1 text-muted-foreground opacity-0 backdrop-blur transition-opacity hover:text-foreground group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>

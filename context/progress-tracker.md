@@ -14,6 +14,13 @@ change.
 
 ## Completed
 
+- **Mobile touch polish, landing page** (2026-11-25, branch `feat/mobile-touch-polish`). The user found the landing page's micro-interactions weak on phones while desktop was fine. Cause: every interaction was hover-based.
+  - `future.hoverOnlyWhenSupported` (Tailwind 3.4): hover lifts/zooms no longer stick after a tap or a back-navigation. Side effect fixed: three hover-revealed buttons (Compress remove-file, Watermark remove, toast close) are now always visible on `hover: none`.
+  - Press states (`active:scale-[0.98]`/`[0.97]`, 75ms) on tool cards, More tools, hero/Final CTA buttons, dropzone tool buttons and the "Choose an image" pill; FAQ rows get an `active:` tint. WebKit tap highlight off.
+  - `ToolPreview` demo sweep replays on every re-entry on touch (once with a mouse).
+  - Hero dropzone says "Pick a photo to find a tool" on coarse pointers.
+  - Verified: `tsc`, lint, `pnpm build`. Playwright on a 390px touch emulation: touch copy shown, no stuck transform after a tap, demo replays on re-entry; desktop: hover lift still -4px, original copy, no replay. Only console errors are the Vercel Insights 404s (local only).
+
 - **Live tool-card previews, all 15** (2026-11-23, branch `feat/live-tool-previews`). Refined the first 4 (lucide `ChevronsLeftRight` handle instead of a text glyph; drop-shadowed, softer-edged Remove Background cut-out; Aurora label on the gradient) and built the other 11, each with a distinct interaction (see ui-context.md → Tool grid card). Merged `LivePreviews.tsx` and `ToolPreviewParts.tsx` into a single client `ToolPreview.tsx` now that every card is live; that also removes the server/client export pitfall.
   - Bugs found by rendering: my Resize rewrite dropped the crop corners' position classes (caught in review); the BlurHash lens didn't render (`circle 26%` is invalid → `ellipse 22% 40%`); the SVG anchor squares floated off the curves (hand-placed → sampled from the Q/T Béziers); the Screenshot tilt and OG parallax were too subtle → roughly doubled.
   - Verified: `tsc`, lint, `pnpm build`. Playwright on `/tools`: 15 live previews, each captured at two pointer positions in light and dark, zero console/page errors.

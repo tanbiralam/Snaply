@@ -84,7 +84,7 @@ export function HeroDropzone() {
                 type="button"
                 onClick={() => setPicked(null)}
                 aria-label="Choose a different file"
-                className="rounded-full p-2 text-muted-foreground transition-colors duration-120 hover:bg-background hover:text-foreground"
+                className="rounded-full p-2 text-muted-foreground transition-colors duration-120 hover:bg-background hover:text-foreground active:bg-background"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -97,7 +97,7 @@ export function HeroDropzone() {
                     <button
                       type="button"
                       onClick={() => open(tool)}
-                      className="group flex w-full items-center gap-3 rounded-lg bg-background px-3 py-3 text-left shadow-elev-1 transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-0.5"
+                      className="group flex w-full items-center gap-3 rounded-lg bg-background px-3 py-3 text-left shadow-elev-1 transition-[box-shadow,transform] duration-160 ease-out hover:shadow-elev-2 motion-safe:hover:-translate-y-0.5 motion-safe:active:scale-[0.98] active:duration-75"
                     >
                       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10">
                         <ToolIcon name={tool.icon} className="h-[18px] w-[18px] text-primary" />
@@ -144,10 +144,17 @@ export function HeroDropzone() {
             />
             <PhotoStack spread={dragging} />
             <span className="text-xl font-semibold text-foreground">
-              {dragging ? "Let go to find a tool" : "Drop an image to find a tool"}
+              {dragging ? (
+                "Let go to find a tool"
+              ) : (
+                <>
+                  <span className="[@media(pointer:coarse)]:hidden">Drop an image to find a tool</span>
+                  <span className="hidden [@media(pointer:coarse)]:inline">Pick a photo to find a tool</span>
+                </>
+              )}
             </span>
             <span className="mt-1 text-sm text-muted-foreground">We'll show you what you can do with it.</span>
-            <span className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.2),0_1px_2px_hsl(var(--primary)/0.4),0_6px_16px_-6px_hsl(var(--primary)/0.6)] transition-[background-color,transform] duration-160 ease-out group-hover:bg-primary-hover motion-safe:group-hover:-translate-y-px">
+            <span className="mt-6 inline-flex h-11 items-center rounded-full bg-primary px-6 font-medium text-primary-foreground shadow-[inset_0_1px_0_hsl(0_0%_100%/0.2),0_1px_2px_hsl(var(--primary)/0.4),0_6px_16px_-6px_hsl(var(--primary)/0.6)] transition-[background-color,transform] duration-160 ease-out group-hover:bg-primary-hover motion-safe:group-hover:-translate-y-px motion-safe:group-active:scale-[0.97] group-active:duration-75">
               Choose an image
             </span>
           </label>
